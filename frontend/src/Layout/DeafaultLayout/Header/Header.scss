@@ -1,0 +1,99 @@
+.header-container {
+  display: flex;
+  justify-content: center;
+  padding: 10px 30px;
+  color: #fff;
+  align-items: center;
+  max-width: 100%;
+  overflow: hidden;
+  box-sizing: border-box;
+  gap: 20px;
+
+  @media (max-width: 768px) {
+    flex-direction: column;
+    padding: 10px 15px;
+  }
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+
+  .logo {
+    height: 64px; // Giảm kích thước logo cho màn hình nhỏ
+    margin-right: 20px;
+    cursor: pointer;
+
+    @media (max-width: 768px) {
+      display: none;
+    }
+  }
+}
+
+.header-right {
+  display: flex;
+  flex: 1;
+  justify-content: center;
+
+  @media (max-width: 768px) {
+    width: 100%; // Đảm bảo input tìm kiếm chiếm toàn bộ chiều rộng
+    justify-content: space-between;
+  }
+}
+
+.search-input {
+  width: 200px;
+  padding: 10px 15px;
+  border: #000 solid 1px;
+  font-size: 14px;
+  outline: none;
+  box-sizing: border-box;
+
+  @media (max-width: 768px) {
+    width: calc(100% - 60px); // Duy trì khoảng cách cho nút tìm kiếm
+    font-size: 12px;
+    padding: 8px 10px;
+  }
+}
+
+.search-button {
+  background-color: #d26e4b;
+  color: #fff;
+  border: none;
+  padding: 0 15px;
+  cursor: pointer;
+  font-size: 16px;
+
+  &:hover {
+    background-color: #823905;
+    color: #fff;
+  }
+
+  @media (max-width: 768px) {
+    font-size: 14px;
+    padding: 8px 10px;
+  }
+}
+
+.cart-container {
+  position: relative;
+  display: inline-block;
+}
+
+.cart-icon {
+  font-size: 30px;
+}
+
+.cart-badge {
+  position: absolute;
+  bottom: -5px;
+  right: -5px;
+  background-color: white;
+  color: #333;
+  font-size: 12px;
+  font-weight: bold;
+  padding: 2px 6px;
+  border-radius: 50%;
+  border: 1px solid #ccc;
+  box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
+}

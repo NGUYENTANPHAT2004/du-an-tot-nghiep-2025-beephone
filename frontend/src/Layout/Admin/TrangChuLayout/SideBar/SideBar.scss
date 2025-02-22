@@ -1,0 +1,88 @@
+.sidebar_container {
+    background-color: #333;
+    height: 100vh;
+    width: 250px;
+    transition: width 0.3s ease-in-out; // Hiệu ứng mượt
+    color: white;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+
+    &.closed {
+        width: 60px; // Khi thu nhỏ
+    }
+}
+
+// Header
+.sidebar_header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px;
+    color: white;
+}
+
+// Logo
+.sidebar_logo {
+    h3 {
+        padding: 0;
+        margin: 0;
+    }
+
+    &.hide {
+        display: none;
+    }
+}
+
+// Toggle Button
+.sidebar_toggle {
+    font-size: 22px;
+    cursor: pointer;
+}
+
+// Menu Items
+.sidebar_body {
+    padding: 10px;
+    a{
+        text-decoration: none;
+        color: white;
+    }
+}
+
+.sidebar_item {
+    display: flex;
+    align-items: center;
+    font-size: 18px;
+    gap: 15px;
+    padding: 12px;
+    border-radius: 8px;
+    margin-top: 10px;
+    cursor: pointer;
+    transition: background 0.2s ease, transform 0.2s ease;
+
+    &:hover {
+        background-color: #555;
+        transform: translateX(5px);
+    }
+}
+
+.sidebar_item_active {
+    background-color: #555;
+    transform: translateX(5px);
+}
+
+// Ẩn tên menu khi thu nhỏ
+.sidebar_text {
+    transition: opacity 0.3s ease-in-out;
+    white-space: nowrap;
+
+    &.hide {
+        opacity: 0;
+        width: 0;
+        overflow: hidden;
+    }
+}
+
+.sidebar_icon {
+    font-size: 20px;
+}

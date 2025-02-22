@@ -1,0 +1,133 @@
+.navbar {
+  position: relative;
+  background-color: #6f6f6f;
+  color: #fff;
+  font-family: Arial, sans-serif;
+
+  .navbar-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 5px 10px;
+    position: relative;
+
+    .logo {
+      display: none;
+
+      @media (max-width: 768px) {
+        height: 50px;
+        display: block;
+      }
+    }
+
+    .menu-toggle {
+      display: none;
+      cursor: pointer;
+      font-size: 24px;
+      color: #fff;
+  
+      @media (max-width: 768px) {
+        display: block;
+        position: absolute;
+        right: 20px; /* Adjust positioning */
+        z-index: 1010;
+      }
+    }
+  }
+
+  .menu {
+    list-style: none;
+    display: flex;
+    align-items: center;
+    margin: 0;
+    padding: 0;
+
+    @media (max-width: 768px) {
+      display: none;
+      flex-direction: column;
+      position: fixed; /* Thay đổi từ absolute sang fixed */
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%; /* Hiển thị toàn bộ màn hình */
+      background-color: #6f6f6f;
+      z-index: 1000;
+      overflow-y: auto; /* Cho phép cuộn menu nếu cần */
+      
+      &.menu-open {
+        display: flex;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: #6f6f6f;
+        z-index: 1000;
+        flex-direction: column;
+        padding: 20px;
+        overflow-y: auto;
+      }
+    }
+
+    .menu-item {
+      position: relative;
+      margin: 0 7px;
+
+      @media (max-width: 768px) {
+        margin: 10px 0;
+        text-align: left;
+        width: 100%;
+        padding: 10px 20px;
+        border-bottom: 1px solid #fff;
+      }
+
+      .menu-title {
+        cursor: pointer;
+        color: #fff;
+        font-weight: bold;
+        display: flex;
+        align-items: center;
+      }
+
+      a {
+        text-decoration: none;
+        color: #fff;
+        font-size: 15px;
+        &:hover {
+          text-decoration: underline;
+        }
+      @media (max-width: 768px) {
+        padding-right: 250px;
+      }
+    }
+      &.has-submenu {
+        .submenu {
+          display: none;
+          position: absolute;
+          background-color: #6f6f6f;
+          list-style: none;
+          padding: 10px 0;
+          box-shadow: none; 
+          z-index: 1000;
+
+          li {
+            padding: 5px;
+            width: 150px; 
+            &:hover {
+              background-color: #be8c45;
+            }
+          }
+        }
+
+        &:hover .submenu {
+          display: block;
+        }
+      }
+    }
+  }
+}
+.menu-logo1 .menu-logo2{
+  height: 50px;
+}

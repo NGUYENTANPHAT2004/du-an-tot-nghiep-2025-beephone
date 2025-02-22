@@ -1,0 +1,13 @@
+.floatingbuton{
+    position: fixed;
+    bottom: 50px;
+    right: 50px;
+}
+.header-navbar {
+    display: flex;
+    flex-direction: column; 
+  
+    @media (max-width: 768px) {
+      flex-direction: column-reverse; // Đảo thứ tự
+    }
+  }

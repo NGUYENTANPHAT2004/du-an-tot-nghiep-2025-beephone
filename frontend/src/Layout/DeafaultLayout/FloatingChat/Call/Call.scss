@@ -1,0 +1,35 @@
+.circle-call {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  width: 65px;
+  height: 65px;
+  background-color: red;
+  border-radius: 50%;
+}
+
+.circle-call span {
+  position: absolute;
+  height: 65px;
+  width: 65px;
+  position: absolute;
+  background: inherit;
+  border-radius: inherit;
+  animation: pulseAnimation 1s ease-out infinite;
+  animation-delay: calc(1s * var(--i));
+  opacity: 0.8;
+}
+
+.logo-call {
+  height: 40px;
+  width: 40px;
+  border-radius: 50%;
+}
+
+@keyframes pulseAnimation {
+  100% {
+    opacity: 0;
+    transform: scale(2);
+  }
+}

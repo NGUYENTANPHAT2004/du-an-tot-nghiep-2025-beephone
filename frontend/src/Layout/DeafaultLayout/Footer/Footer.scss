@@ -1,0 +1,143 @@
+.footer {
+  background-color: #2a2d30;
+  color: white;
+  padding: 30px 10%;
+  font-family: Arial, sans-serif;
+  margin-top: 5%;
+
+  .container {
+    display: flex; 
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 20px;
+  }
+
+  .column {
+    flex: 1; 
+    min-width: 250px; 
+    max-width: 30%; 
+
+    h3 {
+      font-size: 1.2rem;
+      margin-bottom: 15px;
+      color: #fff;
+    }
+
+    .address {
+      color: #fff;
+      text-decoration: none;
+      font-weight: bold;
+      &:hover {
+        color: #ffd700;
+      }
+    }
+
+    p {
+      font-size: 1.0rem;
+      margin-bottom: 15px;
+      color: #fff;
+    }
+
+    ul {
+      list-style: none;
+      padding: 0;
+
+      li {
+        margin: 8px 0;
+        transition: color 0.3s ease, transform 0.3s ease;
+        a {
+          text-decoration: none; 
+          color: inherit; 
+        }
+        &:hover {
+          color: #ffd700;
+          transform: translateX(5px);
+          cursor: pointer;
+        }
+      }
+    }
+
+    form {
+      display: flex;
+      flex-direction: column;
+
+      input {
+        margin-bottom: 10px;
+        padding: 10px;
+        border: none;
+        border-radius: 5px;
+      }
+
+      button {
+        padding: 10px;
+        background-color: #a1541b;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+
+        &:hover {
+          background-color: #833f13; /* Đổi màu khi hover */
+        }
+      }
+    }
+  }
+
+  .logo {
+    max-width: 350px;
+  }
+
+  .socialIcons {
+    display: flex;
+    gap: 10px;
+
+    .icons {
+      font-size: 1.5rem;
+      cursor: pointer;
+      transition: color 0.3s ease, transform 0.3s ease;
+
+      &:hover {
+        color: #ffd700;
+        transform: scale(1.2);
+      }
+    }
+  }
+}
+.crack-column-tong {
+  display: flex; height: 500px; align-items : center;
+
+}
+.crack-column {
+  position: relative;
+  width: 4px;
+  height: 90%;
+  background: linear-gradient(
+    to bottom,
+    rgba(255, 255, 255, 0.8),
+    rgba(0, 0, 0, 0.2),
+    rgba(255, 255, 255, 0.6),
+    rgba(0, 0, 0, 0.1)
+  );
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+@media (max-width: 768px) {
+  .footer {
+    padding: 20px 20px;
+    .column {
+      max-width: 100%;
+    
+    }
+  }
+
+  .container {
+    display: block; /* Chuyển sang block để xếp dọc từng cột */
+  }
+.crack-column-tong{
+  display: none; 
+    height: 5%;
+}
+
+}

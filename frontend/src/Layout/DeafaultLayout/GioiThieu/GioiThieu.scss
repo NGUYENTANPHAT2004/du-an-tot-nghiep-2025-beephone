@@ -1,0 +1,39 @@
+#gioithieu {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 20px;
+  font-family: Arial, sans-serif;
+  line-height: 1.6;
+  color: #333;
+}
+
+.gioi-thieu-title {
+  text-align: center;
+  font-size: 25px;
+  font-weight: bold;
+}
+
+.gioithieu-red {
+  color: red;
+  text-decoration: none;
+}
+
+.gioithieu-red:hover {
+  text-decoration: underline;
+}
+
+.gioithieu-image {
+  text-align: center;
+}
+
+.gioithieu-image .image-gt {
+  display: block;
+  margin: 20px auto;
+  max-width: 100%;
+  height: 500px;
+}
+
+.gioithieu-image .caption {
+  color: #666;
+  font-style: italic;
+}
