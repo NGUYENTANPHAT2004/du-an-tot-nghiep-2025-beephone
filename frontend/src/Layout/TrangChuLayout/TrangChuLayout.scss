@@ -1,0 +1,165 @@
+.divsp {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+  border-radius: 10px;
+  padding: 10px 15%;
+  justify-items: center;
+}
+
+.namesp {
+  font-size: 24px;
+  font-weight: 700;
+  text-align: center;
+  padding: 10px;
+}
+
+.title-product {
+  display: flex;
+  justify-content: center;
+  height: 45px;
+  border: #0066CC solid 1px;
+  border-radius: 10px;
+  align-items: center;
+  margin: 0 42%;
+  
+}
+
+.see-all {
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  color: #0066CC;
+  font-size: 20px;
+
+}
+
+.divtungsp {
+  height: 440px;
+  padding: 5px;
+  overflow: hidden;
+  border-radius: 15px;
+  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);
+  position: relative;
+  text-align: center;
+  margin-bottom: 20px; 
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+.name-sp {
+  font-size: 15px;
+  font-weight: 700;
+  color: #000000;
+  display: -webkit-box;
+  -webkit-line-clamp: 2; /* Giới hạn tối đa 2 dòng */
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.divtungsp:hover {
+  transform: translateY(-12px);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2); 
+}
+.divtungsp img {
+  width: 100%;
+  height: 300px;
+  object-fit: cover;
+}
+
+.divtungsp .discount-logo2 {
+  position: absolute;
+  margin: 5px 0 0 5px;
+  width: 150px;
+  height: 50px;
+  object-fit: contain; /* Đảm bảo ảnh được thu nhỏ cân đối */
+}
+
+
+.divpropsp {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+}
+
+.divpropsp p,
+.divpropsp h5 {
+  margin: 0;
+  flex: 1;
+}
+
+.divpropsp p {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.btnthemgiohang {
+  position: absolute;
+  font-weight: bold;
+  bottom: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 5px 10px;
+  color: #8c6c3f;
+  border: #8c6c3f solid 3px;
+  transition: opacity 0.3s ease;
+  cursor: pointer;
+}
+
+.btnthemgiohang:hover {
+  background-color: #8c6c3f;
+  color: #fff;
+}
+
+.original-price {
+  color: #000000;
+}
+.pricetong{
+  display: flex;
+}
+.price{
+  font-weight: 500;
+  color: red;
+}
+.original-price span {
+  color: #ccc;
+  text-decoration: line-through;
+}
+
+@media (max-width: 768px) {
+  .divsp {
+    grid-template-columns: repeat(2, 1fr); 
+    padding: 10px 2%;
+  }
+
+  .divtungsp {
+    height: auto;
+    padding: 0px !important;
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 0px;
+  }
+  .divtungsp:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2); 
+  }
+  .divtungsp img {
+    height: 250px;
+  }
+
+  .divpropsp {
+    flex-direction: column; 
+    align-items: flex-start; 
+  }
+
+  .divpropsp p,
+  .divpropsp h5 {
+    flex: none;
+  }
+
+  .btnthemgiohang {
+    display: none;
+  }
+}

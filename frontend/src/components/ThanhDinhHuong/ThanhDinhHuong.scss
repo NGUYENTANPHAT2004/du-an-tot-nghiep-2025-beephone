@@ -1,0 +1,36 @@
+.app-container1 {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 15px;
+}
+
+.breadcrumbs {
+  display: flex;
+  align-items: center;
+  font-weight: bold;
+  font-size: 16px;
+  color: #005fc4;
+  padding-left: 15px;
+}
+
+.breadcrumb-link {
+  text-decoration: none;
+  color: #515154;
+  margin-right: 5px;
+  font-size: 13px;
+
+}
+
+.breadcrumb-link:hover {
+  text-decoration: underline;
+}
+
+.breadcrumb-separator {
+  margin-right: 5px;
+  color: #6c757d;
+}
+
+.breadcrumb-current {
+  color: #6c757d;
+}

@@ -1,0 +1,49 @@
+.blog-detail-container {
+    display: flex;
+    margin-right: 10%;
+    padding-left: 10%;
+    margin-top: 10px;
+  
+    @media screen and (max-width: 768px) {
+      flex-direction: column; /* Chuyển thành dạng cột trên màn hình nhỏ */
+      margin-right: 0;
+      padding-left: 5%;
+      padding-right: 5%;
+    }
+  }
+  
+  .blog-detail {
+    h1 {
+      margin-bottom: 1rem;
+    }
+    p {
+      margin-bottom: 1rem;
+    }
+  
+    /* Đảm bảo ảnh không tràn ra ngoài */
+    img {
+      max-width: 100%; /* Hình ảnh không vượt quá kích thước container */
+      height: auto;    /* Giữ tỉ lệ khung hình */
+      display: block;  /* Xóa khoảng cách không mong muốn */
+      margin: 0 auto;  /* Canh giữa */
+    }
+  
+    @media screen and (max-width: 768px) {
+      h1 {
+        font-size: 1.5rem;
+      }
+      p {
+        margin-bottom: 1rem;
+      }
+    }
+  }
+  
+  .category-sidebar {
+    margin-left: 2rem;
+  
+    @media screen and (max-width: 768px) {
+      margin-left: 0;
+      margin-top: 2rem; /* Thêm khoảng cách trên màn hình nhỏ */
+    }
+  }
+  
