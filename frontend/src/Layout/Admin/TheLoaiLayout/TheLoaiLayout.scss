@@ -1,0 +1,58 @@
+
+.btnthemtheloai {
+    display: flex;
+    align-items: center;
+    padding: 10px;
+    gap: 10px;
+    border: none;
+    box-shadow: 0 4px 6px #555555;
+    background-color: #616161;
+    color: white;
+    border-radius: 5px;
+}
+.chitiet{
+    background-color: #5da522;
+    align-items: center;
+    padding: 10px;
+    gap: 10px;
+    border: none;
+    box-shadow: 0 4px 6px #584324;
+    color: white;
+    border-radius: 5px;
+}
+.xoatheloai{
+    background-color: #c20000;
+    align-items: center;
+    padding: 10px;
+    gap: 10px;
+    border: none;
+    box-shadow: 0 4px 6px #333;
+    color: white;
+    border-radius: 5px;
+}
+.capnhat{
+    background-color: #2978f0;
+    align-items: center;
+    padding: 10px;
+    gap: 10px;
+    border: none;
+    box-shadow: 0 4px 6px #333;
+    color: white;
+    border-radius: 5px;
+}
+.tdchucnang1{
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    
+}
+.theloai_container{
+    height: 100%;
+    padding: 10px;
+}
+.nav_chucnang{
+    display: flex;
+    gap: 10px;
+    padding: 10px;
+    background-color: #f5f5f5;
+}
