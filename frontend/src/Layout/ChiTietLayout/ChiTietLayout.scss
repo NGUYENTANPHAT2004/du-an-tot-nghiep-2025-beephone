@@ -1,0 +1,436 @@
+.container-chitiet {
+  font-family: Arial, sans-serif;
+  max-width: 75%;
+  margin: auto;
+}
+
+header {
+  text-align: center;
+  padding: 20px 0;
+}
+
+.main {
+  display: flex;
+  gap: 20px;
+  padding: 20px 10px;
+}
+
+.product-detail {
+  display: flex;
+  flex-direction: column;
+
+  gap: 20px;
+  width: 100%;
+  flex: 1;
+}
+
+.product-image {
+  flex: 1;
+  position: relative;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.product-image .pdt-img {
+  height: auto;
+}
+
+.product-image .discount-logo2 {
+  position: absolute;
+  margin: 5px 0 0 5px;
+  width: 150px;
+  height: 50px;
+  object-fit: contain;
+}
+
+.product-info {
+  flex: 1;
+}
+
+.product-name-chitiet {
+  font-size: 24px;
+  font-weight: bold;
+  color: #666;
+}
+
+.chitietprice {
+  color: #000;
+  font-size: 25px;
+  margin: 30px 0 10px 0;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.old-price {
+  text-decoration: line-through;
+  color: #999;
+  font-size: 20px;
+  font-weight: normal;
+}
+
+.current-price {
+  color: #06c;
+  font-weight: bold;
+  font-size: 25px;
+}
+
+.description {
+  font-weight: bold;
+}
+
+.short-description {
+  line-height: 1.8;
+}
+
+.buttons {
+  display: flex;
+  gap: 10px;
+}
+
+.buy-now,
+.contact {
+  display: flex;
+  align-items: center;
+
+  gap: 8px;
+  padding: 10px 20px;
+  font-size: 16px;
+  justify-content: center;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.buy-now {
+  flex-basis: 50%;
+  max-width: 50%;
+  background-color: #007aff;
+  color: white;
+}
+
+.contact {
+  flex-basis: 50%;
+  max-width: 50%;
+  background-color: rgb(0, 128, 17);
+  color: white;
+}
+
+.buy-now:hover,
+.contact:hover {
+  transform: translateY(-8px);
+  box-shadow: 0px 8px 12px rgba(0, 0, 0, 0.1);
+}
+
+.sidebar {
+  flex: 1;
+}
+
+.chitiet-footer {
+  text-align: center;
+  margin-top: 20px;
+  padding: 10px 0;
+}
+
+.footer-icons {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+
+.icon-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 0 30px;
+  border-right: 1px solid #ccc;
+}
+
+.footer-image {
+  overflow: hidden;
+}
+
+.img-footer {
+  width: 100%;
+}
+
+.icon-item:last-child {
+  border-right: none;
+}
+
+.mausac_dungluong {
+  display: flex;
+  flex-direction: column;
+
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.mausac_chitiet {
+  display: flex;
+  align-items: center;
+}
+
+.dungluong_chitiet {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.border_mausac {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  padding: 3px;
+
+  div {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    ;
+  }
+}
+
+.border_mausac1 {
+  border: 1px solid #0066cc;
+}
+
+.mausac_container {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.dungluong_item {
+  padding: 10px;
+  border: 2px solid rgb(187, 187, 187);
+  width: 80px;
+  text-align: center;
+  border-radius: 5px;
+  box-shadow: 5px 4px 6px rgba(0, 0, 0, 0.1);
+  cursor: pointer;
+  font-size: 13px;
+
+
+  span {
+    font-weight: 600;
+    color: #86868B;
+  }
+
+}
+
+.dungluong_item_active {
+  border-color: #0066cc;
+
+}
+
+.dungluong_container {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.divratedanhgia_container {
+  padding: 10px;
+  border-bottom: 1px solid #ddd;
+  margin-top: 10px;
+}
+
+.divratedanhgia {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.danhgiarate {
+  padding-right: 10px;
+  border-right: 1px solid #06c;
+  color: #06c;
+}
+
+.note_VAT {
+  font-size: 13px;
+  line-height: 16px;
+  color: #86868B;
+  margin-bottom: 10px;
+}
+
+.note_tieude {
+  font-size: 13px;
+  line-height: 16px;
+  color: #86868B;
+  margin-top: 10px;
+}
+
+.short-des {
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  padding-left: 10px;
+  padding-right: 10px;
+  padding-top: 10px;
+  padding-bottom: 10px;
+
+  .title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+}
+
+.short-description {
+  color: #515154;
+  font-size: 13px;
+  padding: 0 10px 25px 10px;
+}
+
+.short-description-header {
+  position: sticky;
+  top: 5px;
+  right: 10px;
+  background-color: #f0f0f0;
+  padding: 5px 5px 5px 10px;
+  border-radius: 5px;
+  font-size: 12px;
+  color: #333333;
+  box-shadow: rgba(0, 0, 0, 0.1) 0px 0px 10px;
+  text-align: left;
+}
+
+hr {
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+  border: 0;
+  border-top: 1px solid rgba(0, 0, 0, .1);
+}
+
+hr {
+  box-sizing: content-box;
+  height: 0;
+  overflow: visible;
+}
+
+.short-description-content {
+  cursor: pointer;
+  border: 1px solid #F4F4F4;
+  border-radius: 5px;
+  margin: 5px 0;
+  padding: 8px;
+  background: linear-gradient(90deg, #F64850, #FB810B);
+  text-align: center;
+  flex-grow: 2;
+  margin-right: 10px;
+  color: #fff;
+  display: flex;
+  flex-direction: column;
+  justify-items: center;
+  justify-content: center;
+}
+
+.event_value {
+  font-weight: bold;
+  font-size: 23px;
+}
+
+.pchitiet {
+  margin: 0;
+  padding: 0;
+
+  img {
+
+    margin-right: 5px;
+  }
+
+}
+
+.pstrong {
+  color: #e03e2d;
+}
+
+.lh-2 {
+  line-height: 2;
+}
+
+.divbtn_muagay {
+  padding: 20px;
+  text-align: center;
+  background-color: #06c;
+  color: white;
+  font-size: 17px;
+  font-weight: bold;
+  line-height: 25px;
+  border-radius: 10px;
+}
+
+.icontichxanh {
+  color: #06c;
+}
+
+.banner_item {
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  padding: 5px;
+}
+
+.banner_item img {
+  width: 100%;
+  border-radius: 8px;
+}
+
+.anhchay {
+  width: 500px;
+  overflow: hidden;
+
+}
+
+.slick-prev,
+.slick-next {
+
+  width: 80px !important;
+  height: 100px !important;
+
+  color: transparent;
+
+  background: transparent;
+  z-index: 1000;
+
+  &::before {
+    color: black !important;
+  }
+}
+.anhchay-img{
+  width: 24px;
+  height: 100px;
+}
+
+
+@media (max-width: 768px) {
+
+  .container-chitiet {
+    font-family: Arial, sans-serif;
+    max-width: unset;
+    margin: auto;
+  }
+
+  .product-detail {
+    flex-direction: column;
+
+  }
+  .main{
+    flex-direction: column;
+  }
+  .anhchay{
+    width: 100% !important;
+  }
+  .anhchay-img{
+    width: 100px !important;
+    height: 100px;
+  }
+  .slick-slide{
+    width: unset !important;
+  }
+}
