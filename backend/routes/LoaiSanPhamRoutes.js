@@ -70,7 +70,8 @@ router.get('/theloaiadmin', async (req, res) => {
           camera: tl.camera,
           pinsac: tl.pinsac,
           hang: tl.hang,
-          congsac: tl.congsac
+          congsac: tl.congsac,
+          khuyenmai: tl.khuyenmai
         }
       })
     )
@@ -79,5 +80,4 @@ router.get('/theloaiadmin', async (req, res) => {
     console.log(error)
   }
 })
-
 module.exports = router
