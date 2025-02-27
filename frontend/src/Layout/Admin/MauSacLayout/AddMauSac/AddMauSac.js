@@ -102,5 +102,4 @@ function AddMauSac({ isOpen, onClose, iddungluong, fetchData }) {
     </Modal>
   );
 }
-
 export default AddMauSac;
