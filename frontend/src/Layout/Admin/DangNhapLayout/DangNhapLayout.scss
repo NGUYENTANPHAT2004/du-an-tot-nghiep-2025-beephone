@@ -1,0 +1,111 @@
+.login_container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background-image: url('../../../../public/background.jpg');
+    background-size: cover;
+}
+
+.login_main {
+    display: flex;
+    width: 750px;
+    margin: 0 auto;
+    height: 600px;
+    align-items: center;
+    background-color: rgba(255, 255, 255, 0.5);
+    backdrop-filter: blur(10px);
+    box-shadow: 5px 4px 6px 3px rgba(0, 0, 0, 0.1);
+    border-radius: 10px;
+
+}
+
+.login_left,
+.login_right {
+    flex: 1;
+    height: 100%;
+}
+
+.login_left {
+   video{
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+   }
+}
+
+.login_right {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background-color: rgba(128, 128, 128, 0.5);
+    gap: 30px;
+    border-radius: 10px;
+}
+
+.login_logo {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 60px;
+
+    h2 {
+        padding: 0;
+        margin: 0;
+        color: white;
+    }
+}
+
+.login_input {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    width: 80%;
+
+    label {
+        font-size: 18px;
+        font-weight: 500;
+        color: white;
+    }
+
+    .divinput_login {
+        display: flex;
+        border-radius: 10px;
+        padding: 10px;
+        background-color: #fff;
+        box-shadow: 5px 4px 6px 3px rgba(0, 0, 0, 0.1);
+        font-size: 16px;
+
+        input {
+            background-color: transparent;
+            border: none;
+            outline: none;
+            flex: 1;
+        }
+    }
+}
+
+.login_button {
+    width: 80%;
+
+    button {
+        width: 100%;
+        padding: 10px;
+        border-radius: 20px;
+        border: none;
+        color: black;
+        background-color: white;
+        font-size: 16px;
+        font-weight: bold;
+        cursor: pointer;
+
+        &:hover {
+            background-color: rgba(255, 255, 255, 0.5);
+        }
+    }
+}
+.error{
+    color: red;
+    margin: 0;
+    padding: 0;
+}

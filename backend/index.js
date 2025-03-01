@@ -12,6 +12,7 @@ const uri = "mongodb://localhost:27017/datn";
 const dungluongroutes = require('./routes/DungLuongRoutes')
 const sanphamroutes = require('./routes/SanPhamRoutes')
 const loaisanphamroutes = require('./routes/LoaiSanPhamRoutes')
+const userroutes = require('./routes/UserRouter')
 const mongoStoreOptions = {
   mongooseConnection: db.mongoose.connection,
   mongoUrl: uri,
@@ -38,9 +39,11 @@ app.use("/", mausacriengroutes);
 app.use("/", categoryrouter);
 app.use('/', dungluongroutes)
 app.use('/', loaisanphamroutes)
+app.use('/', userroutes)
 app.use('/', sanphamroutes) 
 app.listen(3005, () => {
   console.log("Server is running on port 3005");
   console.log(__dirname);
 });
 module.exports = app;
+
