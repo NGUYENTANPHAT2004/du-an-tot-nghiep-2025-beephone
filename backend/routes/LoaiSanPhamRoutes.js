@@ -56,6 +56,60 @@ router.post('/postloaisp', async (req, res) => {
     res.status(500).json({ message: `Đã xảy ra lỗi: ${error}` })
   }
 })
+router.post('/putloaisp/:id', async (req, res) => {
+  try {
+    const id = req.params.id
+    const {
+      name,
+      manhinh,
+      chip,
+      ram,
+      dungluong,
+      camera,
+      pinsac,
+      hang,
+      congsac,
+      thongtin
+    } = req.body
+    const namekhongdau1 = unicode(name)
+    const namekhongdau = removeSpecialChars(namekhongdau1)
+
+    await LoaiSP.LoaiSP.findByIdAndUpdate(id, {
+      name,
+      manhinh,
+      chip,
+      ram,
+      dungluong,
+      camera,
+      pinsac,
+      hang,
+      congsac,
+      thongtin,
+      namekhongdau
+    })
+    res.json({ message: 'sửa thành công' })
+  } catch (error) {
+    console.error(error)
+    res.status(500).json({ message: `Đã xảy ra lỗi: ${error}` })
+  }
+})
+router.get('/theloaisanpham', async (req, res) => {
+  try {
+    const theloai = await LoaiSP.LoaiSP.find().lean()
+    const theloaijson = await Promise.all(
+      theloai.map(async tl => {
+        return {
+          _id: tl._id,
+          name: tl.name,
+          namekhongdau: tl.namekhongdau
+        }
+      })
+    )
+    res.json(theloaijson)
+  } catch (error) {
+    console.log(error)
+  }
+})
 router.get('/theloaiadmin', async (req, res) => {
   try {
     const theloai = await LoaiSP.LoaiSP.find().lean()
@@ -78,6 +132,54 @@ router.get('/theloaiadmin', async (req, res) => {
     res.json(theloaijson)
   } catch (error) {
     console.log(error)
+  }
+})
+router.post('/putloaisp/:id', async (req, res) => {
+  try {
+    const id = req.params.id
+    const {
+      name,
+      manhinh,
+      chip,
+      ram,
+      dungluong,
+      camera,
+      pinsac,
+      hang,
+      congsac,
+      thongtin
+    } = req.body
+    const namekhongdau1 = unicode(name)
+    const namekhongdau = removeSpecialChars(namekhongdau1)
+
+    await LoaiSP.LoaiSP.findByIdAndUpdate(id, {
+      name,
+      manhinh,
+      chip,
+      ram,
+      dungluong,
+      camera,
+      pinsac,
+      hang,
+      congsac,
+      thongtin,
+      namekhongdau
+    })
+    res.json({ message: 'sửa thành công' })
+  } catch (error) {
+    console.error(error)
+    res.status(500).json({ message: `Đã xảy ra lỗi: ${error}` })
+  }
+})
+
+router.get('/getchitiettl/:idtheloai', async (req, res) => {
+  try {
+    const idtheloai = req.params.idtheloai
+    const theloai = await LoaiSP.LoaiSP.findById(idtheloai)
+    res.json(theloai)
+  } catch (error) {
+    console.error(error)
+    res.status(500).json({ message: `Đã xảy ra lỗi: ${error}` })
   }
 })
 module.exports = router
