@@ -1,0 +1,55 @@
+/* Bố cục tổng thể */
+.DanhGiaLayout.review-container {
+    width: 1500px;
+    margin: auto;
+    font-family: Arial, sans-serif;
+    display: flex;
+    justify-content: center;
+    gap: 100px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    margin-top: 10px;
+    border-radius: 10px;
+}
+
+/* Phần hiển thị đánh giá trung bình */
+.rating-summary {
+    display: flex;
+    align-items: center;
+}
+
+.score {
+    font-size: 32px;
+    font-weight: bold;
+    margin-right: 20px;
+}
+
+/* Danh sách đánh giá */
+.reviews {
+    margin-top: 20px;
+    border-left: 1px solid #ddd;
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex: 1;
+}
+
+.review-item {
+    border-bottom: 1px solid #ddd;
+    padding: 10px 0;
+    width: 100%;
+}
+
+/* Responsive cho màn hình nhỏ */
+@media screen and (max-width: 768px) {
+    .review-container {
+        width: unset !important;
+        flex-direction: column;
+        gap: unset !important;
+    }
+
+    .reviews {
+        border-left: unset !important;
+    }
+}
