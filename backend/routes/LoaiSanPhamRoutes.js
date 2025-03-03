@@ -171,7 +171,56 @@ router.post('/putloaisp/:id', async (req, res) => {
     res.status(500).json({ message: `Đã xảy ra lỗi: ${error}` })
   }
 })
+router.post('/deleteloaisp/:id', async (req, res) => {
+  try {
+    const id = req.params.id
+    const xam = await LoaiSP.LoaiSP.findById(id)
+    if (!xam) {
+      res.status(403).json({ message: 'khong tim thay sp' })
+    }
+    await Promise.all(
+      xam.chitietsp.map(async chitietsp => {
+        await Sp.ChitietSp.findByIdAndDelete(chitietsp._id)
+      })
+    )
+    await LoaiSP.LoaiSP.deleteOne({ _id: id })
+    res.json({ message: 'xóa thành công' })
+  } catch (error) {
+    console.error(error)
+    res.status(500).json({ message: `Đã xảy ra lỗi: ${error}` })
+  }
+})
 
+router.post('/deletehangloatloaisp', async (req, res) => {
+  try {
+    const { ids } = req.body
+
+    if (!ids || !Array.isArray(ids) || ids.length === 0) {
+      return res.status(400).json({ message: 'Danh sách ID không hợp lệ' })
+    }
+
+    const loaiSPs = await LoaiSP.LoaiSP.find({ _id: { $in: ids } })
+
+    if (loaiSPs.length === 0) {
+      return res
+        .status(404)
+        .json({ message: 'Không tìm thấy thể loại nào để xóa' })
+    }
+
+    await Promise.all(
+      loaiSPs.map(async loaiSP => {
+        await Sp.ChitietSp.deleteMany({ _id: { $in: loaiSP.chitietsp } })
+      })
+    )
+
+    await LoaiSP.LoaiSP.deleteMany({ _id: { $in: ids } })
+
+    res.json({ message: `Đã xóa ${ids.length} thể loại thành công` })
+  } catch (error) {
+    console.error(error)
+    res.status(500).json({ message: `Đã xảy ra lỗi: ${error}` })
+  }
+})
 router.get('/getchitiettl/:idtheloai', async (req, res) => {
   try {
     const idtheloai = req.params.idtheloai
