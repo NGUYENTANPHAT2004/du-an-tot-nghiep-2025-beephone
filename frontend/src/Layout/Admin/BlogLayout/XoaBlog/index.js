@@ -1,0 +1,1 @@
+export {default as XoaBlog} from './XoaBlog'
