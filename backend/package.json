@@ -4,7 +4,7 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node server.js"
+    "start": "node index.js"
   },
   "keywords": [],
   "author": "",
@@ -23,8 +23,7 @@
     "morgan": "^1.10.0",
     "multer": "^1.4.5-lts.1",
     "unicode": "^14.0.0",
-    "unidecode": "^1.1.0",
-    "webbandienthoai": "file:"
+    "unidecode": "^1.1.0"
   },
   "devDependencies": {
     "@types/multer": "^1.4.11",
