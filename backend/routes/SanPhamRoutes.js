@@ -191,4 +191,50 @@ router.get("/chitietsanpham/:tieude", async (req, res) => {
     console.log(error);
   }
 });
+
+router.get('/san-pham-pt/:nametheloai', async (req, res) => {
+  try {
+    const nametheloai = req.params.nametheloai
+    const page = parseInt(req.query.page) || 1
+    const limit = parseInt(req.query.limit) || 8
+    const skip = (page - 1) * limit
+
+    const theloai = await LoaiSP.LoaiSP.findOne({ namekhongdau: nametheloai })
+    if (!theloai) {
+      return res.status(404).json({ message: 'Thể loại không tồn tại' })
+    }
+
+    const sanphamTotal = theloai.chitietsp.length
+    const sanphamPage = theloai.chitietsp.slice(skip, skip + limit)
+
+    let sanpham = await Promise.all(
+      sanphamPage.map(async sp => {
+        const sp1 = await Sp.ChitietSp.findById(sp._id)
+        return {
+          _id: sp1._id,
+          name: sp1.name,
+          namekhongdau: sp1.namekhongdau,
+          image: sp1.image,
+          price:
+            sp1.price,
+        }
+      })
+    )
+
+    res.json({
+      nametheloai: theloai.name,
+      namekhongdau: theloai.namekhongdau,
+      sanpham,
+      pagination: {
+        currentPage: page,
+        totalPages: Math.ceil(sanphamTotal / limit),
+        totalItems: sanphamTotal
+      }
+    })
+  } catch (error) {
+    console.log(error)
+    res.status(500).json({ message: 'Lỗi server' })
+  }
+})
 module.exports = router;
+
