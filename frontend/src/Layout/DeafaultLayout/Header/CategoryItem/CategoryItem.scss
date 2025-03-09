@@ -1,0 +1,109 @@
+/* CategoryItem.scss */
+
+/* Styles for submenu items */
+.menu-item {
+  position: relative;
+  
+  a {
+    display: block;
+    padding: 8px 12px;
+    color: #fff;
+    text-decoration: none;
+    transition: background-color 0.2s ease;
+    white-space: nowrap;
+  }
+
+  /* Hover effect for all menu items */
+  &:hover > a {
+    background-color: #be8c45;
+    text-decoration: none;
+  }
+
+  /* Styles specific to items with submenus */
+  &.has-submenu {
+    /* Default hide submenu */
+    .submenu {
+      display: none;
+      position: absolute;
+      top: 0;
+      left: 100%;
+      min-width: 200px;
+      background-color: #6f6f6f;
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      z-index: 9999;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+      
+      /* First level submenu position */
+      &:first-child {
+        top: 100%;
+        left: 0;
+      }
+      
+      /* Ensure items stack properly */
+      li {
+        width: 100%;
+        
+        a {
+          padding: 8px 15px;
+          display: block;
+          
+          &:hover {
+            background-color: #be8c45;
+          }
+        }
+      }
+    }
+
+    /* Desktop view: Show submenu on hover */
+    @media (min-width: 769px) {
+      &:hover > .submenu {
+        display: block;
+      }
+    }
+    
+    /* Mobile view: Show submenu when active class is present */
+    @media (max-width: 768px) {
+      > a:after {
+        content: '+';
+        margin-left: 5px;
+      }
+      
+      &.submenu-active {
+        > .submenu {
+          display: block;
+          position: static;
+          box-shadow: none;
+          background-color: rgba(0,0,0,0.1);
+          padding-left: 15px;
+        }
+        
+        > a:after {
+          content: '-';
+        }
+      }
+      
+      &:hover > .submenu {
+        display: none;
+      }
+    }
+  }
+}
+
+/* Mobile-specific adjustments */
+@media (max-width: 768px) {
+  .menu-item {
+    &.has-submenu {
+      .submenu {
+        width: 100%;
+        
+        li {
+          a {
+            padding-left: 25px;
+          }
+        }
+      }
+    }
+  }
+}

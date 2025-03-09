@@ -46,15 +46,32 @@ router.post('/createcate', async (req, res) => {
   }
 });
 
+const populateRecursive = async (categories) => {
+  for (let category of categories) {
+    // Populate thể loại (theloai)
+    if (category.theloai && category.theloai.length > 0) {
+      await category.populate('theloai'); // Không cần .execPopulate()
+    }
+
+    // Populate children và gọi đệ quy
+    if (category.children && category.children.length > 0) {
+      await category.populate('children'); // Không cần .execPopulate()
+      await populateRecursive(category.children); // Gọi đệ quy
+    }
+  }
+};
 router.get('/listcate', async (req, res) => {
   try {
-    const categories = await Category.find({ parent: null }).populate({
-      path: 'children',
-      populate: { path: 'children' }
-    });
-    res.json(categories);
+    // Lấy danh sách các danh mục cha (parent: null)
+    let categories = await Category.find({ parent: null });
+
+    // Sử dụng hàm đệ quy để populate dữ liệu
+    await populateRecursive(categories);
+
+    // Trả về kết quả
+    res.status(200).json(categories);
   } catch (error) {
-    res.status(500).json({ message: `Lỗi: ${error.message}` });
+    res.status(500).json({ message: error.message });
   }
 });
 router.delete('/deletecate/:id', async (req, res) => {
