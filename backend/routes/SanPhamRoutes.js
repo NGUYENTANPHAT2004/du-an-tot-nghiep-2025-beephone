@@ -165,15 +165,87 @@ router.post("/deletechitietsp/:id", async (req, res) => {
   }
 });
 
-router.get("/getchitietspadmin/:idsp", async (req, res) => {
-  try {
-    const idsp = req.params.idsp;
-    const sanpham = await Sp.ChitietSp.findById(idsp);
-    res.json(sanpham);
-  } catch (error) {
-    console.log(error);
+router.get('/san-pham/:nametheloai',async (req,res)=>{
+  try{
+    const nametheloai = req.params.nametheloai
+    const theloai = await LoaiSP.LoaiSP.findOne({
+      namekhongdau: nametheloai
+    })
+    const sanpham = await Promise.all(
+      theloai.chitietsp.map(async sp =>{
+        const sp1 = await Sp.ChitietSp.findById(sp._id)
+        return{
+          _id: sp1._id,
+          name: sp1.name,
+          namekhongdau:sp1.namekhongdau,
+          image:sp1.image,
+          price:sp1.price
+        }
+      })
+    )
+    const sanphamjson = {
+      nametheloai: theloai.name,
+      namekhongdau: theloai.namekhongdau,
+      sanpham: sanpham
+    }
+    res.json(sanphamjson)
+  }catch(error){
+    console.log(error)
   }
-});
+})
+
+router.get('/san-pham-pt/:nametheloai',async (req,res)=>{
+  try {
+    const nametheloai = req.params.nametheloai
+    const page = parseInt(req.query.page) || 1
+    const limit = parseInt(req.query.limit) || 8
+    const skip = (page - 1) * limit
+    const sortOrder = req.query.sort === 'desc'? -1 : 1
+
+    const theloai = await LoaiSP.LoaiSP.findOne({ namekhongdau: nametheloai})
+    if(!theloai){
+      return res.status(404).json({ message:'Thể loại không tồn tại'})
+    }
+
+    const sanphamTotal = theloai.chitietsp.length
+    const sanphamPage = theloai.chitietsp.slice(skip, skip + limit)
+
+    let sanpham = await Promise:all(
+      sanphamPage.map(async sp =>{
+        const sp1 = await Sp.ChitietSp.findById(sp._id)
+        return{
+          _id:sp1._id,
+          name:sp1.name,
+          namekhongdau:sp1.namekhongdau,
+          image:sp1.image,
+          price:
+            theloai.khuyenmai === 0
+                ? sp1.price
+                : sp1.price - (sp1.price * theloai.khuyenmai )/100,
+                giagoc:sp1.price,
+                khuyenmai:theloai.khuyenmai         
+              }
+      })
+    )
+
+    sanpham.sort((a,b)=>(a.price - b.price)*sortOrder)
+    
+    res.json({
+      nametheloai: theloai.name,
+      namekhongdau: theloai.namekhongdau,
+      khuyenmai: theloai.khuyenmai,
+      sanpham,
+      pagination:{
+        currentPage: page,
+        totalPages: Math.ceil(sanphamTotal / limit),
+        totalItems: sanphamTotal
+      }
+    })
+  } catch (error) {
+    console.log(error)
+    res.status(500).json({message:"Lỗi server"})
+  }
+})
 
 router.get("/chitietsanpham/:tieude", async (req, res) => {
   try {
@@ -191,4 +263,15 @@ router.get("/chitietsanpham/:tieude", async (req, res) => {
     console.log(error);
   }
 });
+
+router.get("/getchitietspadmin/:idsp", async (req, res) => {
+  try {
+    const idsp = req.params.idsp;
+    const sanpham = await Sp.ChitietSp.findById(idsp);
+    res.json(sanpham);
+  } catch (error) {
+    console.log(error);
+  }
+});
+
 module.exports = router;
