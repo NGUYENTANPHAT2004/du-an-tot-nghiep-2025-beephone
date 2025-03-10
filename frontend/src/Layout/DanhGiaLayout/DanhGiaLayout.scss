@@ -1,10 +1,10 @@
-/* Bố cục tổng thể */
-.DanhGiaLayout.review-container {
+.review-container {
     width: 1500px;
     margin: auto;
     font-family: Arial, sans-serif;
     display: flex;
     justify-content: center;
+
     gap: 100px;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
     padding: 20px;
@@ -12,7 +12,24 @@
     border-radius: 10px;
 }
 
-/* Phần hiển thị đánh giá trung bình */
+.review-rating {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.danhgia_no {
+    text-align: center;
+    font-size: 20px;
+    font-weight: bold;
+}
+
+.title_rate {
+    font-size: 24px;
+    font-weight: bold;
+    text-align: unset !important;
+}
+
 .rating-summary {
     display: flex;
     align-items: center;
@@ -24,7 +41,70 @@
     margin-right: 20px;
 }
 
-/* Danh sách đánh giá */
+.stars {
+    color: gold;
+    font-size: 30px;
+}
+
+.star {
+    font-size: 30px;
+    cursor: pointer;
+    transition: color 0.3s;
+    color: #ccc;
+}
+
+.starselected {
+    color: gold;
+}
+
+.rating-bars {
+    display: flex;
+    flex-direction: column;
+}
+
+.bar {
+    width: 300px;
+    height: 20px;
+    background: lightgray;
+    margin: 2px 0;
+    border-radius: 50px;
+}
+
+.bar.active {
+    background: gold;
+}
+
+.review-form {
+    margin-top: 20px;
+}
+
+.input-name,
+.input-review {
+    display: block;
+    width: 100%;
+    margin-top: 10px;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 10px;
+}
+
+.input-review {
+    height: 50px;
+}
+
+.upload-btn,
+.submit-btn {
+    background: #0066CC;
+    color: #fff;
+    min-height: 40px;
+    min-width: 160px;
+    z-index: 20;
+    padding: 8px 27px;
+    border-radius: 4px;
+    margin-top: 10px;
+    border: none;
+}
+
 .reviews {
     margin-top: 20px;
     border-left: 1px solid #ddd;
@@ -39,14 +119,58 @@
     border-bottom: 1px solid #ddd;
     padding: 10px 0;
     width: 100%;
+
+    p {
+        padding: 0;
+        margin: 0;
+    }
 }
 
-/* Responsive cho màn hình nhỏ */
+.div_chatluong_star {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.review-form {
+    label {
+        color: #515154;
+        font-size: 16px;
+        font-weight: 700;
+    }
+}
+
+.div_danhgia_input {
+    display: flex;
+    flex-direction: column;
+    margin-top: 20px;
+}
+
+.comment {
+    color: #515154;
+    font-weight: 400;
+    font-size: 15px;
+}
+
+.reviewer {
+    font-weight: 700;
+    font-size: 15px;
+    line-height: 21px;
+    margin-bottom: 8px;
+    color: #444444;
+    padding-left: 8px;
+}
+
 @media screen and (max-width: 768px) {
     .review-container {
         width: unset !important;
         flex-direction: column;
         gap: unset !important;
+    }
+
+    .review-rating {
+        border-bottom: 1px solid #ccc;
+        padding-bottom: 10px;
     }
 
     .reviews {
