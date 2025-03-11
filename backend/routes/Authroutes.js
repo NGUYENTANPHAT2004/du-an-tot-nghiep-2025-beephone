@@ -14,73 +14,7 @@ const generateToken = (user) => {
   return jwt.sign({ id: user._id, email: user.email, role: user.role }, jwtSecret, { expiresIn: "7d" });
 };
 
-// 🔹 Đăng ký tài khoản
-router.post('/register_auth', async (req, res) => {
-  try {
-    const { username, email, password, role, phone } = req.body;
 
-    // Validate phone
-    if (!phone || !/^\d{10}$/.test(phone)) {
-      return res.status(400).json({ message: 'Số điện thoại không hợp lệ' });
-    }
-    
-    const existingPhone = await User.User.findOne({ phone });
-    if (existingPhone) {
-      return res.status(400).json({ message: 'Số điện thoại đã được đăng ký' });
-    }
-
-    // Validate email
-    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-    if (!email || !emailRegex.test(email)) {
-      return res.status(400).json({ message: 'Email không hợp lệ' });
-    }
-
-    const existingUser = await User.User.findOne({ email });
-    if (existingUser) {
-      return res.status(400).json({ message: 'Email đã được đăng ký' });
-    }
-
-    const hashedPassword = await bcrypt.hash(password, 10);
-
-    const user = new User.User({ 
-      username, 
-      email, 
-      password: hashedPassword, 
-      role: role || 'user', 
-      phone,
-      socialLogins: {} 
-    });
-    
-    await user.save();
-    
-    res.json({ message: 'Đăng ký thành công', user });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: 'Đã xảy ra lỗi' });
-  }
-});
-router.post('/login_auth', async (req, res) => {
-  try {
-    const { username, password } = req.body;
-    const user = await User.User.findOne({ username });
-
-    if (!user) {
-      return res.status(400).json({ message: 'Không tìm thấy tên tài khoản' });
-    }
-
-    const isPasswordValid = await bcrypt.compare(password, user.password);
-    if (!isPasswordValid) {
-      return res.status(400).json({ message: 'Nhập sai mật khẩu' });
-    }
-
-    const jwtToken = generateToken(user);
-
-    res.json({ token: jwtToken, user });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: 'Đã xảy ra lỗi' });
-  }
-});
 // 🔹 Đăng nhập bằng Google
 router.post('/auth/google', async (req, res) => {
   try {
