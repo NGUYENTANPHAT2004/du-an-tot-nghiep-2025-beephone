@@ -23,27 +23,27 @@ function sortObject(obj) {
   return sorted;
 }
 
-router.get("/gethoadon", async (req, res) => {
+router.get("/gethoadon", async (request, response) => {
   try {
     const hoadon = await HoaDon.hoadon.find().lean();
-    res.json(hoadon);
+    response.json(hoadon);
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: "Lỗi trong quá trình xóa" });
+    response.status(500).json({ message: "Lỗi trong quá trình xóa" });
   }
 });
 
-router.post("/deletehoaddon", async (req, res) => {
+router.post("/deletehoadon", async (request, response) => {
   try {
-    const { ids } = req.body;
+    const { ids } = request.body;
     await HoaDon.hoadon.deleteMany({ _id: { $in: ids } });
-    res.json({ message: "Xóa hóa đơn thành công" });
+    response.json({ message: "Xóa hóa đơn thành công" });
   } catch (error) {
     console.error(error);
   }
 });
 
-router.post("/posthoadon", async (req, res) => {
+router.post("/posthoadon", async (request, response) => {
   try {
     const {
       name,
@@ -54,7 +54,7 @@ router.post("/posthoadon", async (req, res) => {
       ghichu,
       magiamgia,
       sanphams,
-    } = req.body;
+    } = request.body;
 
     const hoadon = new HoaDon.hoadon({
       name,
@@ -82,11 +82,11 @@ router.post("/posthoadon", async (req, res) => {
       const ngayKetThuc = moment(magiamgia1.ngayketthuc);
 
       if (ngayHienTai.isAfter(ngayKetThuc)) {
-        return res.json({ message: "Mã giảm giá đã hết hạn" });
+        return response.json({ message: "Mã giảm giá đã hết hạn" });
       }
       const daSuDung = await HoaDon.hoadon.findOne({ phone, magiamgia });
       if (daSuDung) {
-        return res
+        return response
           .status(400)
           .json({ message: "Bạn đã sử dụng mã giảm giá này" });
       }
@@ -103,24 +103,24 @@ router.post("/posthoadon", async (req, res) => {
     }
 
     await hoadon.save();
-    res.json(hoadon);
+    response.json(hoadon);
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: "Lỗi trong quá trình thêm" });
+    response.status(500).json({ message: "Lỗi trong quá trình thêm" });
   }
 });
 
-router.post("/create_payment_url", async (req, res) => {
+router.post("/create_payment_url", async (request, response) => {
   process.env.TZ = "Asia/Ho_Chi_Minh";
 
   let date = new Date();
   let createDate = moment(date).format("YYYYMMDDHHmmss");
 
   let ipAddr =
-    req.headers["x-forwarded-for"] ||
-    req.connection.remoteAddress ||
-    req.socket.remoteAddress ||
-    req.connection.socket.remoteAddress;
+    request.headers["x-forwarded-for"] ||
+    request.connection.remoteAddress ||
+    request.socket.remoteAddress ||
+    request.connection.socket.remoteAddress;
 
   let config = require("config");
 
@@ -129,12 +129,12 @@ router.post("/create_payment_url", async (req, res) => {
   let vnpUrl = config.get("vnp_Url");
   let returnUrl = config.get("vnp_ReturnUrl");
   let orderId = moment(date).format("DDHHmmss");
-  let amount = req.body.amount;
-  let bankCode = req.body.bankCode;
+  let amount = request.body.amount;
+  let bankCode = request.body.bankCode;
 
   let locale = "vn";
   const { name, phone, sex, giaotannoi, address, ghichu, magiamgia, sanphams } =
-    req.body;
+    request.body;
 
   let currCode = "VND";
   let vnp_Params = {};
@@ -185,22 +185,22 @@ router.post("/create_payment_url", async (req, res) => {
   if (magiamgia) {
     const magiamgia1 = await MaGiamGia.magiamgia.findOne({ magiamgia });
     if (!magiamgia1) {
-      return res.json({ message: "Mã giảm giá không tồn tại" });
+      return response.json({ message: "Mã giảm giá không tồn tại" });
     }
 
     if (magiamgia1.soluong <= 0) {
-      return res.json({ message: "Mã giảm giá đã hết" });
+      return response.json({ message: "Mã giảm giá đã hết" });
     }
 
     const ngayHienTai = moment();
     const ngayKetThuc = moment(magiamgia1.ngayketthuc);
 
     if (ngayHienTai.isAfter(ngayKetThuc)) {
-      return res.json({ message: "Mã giảm giá đã hết hạn" });
+      return response.json({ message: "Mã giảm giá đã hết hạn" });
     }
     const daSuDung = await HoaDon.hoadon.findOne({ phone, magiamgia });
     if (daSuDung) {
-      return res.json({ message: "Bạn đã sử dụng mã giảm giá này" });
+      return response.json({ message: "Bạn đã sử dụng mã giảm giá này" });
     }
     hoadon.magiamgia = magiamgia;
     const giamGia = magiamgia1.sophantram / 100;
@@ -226,11 +226,11 @@ router.post("/create_payment_url", async (req, res) => {
   vnp_Params["vnp_SecureHash"] = signed;
   vnpUrl += "?" + querystring.stringify(vnp_Params, { encode: false });
 
-  res.json(vnpUrl);
+  response.json(vnpUrl);
 });
 
-router.get("/vnpay_return", async (req, res) => {
-  let vnp_Params = req.query;
+router.get("/vnpay_return", async (request, response) => {
+  let vnp_Params = request.query;
 
   let secureHash = vnp_Params["vnp_SecureHash"];
   let orderId = vnp_Params["vnp_TxnRef"];
@@ -262,30 +262,30 @@ router.get("/vnpay_return", async (req, res) => {
       }
       await hoadon.save();
 
-      return res.redirect("http://localhost:3000/thanhcong?success=true");
+      return response.redirect("http://localhost:3000/thanhcong?success=true");
     }
   }
 
-  res.redirect("http://localhost:3000/thanhcong");
+  response.redirect("http://localhost:3000/thanhcong");
 });
 
-router.post("/settrangthai/:idhoadon", async (req, res) => {
+router.post("/settrangthai/:idhoadon", async (request, response) => {
   try {
-    const idhoadon = req.params.idhoadon;
-    const { trangthai } = req.body;
+    const idhoadon = request.params.idhoadon;
+    const { trangthai } = request.body;
     const hoadon = await HoaDon.hoadon.findById(idhoadon);
     hoadon.trangthai = trangthai;
     await hoadon.save();
-    res.json(hoadon);
+    response.json(hoadon);
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: "lỗi" });
+    response.status(500).json({ message: "lỗi" });
   }
 });
 
-router.get("/getchitiethd/:idhoadon", async (req, res) => {
+router.get("/getchitiethoadon/:idhoadon", async (request, response) => {
   try {
-    const idhoadon = req.params.idhoadon;
+    const idhoadon = request.params.idhoadon;
 
     const hoadon = await HoaDon.hoadon.findById(idhoadon);
     const hoadonsanpham = await Promise.all(
@@ -314,18 +314,18 @@ router.get("/getchitiethd/:idhoadon", async (req, res) => {
       tongtien: hoadon.tongtien,
       hoadonsanpham: hoadonsanpham,
     };
-    res.json(hoadonjson);
+    response.json(hoadonjson);
   } catch (error) {
     console.error(error);
   }
 });
 
-router.get("/getdoanhthu", async (req, res) => {
+router.get("/getdoanhthu", async (request, response) => {
   try {
-    const { startDate, endDate } = req.query;
+    const { startDate, endDate } = request.query;
 
     if (!startDate || !endDate) {
-      return res
+      return response
         .status(400)
         .json({ message: "Vui lòng nhập ngày bắt đầu và ngày kết thúc." });
     }
@@ -355,23 +355,23 @@ router.get("/getdoanhthu", async (req, res) => {
       doanhthu: doanhthuTheoNgay[ngay],
     }));
 
-    res.json(doanhthuArray);
+    response.json(doanhthuArray);
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: "Lỗi server!" });
+    response.status(500).json({ message: "Lỗi server!" });
   }
 });
 
-router.post("/timkiemhoadon", async (req, res) => {
+router.post("/timkiemhoadon", async (request, response) => {
   try {
-    const { phone } = req.body;
+    const { phone } = request.body;
     const hoadon = await HoaDon.hoadon.find({ phone });
     if (!hoadon) {
-      return res.json({
+      return response.json({
         message: "Không có đơn hàng tương ứng với số điện thoại",
       });
     }
-    res.json(hoadon);
+    response.json(hoadon);
   } catch (error) {
     console.error(error);
   }
