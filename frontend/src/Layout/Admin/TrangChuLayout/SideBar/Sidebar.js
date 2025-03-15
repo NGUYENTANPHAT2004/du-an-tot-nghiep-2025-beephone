@@ -21,6 +21,7 @@ function Sidebar({ activeTab }) {
     { name: "Đánh Giá", icon: faComments },
     { name: "Hóa đơn", icon: faReceipt },
     { name: "Doanh Thu", icon: faChartLine },
+    { name: "Kho", icon: faChartLine },
   ];
 
   return (

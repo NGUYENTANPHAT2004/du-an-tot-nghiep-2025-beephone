@@ -11,14 +11,26 @@ router.get('/tonkho/sanpham', async (req, res) => {
 
     // Xử lý từng sản phẩm
     const productList = await Promise.all(
-      sanphams.map(async (product) => {
+      sanphams.map(async (product) => { 
+        const productExists = await ChitietSp.ChitietSp.findById(product._id);
+          if (!productExists) {
+            return null; 
+          }
         // Lấy danh sách dung lượng của sản phẩm
         const dungluongs = await DungLuong.dungluong.find({ idloaisp: product.idloaisp }).lean();
-
+        if (!dungluongs || dungluongs.length === 0) {
+          return null;
+        }
         // Xử lý mỗi dung lượng và màu sắc
         const dungLuongData = await Promise.all(
           dungluongs.map(async (dungluong) => {
             try {
+              // Kiểm tra dung lượng có tồn tại không
+              const dungluongExists = await DungLuong.dungluong.findById(dungluong._id);
+              if (!dungluongExists) {
+                return null; // Bỏ qua nếu dung lượng đã bị xóa
+              }
+
               // Lấy tất cả màu sắc cho dung lượng này
               const mausacs = await MauSac.mausac.find({ dungluong: dungluong._id }).lean();
 
@@ -30,6 +42,12 @@ router.get('/tonkho/sanpham', async (req, res) => {
               const mausacData = await Promise.all(
                 mausacs.map(async (mausac) => {
                   try {
+                    // Kiểm tra màu sắc có tồn tại không
+                    const mausacExists = await MauSac.mausac.findById(mausac._id);
+                    if (!mausacExists) {
+                      return null; // Bỏ qua nếu màu sắc đã bị xóa
+                    }
+
                     // Tìm thông tin tồn kho cho sản phẩm/dung lượng/màu sắc
                     const stock = await ProductSizeStock.findOne({
                       productId: product._id,
@@ -46,13 +64,7 @@ router.get('/tonkho/sanpham', async (req, res) => {
                     };
                   } catch (error) {
                     console.error(`Lỗi khi xử lý màu sắc ${mausac._id}:`, error);
-                    return {
-                      _id: mausac._id,
-                      name: mausac.name,
-                      price: mausac.price || 0,
-                      images: mausac.image || [],
-                      quantity: 0, // Giá trị mặc định nếu có lỗi
-                    };
+                    return null;
                   }
                 })
               );
