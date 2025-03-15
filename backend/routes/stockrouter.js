@@ -1,6 +1,108 @@
 const router = require('express').Router()
 const { ProductSizeStock } = require('../models/ProductSizeStockmodel');
+const ChitietSp = require('../models/chitietSpModel');
+const DungLuong = require('../models/DungLuongModel');
+const MauSac = require('../models/MauSacModel');
+const LoaiSP = require('../models/LoaiSanPham');
+router.get('/tonkho/sanpham', async (req, res) => {
+  try {
+    // Lấy tất cả sản phẩm
+    const sanphams = await ChitietSp.ChitietSp.find().lean();
 
+    // Xử lý từng sản phẩm
+    const productList = await Promise.all(
+      sanphams.map(async (product) => {
+        // Lấy danh sách dung lượng của sản phẩm
+        const dungluongs = await DungLuong.dungluong.find({ idloaisp: product.idloaisp }).lean();
+
+        // Xử lý mỗi dung lượng và màu sắc
+        const dungLuongData = await Promise.all(
+          dungluongs.map(async (dungluong) => {
+            try {
+              // Lấy tất cả màu sắc cho dung lượng này
+              const mausacs = await MauSac.mausac.find({ dungluong: dungluong._id }).lean();
+
+              if (!mausacs || mausacs.length === 0) {
+                return null; // Bỏ qua nếu không có màu sắc
+              }
+
+              // Xử lý từng màu sắc
+              const mausacData = await Promise.all(
+                mausacs.map(async (mausac) => {
+                  try {
+                    // Tìm thông tin tồn kho cho sản phẩm/dung lượng/màu sắc
+                    const stock = await ProductSizeStock.findOne({
+                      productId: product._id,
+                      dungluongId: dungluong._id,
+                      mausacId: mausac._id
+                    }).lean();
+
+                    return {
+                      _id: mausac._id,
+                      name: mausac.name,
+                      price: mausac.price || 0,
+                      images: mausac.image || [],
+                      quantity: stock ? stock.quantity || 0 : 0, // Đảm bảo quantity không bị null
+                    };
+                  } catch (error) {
+                    console.error(`Lỗi khi xử lý màu sắc ${mausac._id}:`, error);
+                    return {
+                      _id: mausac._id,
+                      name: mausac.name,
+                      price: mausac.price || 0,
+                      images: mausac.image || [],
+                      quantity: 0, // Giá trị mặc định nếu có lỗi
+                    };
+                  }
+                })
+              );
+
+              // Lọc ra màu sắc hợp lệ (không null)
+              const validMauSacData = mausacData.filter(ms => ms !== null);
+
+              if (validMauSacData.length === 0) {
+                return null; // Bỏ qua dung lượng nếu không có màu sắc hợp lệ
+              }
+
+              return {
+                _id: dungluong._id,
+                name: dungluong.name,
+                mausac: validMauSacData
+              };
+            } catch (error) {
+              console.error(`Lỗi khi xử lý dung lượng ${dungluong._id}:`, error);
+              return null;
+            }
+          })
+        );
+
+        // Lọc ra dung lượng hợp lệ (không null)
+        const filteredDungLuongData = dungLuongData.filter(dl => dl !== null);
+
+        // Nếu không có dung lượng hợp lệ, bỏ qua sản phẩm này
+        if (filteredDungLuongData.length === 0) {
+          return null;
+        }
+
+        return {
+          _id: product._id,
+          name: product.name,
+          image: product.image,
+          price: product.price,
+          dungluong: filteredDungLuongData
+        };
+      })
+    );
+
+    // Lọc ra các sản phẩm hợp lệ (không null)
+    const filteredProductList = productList.filter(product => product !== null);
+
+    res.json(filteredProductList);
+  } catch (error) {
+    console.error('Lỗi khi lấy danh sách sản phẩm:', error);
+    res.status(500).json({ message: 'Lỗi server', error: error.message });
+  }
+});
 router.post('/stock/add', async (req, res) => {
     try {
         console.log("🚀 Dữ liệu nhận được từ request:", req.body);
