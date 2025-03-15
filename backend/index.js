@@ -14,6 +14,7 @@ const sanphamroutes = require('./routes/SanPhamRoutes')
 const loaisanphamroutes = require('./routes/LoaiSanPhamRoutes')
 const userroutes = require('./routes/UserRouter')
 const authroutes = require("./routes/Authroutes.js")
+const stockrouter = require('./routes/stockrouter')
 const jwtSecret = process.env.JWT_SECRET // Thêm fallback key
 console.log(jwtSecret)
 const mongoStoreOptions = {
@@ -44,7 +45,8 @@ app.use('/', dungluongroutes)
 app.use('/', loaisanphamroutes)
 app.use('/', userroutes)
 app.use('/', sanphamroutes)
-app.use('/',authroutes)
+app.use('/', authroutes)
+app.use('/', stockrouter)
 app.listen(3005, () => {
   console.log("Server is running on port 3005");
   console.log(__dirname);
