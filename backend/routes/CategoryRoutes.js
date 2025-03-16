@@ -64,6 +64,20 @@ const populateRecursive = async (categories) => {
     }
   }
 };
+router.get('/categoryitem/:slug', async (req, res) => {
+  try {
+    const { slug } = req.params;
+    let category = await Category.findOne({ namekhongdau: slug });
+    if (!category) {
+      return res.status(404).json({ message: "Category not found" });
+    }
+    await populateRecursive([category]);
+    res.status(200).json(category);
+  } catch (error) {
+    console.error('List category error:', error);
+    res.status(500).json({ message: error.message });
+  }
+});
 router.get('/listcate', async (req, res) => {
   try {
     // Lấy danh sách các danh mục cha (parent: null)
