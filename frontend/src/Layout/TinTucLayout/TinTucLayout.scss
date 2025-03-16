@@ -1,0 +1,78 @@
+.tieude-blog{
+
+    text-align: center;
+    
+}
+.news-container-blog {
+    display: flex;
+    padding: 0px 20%;
+    
+    .news-banner-blog {
+      position: relative;
+      flex: 2;
+    margin-right: 10px;
+      img {
+        width: 100%;
+        object-fit: cover;
+        height: 100%;
+        border-radius: 10px;
+      }
+  
+      .news-banner-content-blog {
+        position: absolute;
+        bottom: 0px;
+        background: rgba(0, 0, 0, 0.6);
+        color: #fff;
+        padding: 10px;
+        border-radius: 5px;
+        font-weight: bold;
+        a{
+          color: #fff;
+          text-decoration: none;
+        }
+      }
+    }
+  
+    .news-list-blog {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      flex: 1;
+      gap: 10px;
+  
+      .news-item-blog {
+        position: relative;
+        border-radius: 10px;
+        overflow: hidden;
+        cursor: pointer;
+  
+        img {
+          width: 100%;
+          object-fit: cover;
+          border-radius: 10px;
+          transition: transform 0.3s ease;
+        }
+  
+        &:hover img {
+          transform: scale(1.05);
+        }
+  
+        .news-info-blog {
+          position: absolute;
+          bottom: 0;
+        
+          width: 100%;
+          background: rgba(0, 0, 0, 0.6);
+          color: #fff;
+          padding: 10px;
+          font-size: 14px;
+          font-weight: bold;
+          a{
+            color: #fff;
+            text-decoration: none;
+          }
+        }
+      }
+    }
+  }
+  

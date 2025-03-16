@@ -8,10 +8,14 @@ import TimKiemLayout from "../Layout/TimKiemLayout/TiemKiemLayout";
 import DoiTra from '../Layout/DeafaultLayout/HuongDan/DoiTra/DoiTra'
 import CamKet from '../Layout/DeafaultLayout/HuongDan/CamKet/CamKet'
 import { TimKiemSanPhamLayout } from "../Layout/TimKiemSanPhamLayout";
+<<<<<<< HEAD
 import GioiThieu from '../Layout/DeafaultLayout/GioiThieu/GioiThieu';
 import HuongDanThanhToan from '../Layout/DeafaultLayout/HuongDan/HuongDanThanhToan/HuongDanThanhToan'
 import { DangNhapLayout } from '../Layout/Admin/DangNhapLayout'
 import ChinhSachVanChuyen from '../Layout/DeafaultLayout/HuongDan/ChinhSachVanChuyen/ChinhSachVanChuyen'
+=======
+import { TinTucLayout } from "../Layout/TinTucLayout";
+>>>>>>> 06e9236 (tintuclayout)
 const publicRoutes = [
   { path: "/admin", component: AdminLayout, layout: null },
   { path: "/thanhcong", component: PaySuccess },
@@ -28,6 +32,7 @@ const publicRoutes = [
   { path: "/chitietsanpham/:loaisp/:tieude", component: ChiTietLayout },
   { path: "/search/:keyword", component: TimKiemLayout },
   { path: "/search-sanpham/:keyword", component: TimKiemSanPhamLayout },
+  { path: "/tintuc", component: TinTucLayout },
 ];
 const privateRoutes = [];
 export { publicRoutes, privateRoutes };
