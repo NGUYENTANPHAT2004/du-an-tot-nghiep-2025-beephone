@@ -9,7 +9,7 @@ import { UpdateMauSac } from "./UpdateMauSac";
 import { XoaMauSac } from "./XoaMauSac";
 import "./MauSacLayout.scss";
 
-function MauSacLayout({ isOpen, onClose, iddungluong }) {
+function MauSacLayout({ isOpen, onClose, idDungLuong }) {
   const [data, setdata] = useState([]);
   const [isOpenThem, setIsOpenThem] = useState(false);
   const [isOpenEdit, setIsOpenEdit] = useState(false);
@@ -19,11 +19,11 @@ function MauSacLayout({ isOpen, onClose, iddungluong }) {
   const [selectAll, setSelectAll] = useState(false);
 
   const fetchdata = async () => {
-    if (iddungluong) {
+    if (idDungLuong) {
       setloading(true);
       try {
         const response = await fetch(
-          `http://localhost:3005/mausac/${iddungluong}`
+          `http://localhost:3005/mausac/${idDungLuong}`
         );
         if (response.ok) {
           const data = await response.json();
@@ -40,10 +40,10 @@ function MauSacLayout({ isOpen, onClose, iddungluong }) {
   };
 
   useEffect(() => {
-    if (iddungluong && isOpen) {
+    if (idDungLuong && isOpen) {
       fetchdata();
     }
-  }, [iddungluong, isOpen]);
+  }, [idDungLuong, isOpen]);
 
   const handleSelectAll = () => {
     if (selectAll) {
@@ -171,7 +171,7 @@ function MauSacLayout({ isOpen, onClose, iddungluong }) {
       <AddMauSac
         isOpen={isOpenThem}
         onClose={() => setIsOpenThem(false)}
-        iddungluong={iddungluong}
+        idDungLuong={idDungLuong}
         fetchData={fetchdata}
       />
       <UpdateMauSac
