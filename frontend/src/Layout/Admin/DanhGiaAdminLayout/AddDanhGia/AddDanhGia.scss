@@ -1,0 +1,22 @@
+.star_admin {
+    font-size: 50px;
+    cursor: pointer;
+    transition: color 0.3s;
+    color: #ccc;
+}
+
+.starselected_admin {
+    color: gold;
+}
+.rating-select-admin{
+    margin-bottom: 10px;
+    text-align: center;
+}
+.input-review_admin{
+     display: block;
+     margin-top: 10px;
+     padding: 8px;
+     border: 1px solid #ccc;
+     border-radius: 10px;
+     height: 200px;
+}
