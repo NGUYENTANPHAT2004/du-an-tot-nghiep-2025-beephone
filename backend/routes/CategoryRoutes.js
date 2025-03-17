@@ -92,6 +92,21 @@ router.get('/listcate', async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 });
+router.get('/categoryitem/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    let categories = await Category.findById(id);
+
+    // Use recursive function to populate data
+    await populateRecursive([categories]);
+
+    const cleanedCategory = cleanCategory(categories);
+    res.status(200).json(cleanedCategory);
+  } catch (error) {
+    console.error('List category error:', error);
+    res.status(500).json({ message: error.message });
+  }
+});
 router.delete('/deletecate/:id', async (req, res) => {
   try {
     const { id } = req.params;
