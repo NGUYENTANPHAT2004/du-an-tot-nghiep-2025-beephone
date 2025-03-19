@@ -1,7 +1,7 @@
 import { Modal } from "../../../../components/Modal";
 import { useState } from "react";
 
-function AddMauSac({ isOpen, onClose, iddungluong, fetchData }) {
+function AddMauSac({ isOpen, onClose, idDungLuong, fetchData }) {
   const [name, setname] = useState("");
   const [price, setprice] = useState("");
   const [images, setImages] = useState([]); // Danh sách ảnh hiển thị
@@ -26,7 +26,7 @@ function AddMauSac({ isOpen, onClose, iddungluong, fetchData }) {
       });
 
       const response = await fetch(
-        `http://localhost:3005/postmausac/${iddungluong}`,
+        `http://localhost:3005/postmausac/${idDungLuong}`,
         {
           method: "POST",
           body: formData,

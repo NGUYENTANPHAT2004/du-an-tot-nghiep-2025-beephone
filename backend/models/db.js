@@ -1,6 +1,6 @@
 const mongoose = require('mongoose')
 const uri =
-  'mongodb+srv://baongocxink03:KD3qvAqFfpKC1uzX@cluster0.aocmw.mongodb.net/webbandienthoai?retryWrites=true&w=majority'
+  'mongodb+srv://phat1z:123@ez88.akrq2.mongodb.net/datn?retryWrites=true&w=majority&appName=ez88'
 mongoose.connect(uri).catch(err => {
   console.log('Loi ket noi CSDL')
   console.log(err)

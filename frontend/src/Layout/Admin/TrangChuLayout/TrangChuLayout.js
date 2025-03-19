@@ -7,6 +7,7 @@ import { MaGiamGiaLayout } from "../MaGiamGiaLayout";
 import { HoaDonLayout } from "../HoaDonLayout";
 import { DoanhThuLayout } from "../DoanhThuLayout";
 import { DanhGiaAdminLayout } from "../DanhGiaAdminLayout";
+import TonKhoLayout  from '../TonKhoLayout/TonKhoLayout'
 function TrangChuLayout() {
   const [searchParams] = useSearchParams();
   const tabFromUrl = searchParams.get("tab") || "Trang chủ";
@@ -20,6 +21,7 @@ function TrangChuLayout() {
         {tabFromUrl === "Blog" && <BlogLayout />}
         {tabFromUrl === "Hóa đơn" && <HoaDonLayout />}
         {tabFromUrl === "Mã Giảm Giá" && <MaGiamGiaLayout />}
+        {tabFromUrl === "Kho" && <DanhGiaAdminLayout />}
         {tabFromUrl === "Đánh Giá" && <DanhGiaAdminLayout />}
       </div>
     </div>

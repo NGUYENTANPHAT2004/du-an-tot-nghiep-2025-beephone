@@ -2,118 +2,120 @@ import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import "./Navbar.scss";
 import Header from "../Header";
+import CategoryItem from "../CategoryItem/CategoryItem";
 
-const Navbar = ({ onMenuSelect }) => {
+const Navbar = () => {
   const [categories, setCategories] = useState([]);
   const [menuOpen, setMenuOpen] = useState(false);
-  const [submenuOpen, setSubmenuOpen] = useState(false);
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
+
+  // Check for mobile view on resize
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth <= 768);
+      if (window.innerWidth > 768) {
+        setMenuOpen(false); // Close menu when resizing to desktop
+      }
+    };
+    
+    window.addEventListener('resize', handleResize);
+    return () => {
+      window.removeEventListener('resize', handleResize);
+    };
+  }, []);
 
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        const response = await fetch(
-          "http://localhost:3005/theloaisanpham"
-        );
+        const response = await fetch("http://localhost:3005/listcate");
         const data = await response.json();
         setCategories(data);
       } catch (error) {
         console.error("Lỗi khi gọi API:", error);
       }
     };
-
     fetchCategories();
   }, []);
 
-  const handleSubmenuClick = () => {
-    setMenuOpen(false); 
-    setSubmenuOpen(false);
+  // Toggle for mobile menu
+  const toggleMenu = () => {
+    setMenuOpen(!menuOpen);
+  };
+
+  // Mobile submenu toggle handler
+  const toggleSubmenu = (e, categoryId) => {
+    if (isMobile) {
+      e.preventDefault();
+      const submenuEl = e.currentTarget.querySelector('.submenu');
+      if (submenuEl) {
+        // Close other open submenus first
+        const activeSubmenus = document.querySelectorAll('.menu-item.submenu-active');
+        activeSubmenus.forEach(item => {
+          if (item !== e.currentTarget) {
+            item.classList.remove('submenu-active');
+          }
+        });
+        e.currentTarget.classList.toggle('submenu-active');
+      }
+    }
   };
 
   return (
     <nav className="navbar">
       <div className="navbar-container">
-        <div className="navbar-left">
-          <img src="/logo.png" alt="Logo" className="logo" />
+        {/* Logo for desktop */}
+        <div className="logo-container">
+          <Link to="/">
+            <img src="/logo.png" alt="Logo" className="navbar-logo" />
+          </Link>
         </div>
-        <div
-          className={`menu-toggle ${menuOpen ? "open" : ""}`}
-          onClick={() => setMenuOpen(!menuOpen)}
-        >
-          {menuOpen ? "✖" : "☰"}
+        
+        {/* Mobile menu toggle button */}
+        <button className="menu-toggle" onClick={toggleMenu}>
+          <span className={`hamburger ${menuOpen ? 'open' : ''}`}></span>
+        </button>
+
+        {/* Header component with search and icons */}
+        <div className="header-wrapper">
+          <Header />
         </div>
+
+        {/* Navigation menu */}
         <ul className={`menu ${menuOpen ? "menu-open" : ""}`}>
-        <li className="menu-logo1">
-            <a href="/">
-              <img src="/logo.png" alt="Logo" className="menu-logo2"/>
-            </a>
-          </li>
-          <li
-            className={`menu-item has-submenu ${
-              submenuOpen ? "submenu-active" : ""
-            }`}
-            onMouseEnter={() => setSubmenuOpen(true)}
-            onMouseLeave={() => setSubmenuOpen(false)}
-          >
-            <span
-              className="menu-title"
-              onClick={() => setSubmenuOpen(!submenuOpen)}
-            >
-              <i className="fas fa-bars"></i> Danh mục sản phẩm
-            </span>
-            <ul className={`submenu ${submenuOpen ? "submenu-open" : ""}`}>
-              {categories.map((category) => (
-                <li key={category._id} onClick={handleSubmenuClick}>
-                  <Link to={`/san-pham/${category.namekhongdau}`}>
-                    {category.name.toUpperCase()}
-                  </Link>
-                </li>
+          {/* Product Categories with recursive submenu */}
+          <li className="menu-item has-submenu" onClick={(e) => toggleSubmenu(e)}>
+            <span className="menu-title">Danh mục sản phẩm</span>
+            <ul className="submenu">
+              {categories.map((cat) => (
+                <CategoryItem key={cat._id} category={cat} />
               ))}
             </ul>
           </li>
-          
+
+          {/* Other menu items */}
           <li className="menu-item" onClick={() => setMenuOpen(false)}>
             <Link to="/">Trang chủ</Link>
           </li>
           <li className="menu-item" onClick={() => setMenuOpen(false)}>
-            <Link to="/gioi-thieu-do-tho-y-yen">Giới thiệu</Link>
+            <Link to="/gioi-thieu">Giới thiệu</Link>
           </li>
           <li className="menu-item" onClick={() => setMenuOpen(false)}>
             <Link to="/">Sản phẩm</Link>
           </li>
-         
-          <li
-            className="menu-item has-submenu"
-            onMouseEnter={() => setSubmenuOpen(true)}
-            onMouseLeave={() => setSubmenuOpen(false)}
-          >
-            Dịch vụ
+          <li className="menu-item has-submenu" onClick={(e) => toggleSubmenu(e)}>
+            <span className="menu-title">Dịch vụ</span>
             <ul className="submenu">
-              <li onClick={handleSubmenuClick}>
+              <li>
                 <Link to="/chinh-sach-van-chuyen">Chính sách vận chuyển</Link>
               </li>
-              <li onClick={handleSubmenuClick}>
+              <li>
                 <Link to="/huong-dan-thanh-toan">Hướng dẫn thanh toán</Link>
-              </li>
-              <li onClick={handleSubmenuClick}>
-                <Link to="/huong-dan-mua-hang">Hướng dẫn mua hàng</Link>
-              </li>
-              <li onClick={handleSubmenuClick}>
-                <Link to="/doi-tra">Thu cũ đổi mới</Link>
-              </li>
-              <li onClick={handleSubmenuClick}>
-                <Link to="/cam-ket">Cam kết và quy định chung</Link>
-              </li>
-              <li onClick={handleSubmenuClick}>
-                <Link to="/bao-mat">Bảo mật thông tin</Link>
               </li>
             </ul>
           </li>
           <li className="menu-item" onClick={() => setMenuOpen(false)}>
             <Link to="/lien-he">Liên hệ</Link>
           </li>
-                  <Header />
-          
-
         </ul>
       </div>
     </nav>

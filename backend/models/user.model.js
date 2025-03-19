@@ -1,13 +1,16 @@
-const db = require('./db')
+const mongoose = require('mongoose');
 
-const userSchema = new db.mongoose.Schema({
-  username: { type: String },
-  phone: { type: String },
-  email: { type: String },
-  password: { type: String, required: true },
-  role: { type: String, enum: ['admin', 'user'], default: 'admin' },
-  date: { type: String }
-})
+const userSchema = new mongoose.Schema({
+  username: { type: String, required: true },
+  email: { type: String, unique: true, required: true },
+  password: { type: String },
+  role: { type: String, default: 'user' },
+  phone: { type: String, unique: true, sparse: true }, // sparse tránh lỗi nếu không có số điện thoại
+  socialLogins: { // Thêm để lưu ID Google/Facebook
+    google: { type: String },
+    facebook: { type: String }
+  }
+});
 
-const User = db.mongoose.model('user', userSchema)
-module.exports = { User }
+const User = mongoose.model('User', userSchema);
+module.exports = { User };

@@ -263,15 +263,5 @@ router.get("/chitietsanpham/:tieude", async (req, res) => {
     console.log(error);
   }
 });
-
-router.get("/getchitietspadmin/:idsp", async (req, res) => {
-  try {
-    const idsp = req.params.idsp;
-    const sanpham = await Sp.ChitietSp.findById(idsp);
-    res.json(sanpham);
-  } catch (error) {
-    console.log(error);
-  }
-});
-
 module.exports = router;
+

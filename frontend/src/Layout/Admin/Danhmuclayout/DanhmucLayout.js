@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
 import { FaPlus } from 'react-icons/fa';
-import {AddCate} from './Add';
-import {EditCate} from './Edit';
-import {DeleteCate} from './Delete';
+import { FaTrashCan } from 'react-icons/fa6';
+import { AddCate } from './Add';
+import { EditCate } from './Edit';
+import { DeleteCate } from './Delete';
 import './DanhmucLayout.scss';
 
 // Component AccordionItem: hiển thị một mục danh mục đa cấp kèm checkbox và đệ quy các mục con
@@ -28,8 +29,8 @@ const AccordionItem = ({ category, onEdit, onDelete, onSelect, selectedIds }) =>
           />
           <span className="title-text">{category.name}</span>
           <div className="accordion-actions" onClick={(e) => e.stopPropagation()}>
-            <button onClick={() => onEdit(category._id)}>Sửa</button>
-            <button onClick={() => onDelete(category._id)}>Xóa</button>
+            <button onClick={() => onEdit(category._id)}>Edit</button>
+            <button onClick={() => onDelete(category._id)}>Delete</button>
           </div>
         </div>
         {category.children && category.children.length > 0 && (
@@ -54,7 +55,6 @@ const AccordionItem = ({ category, onEdit, onDelete, onSelect, selectedIds }) =>
   );
 };
 
-
 function DanhmucLayout() {
   const [categories, setCategories] = useState([]);
   const [selectedIds, setSelectedIds] = useState([]);
@@ -62,20 +62,25 @@ function DanhmucLayout() {
   const [isOpenAdd, setIsOpenAdd] = useState(false);
   const [isOpenEdit, setIsOpenEdit] = useState(false);
   const [isOpenDelete, setIsOpenDelete] = useState(false);
+  const [currentEditId, setCurrentEditId] = useState(null);
+  const [error, setError] = useState('');
 
-  // Hàm gọi API lấy danh mục (API trả về cấu trúc cây)
+  // Fetch categories from API (returns tree structure)
   const fetchCategories = async () => {
     try {
+      setError('');
       const response = await fetch('http://localhost:3005/listcate');
       if (response.ok) {
         const data = await response.json();
-        console.log('Dữ liệu từ API:', data);
+        console.log('Data from API:', data);
         setCategories(data);
       } else {
-        console.error('Lỗi khi lấy danh mục');
+        console.error('Error fetching categories');
+        setError('Failed to load categories');
       }
     } catch (error) {
-      console.error('Lỗi kết nối:', error);
+      console.error('Connection error:', error);
+      setError('Connection error. Please check your network.');
     }
   };
 
@@ -83,7 +88,7 @@ function DanhmucLayout() {
     fetchCategories();
   }, []);
 
-  // Hàm đệ quy để lấy tất cả các ID từ cấu trúc cây
+  // Recursive function to get all IDs from tree structure
   const flattenIds = (tree) => {
     let result = [];
     tree.forEach((item) => {
@@ -95,7 +100,7 @@ function DanhmucLayout() {
     return result;
   };
 
-  // Xử lý chọn tất cả
+  // Handle select all
   const handleSelectAll = () => {
     if (selectAll) {
       setSelectedIds([]);
@@ -106,7 +111,7 @@ function DanhmucLayout() {
     setSelectAll(!selectAll);
   };
 
-  // Xử lý chọn/bỏ chọn một mục
+  // Handle select/deselect an item
   const handleSelectItem = (id) => {
     let newSelectedIds = [...selectedIds];
     if (newSelectedIds.includes(id)) {
@@ -119,26 +124,31 @@ function DanhmucLayout() {
     setSelectAll(newSelectedIds.length === allIds.length);
   };
 
-  // Xử lý Sửa: chỉ cho phép sửa khi chọn đúng 1 danh mục
-  const handleEdit = () => {
-    if (selectedIds.length !== 1) {
-      alert('Vui lòng chọn đúng 1 danh mục để sửa!');
-      return;
-    }
+  // Handle Edit: can only edit one category at a time
+  const handleEdit = (id) => {
+    setCurrentEditId(id);
     setIsOpenEdit(true);
   };
 
-  // Xử lý Xóa: cho phép xóa nhiều mục
-  const handleDelete = () => {
+  // Handle Delete via button: can delete multiple items
+  const handleDeleteSelected = () => {
     if (selectedIds.length === 0) {
-      alert('Vui lòng chọn ít nhất 1 danh mục để xóa!');
+      alert('Please select at least 1 category to delete!');
       return;
     }
     setIsOpenDelete(true);
   };
 
+  // Handle Delete via accordion: delete a specific item
+  const handleDeleteItem = (id) => {
+    setSelectedIds([id]);
+    setIsOpenDelete(true);
+  };
+
   return (
     <div className="danhmuc_container">
+      {error && <div className="error-message">{error}</div>}
+      
       <div className="top-actions">
         <button className="btn-them-danhmuc" onClick={() => setIsOpenAdd(true)}>
           <FaPlus className="icons" />
@@ -151,12 +161,14 @@ function DanhmucLayout() {
               checked={selectAll}
               onChange={handleSelectAll}
             />
-            Chọn tất cả
+            Chọn Tất Cả
           </label>
         </div>
         <div className="action-buttons">
-          <button onClick={handleEdit}>Sửa</button>
-          <button onClick={handleDelete}>Xóa</button>
+          <button className="btn-them-danhmuc" onClick={handleDeleteSelected}>
+            <FaTrashCan className='icons' />
+            Xóa
+          </button>
         </div>
       </div>
 
@@ -167,6 +179,8 @@ function DanhmucLayout() {
             category={category}
             selectedIds={selectedIds}
             onSelect={handleSelectItem}
+            onEdit={handleEdit}
+            onDelete={handleDeleteItem}
           />
         ))}
       </div>
@@ -174,19 +188,19 @@ function DanhmucLayout() {
       <AddCate
         isOpen={isOpenAdd}
         onClose={() => setIsOpenAdd(false)}
-        fetchdata={fetchCategories}
+        fetchData={fetchCategories}  // Fixed prop name (camelCase)
       />
       <EditCate
         isOpen={isOpenEdit}
         onClose={() => setIsOpenEdit(false)}
-        idcate={selectedIds[0]}
-        fetchdata={fetchCategories}
+        idcate={currentEditId || selectedIds[0]}
+        fetchData={fetchCategories}  // Fixed prop name (camelCase)
       />
       <DeleteCate
         isOpen={isOpenDelete}
         onClose={() => setIsOpenDelete(false)}
         idcate={selectedIds}
-        fetchdata={fetchCategories}
+        fetchData={fetchCategories}  // Fixed prop name (camelCase)
       />
     </div>
   );
