@@ -1,50 +1,139 @@
-import { useState } from "react";
+/* eslint-disable jsx-a11y/anchor-has-content */
+/* eslint-disable jsx-a11y/anchor-is-valid */
+import "./GioHangLayout.scss";
+import { useState, useEffect } from "react";
+import { ModalNhapThongTin } from "./ModalNhapThongTin";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCartShopping } from "@fortawesome/free-solid-svg-icons";
-import "./GioHangLayout.scss";
-import { ModalNhapThongTin } from "./ModalNhapThongTin";
 
 function GioHangLayout() {
-  const [cart] = useState([
-    {
-      imgsanpham:
-        "https://cdn.viettelstore.vn/Images/Product/ProductImage/66855595.jpeg",
-      namesanpham: "Ip16",
-      pricemausac: 120000,
-      soluong: 2,
-      mausac: "red",
-    },
-    {
-      imgsanpham:
-        "https://cdn.viettelstore.vn/Images/Product/ProductImage/66855595.jpeg",
-      namesanpham: "Ip16 Pro",
-      pricemausac: 200000,
-      soluong: 1,
-      mausac: "black",
-    },
-  ]);
+  const [cart, setCart] = useState([]);
+  const [sex, setsex] = useState("Anh");
+  const [name, setname] = useState("");
+  const [phone, setphone] = useState("");
 
-  const [sex, setSex] = useState("Anh");
-  const [name, setName] = useState("");
-  const [phone, setPhone] = useState("");
-  const [giaotannoi, setGiaotannoi] = useState(true);
-  const [address, setAddress] = useState("");
-  const [ghichu, setGhichu] = useState("");
-  const [magiamgia, setMagiamgia] = useState("");
-  const [isOpenModaltt, setIsOpenModaltt] = useState(false);
-  const [sanphams] = useState([]);
+  const [giaotannoi, setgiaotannoi] = useState(true);
+  const [address, setaddress] = useState("");
+  const [ghichu, setghichu] = useState("");
+  const [magiamgia, setmagiamgia] = useState("");
+  const [isOpenModaltt, setisOpenModaltt] = useState(false);
+  const [sanphams, setsanphams] = useState([]);
 
-  // Chỉ để tính tổng tiền hiển thị
+  useEffect(() => {
+    const cartData = JSON.parse(localStorage.getItem("cart")) || [];
+    setCart(cartData);
+  }, []);
+
+  const callAPIsForEachObject = async (cart) => {
+    try {
+      const updatedData = await Promise.all(
+        cart.map(async (item) => {
+          try {
+            const response = await fetch(
+              `http://localhost:3005/getmausacgh/${item.iddungluong}`
+            );
+            if (!response.ok)
+              throw new Error(`Lỗi khi gọi API với ${item.iddungluong}`);
+
+            const data = await response.json();
+
+            return {
+              ...item,
+              soluong: 1,
+              mangmausac: data.length > 0 ? data : [],
+            };
+          } catch (error) {
+            console.error("Lỗi khi gọi API:", error);
+            return {
+              ...item,
+              soluong: 1,
+              mangmausac: [],
+            };
+          }
+        })
+      );
+
+      setCart(updatedData);
+      localStorage.setItem("cart", JSON.stringify(updatedData));
+    } catch (error) {
+      console.error("Lỗi khi gọi API:", error);
+    }
+  };
+
+  useEffect(() => {
+    const cartData = JSON.parse(localStorage.getItem("cart")) || [];
+    setCart(cartData);
+    if (cartData.length > 0) {
+      callAPIsForEachObject(cartData);
+    }
+  }, []);
+
+  const increaseQuantity = (index) => {
+    const newCart = [...cart];
+    newCart[index].soluong += 1;
+    setCart(newCart);
+    localStorage.setItem("cart", JSON.stringify(newCart));
+  };
+
+  const decreaseQuantity = (index) => {
+    const newCart = [...cart];
+
+    if (newCart[index].soluong > 1) {
+      newCart[index].soluong -= 1;
+    } else {
+      newCart.splice(index, 1);
+    }
+
+    setCart(newCart);
+    localStorage.setItem("cart", JSON.stringify(newCart));
+    window.dispatchEvent(new Event("cartUpdated"));
+  };
+
   const totalPrice = cart.reduce(
     (sum, item) => sum + item.pricemausac * item.soluong,
     0
   );
 
+  const changeColor = (index, selectedColor, newPrice) => {
+    const newCart = [...cart];
+    newCart[index].mausac = selectedColor;
+    newCart[index].pricemausac = newPrice;
+
+    setCart(newCart);
+    localStorage.setItem("cart", JSON.stringify(newCart));
+  };
+
+  useEffect(() => {
+    const formattedSanphams = cart.map((item) => ({
+      idsp: item.idsanpham,
+      soluong: item.soluong,
+      price: item.pricemausac,
+      dungluong: item.iddungluong,
+      mausac: item.mausac,
+    }));
+    setsanphams(formattedSanphams);
+  }, [cart]);
+
+  const handelOpenModalTT = () => {
+    if (!name) {
+      alert("Vui lòng nhập họ tên");
+      return;
+    }
+
+    if (!phone) {
+      alert("Vui lòng nhập số điện thoại");
+      return;
+    }
+    if (!address) {
+      alert("Vui lòng nhập địa chỉ");
+      return;
+    }
+    setisOpenModaltt(true);
+  };
   return (
     <div className="giohang_container">
       {cart.length > 0 ? (
         <>
-          {/* Hiển thị danh sách sản phẩm trong giỏ */}
           <div className="giohang_header_container">
             {cart.map((item, index) => (
               <div className="giohang_header" key={index}>
@@ -59,27 +148,56 @@ function GioHangLayout() {
                   </div>
                   <div className="giohang_header_top_right">
                     <div className="giohang_header_top_right_top">
-                      <span className="item_name">{item.namesanpham}</span>
+                      <span>{item.namesanpham}</span>
+                      <div className="mausac_container">
+                        {item.mangmausac &&
+                          item.mangmausac.map((mausac, row) => (
+                            <div
+                              className={
+                                item.mausac === mausac.name
+                                  ? `border_mausac border_mausac1`
+                                  : `border_mausac`
+                              }
+                              key={row}
+                              onClick={() =>
+                                changeColor(index, mausac.name, mausac.price)
+                              }
+                            >
+                              <div
+                                style={{ backgroundColor: `${mausac.name}` }}
+                              ></div>
+                            </div>
+                          ))}
+                      </div>
                     </div>
                     <div className="giohang_header_top_right_bottom">
-                      <span className="price">
+                      <span>
                         {(item.pricemausac * item.soluong).toLocaleString()}đ
                       </span>
                       <div className="quantity">
-                        <div className="quantity_minus">-</div>
+                        <div
+                          className="quantity_minus"
+                          onClick={() => decreaseQuantity(index)}
+                        >
+                          -
+                        </div>
                         <div className="quantity_number">{item.soluong}</div>
-                        <div className="quantity_plus">+</div>
+                        <div
+                          className="quantity_plus"
+                          onClick={() => increaseQuantity(index)}
+                        >
+                          +
+                        </div>
                       </div>
                     </div>
                   </div>
                 </div>
               </div>
             ))}
-
             <div className="giohang_header_bottom">
               <div className="giohang_header_bottom_left">
                 <span>
-                  <strong>Tạm tính</strong> ({cart.length} sản phẩm)
+                  <strong>Tạm tính </strong>({cart.length} sản phẩm)
                 </span>
               </div>
               <div className="giohang_header_bottom_right">
@@ -87,26 +205,24 @@ function GioHangLayout() {
               </div>
             </div>
           </div>
-
-          {/* Thông tin khách hàng */}
           <div className="giohang_content_container">
-            <span className="section_title">Thông tin khách hàng</span>
+            <span>Thông tin khách hàng</span>
             <div className="giohang_thongtin_sex">
               <div className="giohang_thongtin_sex_item">
                 <input
                   type="radio"
                   checked={sex === "Anh"}
-                  onChange={() => setSex("Anh")}
+                  onClick={() => setsex("Anh")}
                 />
-                <label>Anh</label>
+                <label htmlFor="">Anh</label>
               </div>
               <div className="giohang_thongtin_sex_item">
                 <input
                   type="radio"
                   checked={sex === "Chị"}
-                  onChange={() => setSex("Chị")}
+                  onClick={() => setsex("Chị")}
                 />
-                <label>Chị</label>
+                <label htmlFor="">Chị</label>
               </div>
             </div>
             <div className="giohang_thongtin_input">
@@ -116,7 +232,7 @@ function GioHangLayout() {
                   className="input_giohang"
                   placeholder="Họ và tên"
                   value={name}
-                  onChange={(e) => setName(e.target.value)}
+                  onChange={(e) => setname(e.target.value)}
                 />
               </div>
               <div className="div_thongtin_input">
@@ -125,23 +241,21 @@ function GioHangLayout() {
                   className="input_giohang"
                   placeholder="Số điện thoại"
                   value={phone}
-                  onChange={(e) => setPhone(e.target.value)}
+                  onChange={(e) => setphone(e.target.value)}
                 />
               </div>
             </div>
           </div>
-
-          {/* Hình thức nhận hàng */}
           <div className="giohang_content_container">
-            <span className="section_title">Hình thức nhận hàng</span>
+            <span>Hình thức nhận hàng</span>
             <div className="giohang_thongtin_sex">
               <div className="giohang_thongtin_sex_item">
                 <input
                   type="radio"
-                  checked={giaotannoi === true}
-                  onChange={() => setGiaotannoi(true)}
+                  checked={giaotannoi}
+                  onClick={() => setgiaotannoi(true)}
                 />
-                <label>Giao tận nơi</label>
+                <label htmlFor="">Giao tận nơi</label>
               </div>
             </div>
             <div className="giohang_thongtin_input">
@@ -151,44 +265,7 @@ function GioHangLayout() {
                   className="input_giohang"
                   placeholder="Địa chỉ cụ thể"
                   value={address}
-                  onChange={(e) => setAddress(e.target.value)}
-                />
-              </div>
-            </div>
-            <div className="giohang_thongtin_input">
-              <div className="div_thongtin_input">
-                <input
-                  type="text"
-                  className="input_giohang"
-                  placeholder="Số điện thoại"
-                  value={phone}
-                  onChange={(e) => setPhone(e.target.value)}
-                />
-              </div>
-            </div>
-          </div>
-
-          {/* Hình thức nhận hàng */}
-          <div className="giohang_content_container">
-            <span className="section_title">Hình thức nhận hàng</span>
-            <div className="giohang_thongtin_sex">
-              <div className="giohang_thongtin_sex_item">
-                <input
-                  type="radio"
-                  checked={giaotannoi === true}
-                  onChange={() => setGiaotannoi(true)}
-                />
-                <label>Giao tận nơi</label>
-              </div>
-            </div>
-            <div className="giohang_thongtin_input">
-              <div className="div_thongtin_input">
-                <input
-                  type="text"
-                  className="input_giohang"
-                  placeholder="Địa chỉ cụ thể"
-                  value={address}
-                  onChange={(e) => setAddress(e.target.value)}
+                  onChange={(e) => setaddress(e.target.value)}
                 />
               </div>
             </div>
@@ -199,15 +276,13 @@ function GioHangLayout() {
                   className="input_giohang"
                   placeholder="Ghi chú (nếu có)"
                   value={ghichu}
-                  onChange={(e) => setGhichu(e.target.value)}
+                  onChange={(e) => setghichu(e.target.value)}
                 />
               </div>
             </div>
           </div>
-
-          {/* Mã giảm giá */}
           <div className="giohang_content_container">
-            <span className="section_title">Sử dụng mã giảm giá</span>
+            <span>Sử dụng mã giảm giá</span>
             <div className="giohang_thongtin_input">
               <div className="div_thongtin_input">
                 <input
@@ -215,7 +290,7 @@ function GioHangLayout() {
                   className="input_giohang"
                   placeholder="Mã giảm giá"
                   value={magiamgia}
-                  onChange={(e) => setMagiamgia(e.target.value)}
+                  onChange={(e) => setmagiamgia(e.target.value)}
                 />
               </div>
             </div>
@@ -230,19 +305,17 @@ function GioHangLayout() {
               </div>
             </div>
           </div>
-
-          {/* Nút đặt hàng */}
           <div className="giohang_content_container">
-            <button className="btndathang">Tiến hành đặt hàng</button>
+            <button className="btndathang" onClick={handelOpenModalTT}>
+              Tiến hành đặt hàng
+            </button>
             <div className="div_text_hinhthuc">
               Bạn có thể lựa chọn các hình thức thanh toán ở bước sau
             </div>
           </div>
-
-          {/* Modal (nếu cần hiển thị) */}
           <ModalNhapThongTin
             isOpen={isOpenModaltt}
-            onClose={() => setIsOpenModaltt(false)}
+            onClose={() => setisOpenModaltt(false)}
             amount={totalPrice}
             name={name}
             phone={phone}
