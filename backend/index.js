@@ -15,6 +15,8 @@ const loaisanphamroutes = require('./routes/LoaiSanPhamRoutes')
 const userroutes = require('./routes/UserRouter')
 const authroutes = require("./routes/Authroutes.js")
 const stockrouter = require('./routes/stockrouter')
+const http = require("http")
+const { initSocket } = require('./config/socket');
 const jwtSecret = process.env.JWT_SECRET // Thêm fallback key
 console.log(jwtSecret)
 const mongoStoreOptions = {
@@ -23,7 +25,8 @@ const mongoStoreOptions = {
   collection: "sessions",
 };
 const cors = require("cors");
-
+const server = http.createServer(app)
+const io = initSocket(server)
 app.use(cors());
 
 app.use(
@@ -47,9 +50,13 @@ app.use('/', userroutes)
 app.use('/', sanphamroutes)
 app.use('/', authroutes)
 app.use('/', stockrouter)
-app.listen(3005, () => {
-  console.log("Server is running on port 3005");
-  console.log(__dirname);
-});
-module.exports = app;
+adminnotifi(io)
+
+// Use server.listen instead of app.listen
+server.listen(3005, () => {
+  console.log('Server is running on port 3005')
+  console.log(__dirname)
+})
+
+module.exports = { io, app, server }
 
