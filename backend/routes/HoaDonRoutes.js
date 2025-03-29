@@ -728,6 +728,7 @@ router.get('/product-sales-trend', async (req, res) => {
 });
 
 // New route for product category statistics
+// Fixed category-stats route in HoaDonRoutes.js
 router.get('/category-stats', async (req, res) => {
   try {
     const { startDate, endDate } = req.query;
@@ -753,6 +754,11 @@ router.get('/category-stats', async (req, res) => {
       }
     ]);
 
+    // If no data, return empty array
+    if (soldProducts.length === 0) {
+      return res.json([]);
+    }
+
     // Get category info for each product
     const categoryStats = {};
     
@@ -765,7 +771,7 @@ router.get('/category-stats', async (req, res) => {
           if (!categoryStats[categoryId]) {
             categoryStats[categoryId] = {
               categoryId,
-              categoryName: "Loading...",
+              categoryName: "Không rõ danh mục",
               productCount: 0,
               totalQuantity: 0,
               totalRevenue: 0
@@ -775,10 +781,11 @@ router.get('/category-stats', async (req, res) => {
             try {
               const category = await db.mongoose.model('loaisp').findById(categoryId);
               if (category) {
-                categoryStats[categoryId].categoryName = category.name;
+                categoryStats[categoryId].categoryName = category.name || "Không rõ danh mục";
               }
             } catch (err) {
               console.error(`Error fetching category ${categoryId}:`, err);
+              // Category name already set to default above
             }
           }
           
@@ -791,7 +798,25 @@ router.get('/category-stats', async (req, res) => {
       }
     }
 
-    res.json(Object.values(categoryStats));
+    // Convert to array and sort by revenue
+    const sortedStats = Object.values(categoryStats).sort((a, b) => b.totalRevenue - a.totalRevenue);
+
+    // If no categories were found, return empty array
+    if (sortedStats.length === 0) {
+      return res.json([]);
+    }
+
+    // Calculate percentages
+    const totalRevenue = sortedStats.reduce((sum, category) => sum + category.totalRevenue, 0);
+    const totalQuantity = sortedStats.reduce((sum, category) => sum + category.totalQuantity, 0);
+
+    const statsWithPercentages = sortedStats.map(category => ({
+      ...category,
+      revenuePercentage: ((category.totalRevenue / totalRevenue) * 100).toFixed(2),
+      quantityPercentage: ((category.totalQuantity / totalQuantity) * 100).toFixed(2)
+    }));
+
+    res.json(statsWithPercentages);
   } catch (err) {
     console.error("Error in category-stats:", err);
     res.status(500).json({ message: "Lỗi thống kê danh mục", error: err.message });
@@ -1012,6 +1037,7 @@ router.get('/least-products', async (req, res) => {
 
 
 // Cập nhật route trung bình sản phẩm mỗi đơn
+// Fixed avg-products-per-order route in HoaDonRoutes.js
 router.get('/avg-products-per-order', async (req, res) => {
   try {
     const { startDate, endDate } = req.query;
@@ -1024,7 +1050,7 @@ router.get('/avg-products-per-order', async (req, res) => {
       {
         $match: {
           ngaymua: { $gte: start, $lte: end },
-          trangthai: { $in: ['Đã thanh toán', 'Hoàn tất'] }
+          trangthai: { $in: ['Đã thanh toán', 'Hoàn thành'] }
         }
       },
       {
@@ -1048,11 +1074,54 @@ router.get('/avg-products-per-order', async (req, res) => {
       }
     ]);
     
+    // If no data, return default values
     if (basicStats.length === 0) {
-      return res.json({ avgSP: 0, totalDon: 0 });
+      return res.json({ 
+        avgSP: 0, 
+        totalDon: 0,
+        totalItems: 0,
+        maxItems: 0,
+        medianItems: 0,
+        orderSizes: {
+          single: 0,
+          small: 0,
+          medium: 0,
+          large: 0,
+          extraLarge: 0
+        },
+        timeOfDay: {
+          morning: 0,
+          afternoon: 0,
+          evening: 0,
+          night: 0
+        },
+        busiest: {
+          day: 'N/A',
+          timeOfDay: 'N/A'
+        },
+        returnsPercent: '0.0'
+      });
     }
     
     const stats = basicStats[0];
+    
+    // Safety check for null stats
+    if (!stats) {
+      return res.json({ 
+        avgSP: 0, 
+        totalDon: 0,
+        totalItems: 0
+      });
+    }
+    
+    // Ensure orders array exists
+    if (!stats.orders || !Array.isArray(stats.orders)) {
+      stats.orders = [];
+    }
+    
+    // Ensure totalDon and totalItems are numbers
+    stats.totalDon = stats.totalDon || 0;
+    stats.totalItems = stats.totalItems || 0;
     
     // Tìm median (trung vị) số sản phẩm mỗi đơn
     const itemsPerOrder = stats.orders.map(order => order.items).sort((a, b) => a - b);
@@ -1086,6 +1155,7 @@ router.get('/avg-products-per-order', async (req, res) => {
     };
     
     stats.orders.forEach(order => {
+      if (!order.time) return;
       const hour = new Date(order.time).getHours();
       if (hour >= 6 && hour < 12) timeOfDay.morning++;
       else if (hour >= 12 && hour < 18) timeOfDay.afternoon++;
@@ -1095,22 +1165,10 @@ router.get('/avg-products-per-order', async (req, res) => {
     
     // Xác định ngày bận rộn nhất
     const ordersByDay = {};
-    const ordersByTimeOfDay = {
-      morning: 0,
-      afternoon: 0,
-      evening: 0,
-      night: 0
-    };
-    
     stats.orders.forEach(order => {
+      if (!order.time) return;
       const date = moment(order.time).format('DD/MM/YYYY');
       ordersByDay[date] = (ordersByDay[date] || 0) + 1;
-      
-      const hour = new Date(order.time).getHours();
-      if (hour >= 6 && hour < 12) ordersByTimeOfDay.morning++;
-      else if (hour >= 12 && hour < 18) ordersByTimeOfDay.afternoon++;
-      else if (hour >= 18 && hour < 22) ordersByTimeOfDay.evening++;
-      else ordersByTimeOfDay.night++;
     });
     
     let busiestDay = { day: 'N/A', count: 0 };
@@ -1122,7 +1180,7 @@ router.get('/avg-products-per-order', async (req, res) => {
     
     // Xác định thời gian phổ biến nhất
     let busiestTime = { timeOfDay: 'N/A', count: 0 };
-    Object.entries(ordersByTimeOfDay).forEach(([timeOfDay, count]) => {
+    Object.entries(timeOfDay).forEach(([timeOfDay, count]) => {
       if (count > busiestTime.count) {
         const timeLabels = {
           morning: 'Sáng (6h-12h)',
@@ -1130,7 +1188,7 @@ router.get('/avg-products-per-order', async (req, res) => {
           evening: 'Tối (18h-22h)',
           night: 'Đêm (22h-6h)'
         };
-        busiestTime = { timeOfDay: timeLabels[timeOfDay], count };
+        busiestTime = { timeOfDay: timeLabels[timeOfDay] || 'N/A', count };
       }
     });
     
@@ -1140,14 +1198,14 @@ router.get('/avg-products-per-order', async (req, res) => {
       order.status === 'Trả hàng/Hoàn tiền'
     ).length;
     
-    const returnsPercent = ((returnOrders / stats.totalDon) * 100).toFixed(1);
+    const returnsPercent = ((returnOrders / (stats.totalDon || 1)) * 100).toFixed(1);
     
     const response = {
-      avgSP: stats.avgSP,
-      totalDon: stats.totalDon,
-      totalItems: stats.totalItems,
-      maxItems: stats.maxItems,
-      medianItems,
+      avgSP: Number((stats.avgSP || 0).toFixed(2)),
+      totalDon: stats.totalDon || 0,
+      totalItems: stats.totalItems || 0,
+      maxItems: stats.maxItems || 0,
+      medianItems: Number((medianItems || 0).toFixed(2)),
       orderSizes,
       timeOfDay,
       busiest: {
@@ -1160,7 +1218,14 @@ router.get('/avg-products-per-order', async (req, res) => {
     res.json(response);
   } catch (err) {
     console.error("Error in avg-products-per-order:", err);
-    res.status(500).json({ message: "Lỗi tính trung bình sản phẩm", error: err.message });
+    res.status(500).json({ 
+      message: "Lỗi tính trung bình sản phẩm", 
+      error: err.message,
+      // Provide default values
+      avgSP: 0,
+      totalDon: 0,
+      totalItems: 0
+    });
   }
 });
 
@@ -1177,7 +1242,7 @@ router.get('/top-phone', async (req, res) => {
       {
         $match: {
           ngaymua: { $gte: start, $lte: end },
-          trangthai: { $in: ['Đã thanh toán', 'Hoàn tất'] }
+          trangthai: { $in: ['Đã thanh toán', 'Hoàn thành'] }
         }
       },
       {
@@ -1215,7 +1280,13 @@ router.get('/top-phone', async (req, res) => {
         };
       } catch (err) {
         console.error(`Error enhancing customer data for ${customer._id}:`, err);
-        return customer;
+        // Return basic data if enhancement fails
+        return {
+          ...customer,
+          lastOrder: moment(customer.lastOrderDate).format('DD/MM/YYYY'),
+          avgOrdersPerMonth: '0.0',
+          orderHistory: []
+        };
       }
     }));
 
@@ -1287,5 +1358,116 @@ router.post('/gethoadonuser', async (req, res) => {
     res.status(500).json({ message: 'Lỗi server khi lấy hóa đơn người dùng' });
   }
 });
+
+router.get('/order-success-rate', async (req, res) => {
+  try {
+    const { startDate, endDate } = req.query;
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+    end.setHours(23, 59, 59, 999);
+
+    const stats = await HoaDon.hoadon.aggregate([
+      {
+        $match: {
+          ngaymua: { $gte: start, $lte: end }
+        }
+      },
+      {
+        $group: {
+          _id: "$trangthai",
+          count: { $sum: 1 },
+          totalAmount: { $sum: "$tongtien" }
+        }
+      }
+    ]);
+
+    // Tính tổng số đơn hàng và tổng doanh thu
+    const totalOrders = stats.reduce((sum, item) => sum + item.count, 0);
+    const totalRevenue = stats.reduce((sum, item) => sum + item.totalAmount, 0);
+
+    // Phân loại trạng thái đơn hàng
+    const statusStats = {
+      success: { count: 0, amount: 0, rate: 0 },
+      pending: { count: 0, amount: 0, rate: 0 },
+      failed: { count: 0, amount: 0, rate: 0 },
+      cancelled: { count: 0, amount: 0, rate: 0 }
+    };
+
+    stats.forEach(item => {
+      const status = item._id;
+      const count = item.count;
+      const amount = item.totalAmount;
+
+      if (status === 'Đã thanh toán' || status === 'Hoàn thành') {
+        statusStats.success.count += count;
+        statusStats.success.amount += amount;
+      } else if (status === 'Đang xử lý') {
+        statusStats.pending.count += count;
+        statusStats.pending.amount += amount;
+      } else if (status === 'Thanh toán thất bại' || status === 'Thanh toán hết hạn') {
+        statusStats.failed.count += count;
+        statusStats.failed.amount += amount;
+      } else if (status === 'Hủy Đơn Hàng') {
+        statusStats.cancelled.count += count;
+        statusStats.cancelled.amount += amount;
+      }
+    });
+
+    // Tính tỷ lệ phần trăm
+    Object.keys(statusStats).forEach(key => {
+      statusStats[key].rate = ((statusStats[key].count / totalOrders) * 100).toFixed(2);
+    });
+
+    res.json({
+      totalOrders,
+      totalRevenue,
+      statusStats,
+      dailyStats: await getDailyOrderStats(start, end)
+    });
+  } catch (err) {
+    console.error("Error in order-success-rate:", err);
+    res.status(500).json({ message: "Lỗi thống kê tỷ lệ đơn hàng", error: err.message });
+  }
+});
+
+// Helper function to get daily order statistics
+async function getDailyOrderStats(start, end) {
+  const dailyStats = await HoaDon.hoadon.aggregate([
+    {
+      $match: {
+        ngaymua: { $gte: start, $lte: end }
+      }
+    },
+    {
+      $group: {
+        _id: {
+          date: { $dateToString: { format: "%Y-%m-%d", date: "$ngaymua" } },
+          status: "$trangthai"
+        },
+        count: { $sum: 1 },
+        amount: { $sum: "$tongtien" }
+      }
+    },
+    {
+      $group: {
+        _id: "$_id.date",
+        totalOrders: { $sum: "$count" },
+        totalAmount: { $sum: "$amount" },
+        statusBreakdown: {
+          $push: {
+            status: "$_id.status",
+            count: "$count",
+            amount: "$amount"
+          }
+        }
+      }
+    },
+    {
+      $sort: { "_id": 1 }
+    }
+  ]);
+
+  return dailyStats;
+}
 
 module.exports = router
