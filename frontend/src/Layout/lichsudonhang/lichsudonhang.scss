@@ -1,0 +1,80 @@
+.lichsu-donhang-container {
+  padding: 20px;
+  max-width: 1000px;
+  margin: 0 auto;
+  background: #f9f9f9;
+  border-radius: 8px;
+
+  h2 {
+    margin-bottom: 20px;
+    color: #333;
+  }
+
+  .empty-message {
+    font-style: italic;
+    color: #888;
+  }
+
+  .table-donhang {
+    width: 100%;
+    border-collapse: collapse;
+    background: #fff;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+
+    th, td {
+      padding: 12px;
+      border-bottom: 1px solid #eee;
+      text-align: center;
+    }
+
+    th {
+      background: #f0f0f0;
+      font-weight: bold;
+    }
+
+    .btn-view, .btn-confirm {
+      padding: 6px 12px;
+      margin: 2px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    .btn-view {
+      background-color: #3498db;
+      color: #fff;
+    }
+
+    .btn-confirm {
+      background-color: #27ae60;
+      color: #fff;
+    }
+  }
+
+  .chitiet-donhang {
+    margin-top: 30px;
+    padding: 20px;
+    background: #fff;
+    border-radius: 6px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+
+    h3 {
+      margin-bottom: 15px;
+    }
+
+    ul {
+      list-style: disc;
+      margin-left: 20px;
+    }
+
+    .btn-close {
+      margin-top: 15px;
+      padding: 8px 16px;
+      background-color: #777;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+  }
+}
