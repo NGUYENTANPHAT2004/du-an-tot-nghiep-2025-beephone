@@ -5,6 +5,7 @@ const moment = require('moment')
 const MaGiamGia = require('../models/MaGiamGiaModel')
 const SanPham = require('../models/chitietSpModel')
 const DungLuong = require('../models/DungLuongModel')
+const User = require('../models/user.model')
 const momenttimezone = require('moment-timezone');
 const { ProductSizeStock } = require('../models/ProductSizeStockmodel')
 const { 
@@ -12,7 +13,9 @@ const {
   isFirstOrderVoucherEligible, 
   isThirdOrderVoucherEligible 
 } = require('../socket/handlers/voucherGenerator');
-const { db } = require('../models/CategoryModel')
+const db = require('../models/db')
+const Category = require('../models/CategoryModel');
+const LoaiSP = require('../models/LoaiSanPham').LoaiSP;
 
 function sortObject (obj) {
   let sorted = {}
@@ -64,10 +67,23 @@ router.post('/deletehoaddon', async (req, res) => {
 })
 
 // Helper function to restore inventory
+// Improved helper function to restore inventory
 async function restoreInventory(sanphams) {
-  try {
-    for (const sanpham of sanphams) {
-      const { idsp, soluong, dungluong, idmausac } = sanpham
+  if (!sanphams || !Array.isArray(sanphams) || sanphams.length === 0) {
+    console.log('No products to restore in inventory');
+    return;
+  }
+  
+  const failedRestores = [];
+  
+  for (const sanpham of sanphams) {
+    try {
+      if (!sanpham || !sanpham.idsp || !sanpham.dungluong || !sanpham.soluong) {
+        console.warn('Invalid product data for inventory restore:', sanpham);
+        continue;
+      }
+      
+      const { idsp, soluong, dungluong, idmausac } = sanpham;
       
       const stockItem = await ProductSizeStock.findOne({
         productId: idsp,
@@ -79,18 +95,36 @@ async function restoreInventory(sanphams) {
         stockItem.quantity += soluong;
         await stockItem.save();
         console.log(`Restored ${soluong} items to inventory for product ${idsp}`);
+      } else {
+        console.log(`Stock item not found or has unlimited stock for product ${idsp}, dungluong: ${dungluong}, mausac: ${idmausac}`);
       }
+    } catch (error) {
+      console.error(`Error restoring inventory for product ${sanpham?.idsp}:`, error);
+      failedRestores.push(sanpham);
     }
-  } catch (error) {
-    console.error('Error restoring inventory:', error);
+  }
+  
+  // Log if any items failed to be restored
+  if (failedRestores.length > 0) {
+    console.error(`Failed to restore ${failedRestores.length} product(s) to inventory`);
   }
 }
 
-// Helper function to reduce inventory
+// Improved helper function to reduce inventory
 async function reduceInventory(sanphams) {
+  if (!sanphams || !Array.isArray(sanphams) || sanphams.length === 0) {
+    throw new Error('No products to reduce in inventory');
+  }
+  
+  const reducedItems = [];
+  
   try {
     for (const sanpham of sanphams) {
-      const { idsp, soluong, dungluong, idmausac } = sanpham
+      if (!sanpham || !sanpham.idsp || !sanpham.dungluong || !sanpham.soluong) {
+        throw new Error('Invalid product data for inventory reduction');
+      }
+      
+      const { idsp, soluong, dungluong, idmausac } = sanpham;
       
       const stockItem = await ProductSizeStock.findOne({
         productId: idsp,
@@ -101,19 +135,51 @@ async function reduceInventory(sanphams) {
       if (stockItem) {
         if (!stockItem.unlimitedStock) {
           if (stockItem.quantity < soluong) {
+            // Roll back any inventory reductions made so far
+            for (const item of reducedItems) {
+              await ProductSizeStock.findByIdAndUpdate(
+                item.stockId,
+                { $inc: { quantity: item.quantity } }
+              );
+            }
+            
             throw new Error(`Sản phẩm không đủ số lượng trong kho. Hiện chỉ còn ${stockItem.quantity} sản phẩm.`);
           }
+          
           stockItem.quantity -= soluong;
           await stockItem.save();
+          reducedItems.push({ 
+            stockId: stockItem._id, 
+            quantity: soluong 
+          });
         }
       } else {
         console.log(`Không tìm thấy thông tin tồn kho cho sản phẩm: ${idsp}, dungluong: ${dungluong}, mausac: ${idmausac}`);
       }
     }
   } catch (error) {
+    // If there's an error during reduction and we already reduced some items,
+    // restore those items before propagating the error
+    if (reducedItems.length > 0) {
+      console.error('Error during inventory reduction, rolling back changes:', error);
+      
+      for (const item of reducedItems) {
+        try {
+          await ProductSizeStock.findByIdAndUpdate(
+            item.stockId,
+            { $inc: { quantity: item.quantity } }
+          );
+        } catch (restoreErr) {
+          console.error(`Critical error: Failed to restore inventory for stock item ${item.stockId}:`, restoreErr);
+          // Continue to try restoring other items even if this one failed
+        }
+      }
+    }
+    
     throw error;
   }
 }
+
 
 router.post('/posthoadon', async (req, res) => {
   try {
@@ -672,7 +738,7 @@ router.get('/product-sales-trend', async (req, res) => {
 
     let matchQuery = {
       ngaymua: { $gte: start, $lte: end },
-      trangthai: { $in: ['Đã thanh toán', 'Hoàn tất'] }
+      trangthai: { $in: ['Đã thanh toán', 'Hoàn thành','Đã nhận'] }
     };
 
     // Add product filter if provided
@@ -729,6 +795,7 @@ router.get('/product-sales-trend', async (req, res) => {
 
 // New route for product category statistics
 // Fixed category-stats route in HoaDonRoutes.js
+// Fixed category-stats route in HoaDonRoutes.js
 router.get('/category-stats', async (req, res) => {
   try {
     const { startDate, endDate } = req.query;
@@ -741,7 +808,7 @@ router.get('/category-stats', async (req, res) => {
       {
         $match: {
           ngaymua: { $gte: start, $lte: end },
-          trangthai: { $in: ['Đã thanh toán', 'Hoàn tất'] }
+          trangthai: { $in: ['Đã thanh toán', 'Hoàn thành', 'Đã nhận'] }
         }
       },
       { $unwind: "$sanpham" },
@@ -764,35 +831,32 @@ router.get('/category-stats', async (req, res) => {
     
     for (const product of soldProducts) {
       try {
+        if (!product || !product._id) continue;
+
         const productDetails = await SanPham.ChitietSp.findById(product._id);
-        if (productDetails && productDetails.loaisp) {
-          const categoryId = productDetails.loaisp.toString();
-          
-          if (!categoryStats[categoryId]) {
-            categoryStats[categoryId] = {
-              categoryId,
-              categoryName: "Không rõ danh mục",
-              productCount: 0,
-              totalQuantity: 0,
-              totalRevenue: 0
-            };
-            
-            // Try to get category name
-            try {
-              const category = await db.mongoose.model('loaisp').findById(categoryId);
-              if (category) {
-                categoryStats[categoryId].categoryName = category.name || "Không rõ danh mục";
-              }
-            } catch (err) {
-              console.error(`Error fetching category ${categoryId}:`, err);
-              // Category name already set to default above
-            }
-          }
-          
-          categoryStats[categoryId].productCount++;
-          categoryStats[categoryId].totalQuantity += product.totalSold;
-          categoryStats[categoryId].totalRevenue += product.totalRevenue;
+        
+        // Skip if product not found or has no category
+        if (!productDetails || !productDetails.idloaisp) continue;
+        
+        const loaisp = await LoaiSP.findById(productDetails.idloaisp);
+        if (!loaisp) continue;
+        
+        const categoryId = loaisp._id.toString();
+        const categoryName = loaisp.name || "Không rõ danh mục";
+        
+        if (!categoryStats[categoryId]) {
+          categoryStats[categoryId] = {
+            categoryId,
+            categoryName,
+            productCount: 0,
+            totalQuantity: 0,
+            totalRevenue: 0
+          };
         }
+        
+        categoryStats[categoryId].productCount++;
+        categoryStats[categoryId].totalQuantity += product.totalSold || 0;
+        categoryStats[categoryId].totalRevenue += product.totalRevenue || 0;
       } catch (err) {
         console.error(`Error processing product ${product._id}:`, err);
       }
@@ -812,8 +876,8 @@ router.get('/category-stats', async (req, res) => {
 
     const statsWithPercentages = sortedStats.map(category => ({
       ...category,
-      revenuePercentage: ((category.totalRevenue / totalRevenue) * 100).toFixed(2),
-      quantityPercentage: ((category.totalQuantity / totalQuantity) * 100).toFixed(2)
+      revenuePercentage: totalRevenue > 0 ? ((category.totalRevenue / totalRevenue) * 100).toFixed(2) : "0",
+      quantityPercentage: totalQuantity > 0 ? ((category.totalQuantity / totalQuantity) * 100).toFixed(2) : "0"
     }));
 
     res.json(statsWithPercentages);
@@ -834,7 +898,7 @@ router.get('/top-products', async (req, res) => {
       {
         $match: {
           ngaymua: { $gte: start, $lte: end },
-          trangthai: { $in: ['Đã thanh toán', 'Hoàn tất'] }
+          trangthai: { $in: ['Đã thanh toán', 'Hoàn thành','Đã nhận'] }
         }
       },
       { $unwind: "$sanpham" },
@@ -856,7 +920,7 @@ router.get('/top-products', async (req, res) => {
       {
         $match: {
           ngaymua: { $gte: start, $lte: end },
-          trangthai: { $in: ['Đã thanh toán', 'Hoàn tất'] }
+          trangthai: { $in: ['Đã thanh toán', 'Hoàn thành','Đã nhận'] }
         }
       },
       { $unwind: "$sanpham" },
@@ -941,7 +1005,7 @@ router.get('/least-products', async (req, res) => {
       {
         $match: {
           ngaymua: { $gte: start, $lte: end },
-          trangthai: { $in: ['Đã thanh toán', 'Hoàn tất'] }
+          trangthai: { $in: ['Đã thanh toán', 'Hoàn thành','Đã nhận'] }
         }
       },
       { $unwind: "$sanpham" },
@@ -963,7 +1027,7 @@ router.get('/least-products', async (req, res) => {
       {
         $match: {
           ngaymua: { $gte: start, $lte: end },
-          trangthai: { $in: ['Đã thanh toán', 'Hoàn tất'] }
+          trangthai: { $in: ['Đã thanh toán', 'Hoàn thành','Đã nhận'] }
         }
       },
       { $unwind: "$sanpham" },
@@ -1050,7 +1114,7 @@ router.get('/avg-products-per-order', async (req, res) => {
       {
         $match: {
           ngaymua: { $gte: start, $lte: end },
-          trangthai: { $in: ['Đã thanh toán', 'Hoàn thành'] }
+          trangthai: { $in: ['Đã thanh toán', 'Hoàn thành','Đã nhận'] }
         }
       },
       {
@@ -1230,6 +1294,7 @@ router.get('/avg-products-per-order', async (req, res) => {
 });
 
 // Cập nhật route thống kê số điện thoại khách hàng
+// Fixed top-phone route in HoaDonRoutes.js
 router.get('/top-phone', async (req, res) => {
   try {
     const { startDate, endDate, limit = 5 } = req.query;
@@ -1242,7 +1307,7 @@ router.get('/top-phone', async (req, res) => {
       {
         $match: {
           ngaymua: { $gte: start, $lte: end },
-          trangthai: { $in: ['Đã thanh toán', 'Hoàn thành'] }
+          trangthai: { $in: ['Đã thanh toán', 'Hoàn thành', 'Đã nhận'] }
         }
       },
       {
@@ -1258,33 +1323,65 @@ router.get('/top-phone', async (req, res) => {
       { $limit: parseInt(limit) }
     ]);
 
+    // If no data, return empty array
+    if (!basicStats || basicStats.length === 0) {
+      return res.json([]);
+    }
+
     // Cố gắng bổ sung thêm thông tin khách hàng nếu có thể
     const enhancedData = await Promise.all(basicStats.map(async (customer) => {
       try {
+        if (!customer || !customer._id) {
+          return {
+            _id: 'Không rõ',
+            soDon: 0,
+            tongTien: 0,
+            lastOrder: 'N/A',
+            avgOrdersPerMonth: 0,
+            orderHistory: []
+          };
+        }
+        
         // Tìm thông tin khách hàng từ model User nếu có
-        const userInfo = await User.User.findOne({ phone: customer._id });
+        let userInfo = null;
+        try {
+          userInfo = await User.User.findOne({ phone: customer._id });
+        } catch (userErr) {
+          console.error(`Error finding user with phone ${customer._id}:`, userErr);
+        }
         
         // Format lại mảng lịch sử đơn hàng để hiển thị biểu đồ
-        const orderHistory = customer.orders.map(order => ({
-          date: moment(order.date).format('DD/MM/YYYY'),
-          value: order.value
-        })).sort((a, b) => new Date(a.date) - new Date(b.date));
+        const orderHistory = Array.isArray(customer.orders) 
+          ? customer.orders
+              .filter(order => order && order.date instanceof Date) // Filter out invalid entries
+              .map(order => ({
+                date: moment(order.date).format('DD/MM/YYYY'),
+                value: order.value || 0
+              }))
+              .sort((a, b) => new Date(a.date) - new Date(b.date))
+          : [];
+        
+        const lastOrder = customer.lastOrderDate instanceof Date 
+          ? moment(customer.lastOrderDate).format('DD/MM/YYYY') 
+          : 'N/A';
         
         return {
           ...customer,
           customerName: userInfo ? userInfo.username : null,
-          lastOrder: moment(customer.lastOrderDate).format('DD/MM/YYYY'),
+          lastOrder,
           // Tính trung bình đơn hàng mỗi tháng
           avgOrdersPerMonth: calculateAvgOrdersPerMonth(customer.orders),
           orderHistory
         };
       } catch (err) {
-        console.error(`Error enhancing customer data for ${customer._id}:`, err);
+        console.error(`Error enhancing customer data for ${customer ? customer._id : 'unknown'}:`, err);
         // Return basic data if enhancement fails
         return {
           ...customer,
-          lastOrder: moment(customer.lastOrderDate).format('DD/MM/YYYY'),
-          avgOrdersPerMonth: '0.0',
+          lastOrder: customer.lastOrderDate instanceof Date 
+            ? moment(customer.lastOrderDate).format('DD/MM/YYYY') 
+            : 'N/A',
+          avgOrdersPerMonth: 0,
           orderHistory: []
         };
       }
@@ -1299,24 +1396,44 @@ router.get('/top-phone', async (req, res) => {
 
 // Hàm hỗ trợ tính trung bình đơn hàng mỗi tháng
 function calculateAvgOrdersPerMonth(orders) {
-  if (!orders || orders.length === 0) return 0;
+  if (!orders || !Array.isArray(orders) || orders.length === 0) return 0;
+  
+  // Lọc đơn hàng có ngày hợp lệ
+  const validOrders = orders.filter(order => order && order.date instanceof Date);
+  if (validOrders.length === 0) return 0;
   
   // Lấy tháng đầu tiên và tháng cuối cùng
-  const dates = orders.map(order => new Date(order.date));
-  const firstDate = new Date(Math.min(...dates));
-  const lastDate = new Date(Math.max(...dates));
-  
-  // Tính số tháng giữa hai ngày
-  const monthsDiff = 
-    (lastDate.getFullYear() - firstDate.getFullYear()) * 12 + 
-    (lastDate.getMonth() - firstDate.getMonth()) + 1;
-  
-  // Nếu chỉ trong một tháng, trả về số lượng đơn hàng
-  if (monthsDiff <= 1) return orders.length;
-  
-  // Nếu nhiều tháng, tính trung bình
-  return orders.length / monthsDiff;
+  try {
+    const dates = validOrders.map(order => new Date(order.date));
+    if (dates.length === 0) return 0;
+    
+    const firstDate = new Date(Math.min(...dates));
+    const lastDate = new Date(Math.max(...dates));
+    
+    // Kiểm tra ngày hợp lệ
+    if (isNaN(firstDate.getTime()) || isNaN(lastDate.getTime())) return 0;
+    
+    // Tính số tháng giữa hai ngày
+    const monthsDiff = 
+      (lastDate.getFullYear() - firstDate.getFullYear()) * 12 + 
+      (lastDate.getMonth() - firstDate.getMonth()) + 1;
+    
+    // Tránh trường hợp chia cho 0
+    if (monthsDiff <= 0) return validOrders.length;
+    
+    // Nếu chỉ trong một tháng, trả về số lượng đơn hàng
+    if (monthsDiff <= 1) return validOrders.length;
+    
+    // Nếu nhiều tháng, tính trung bình
+    return (validOrders.length / monthsDiff).toFixed(1);
+  } catch (error) {
+    console.error("Error calculating average orders per month:", error);
+    return 0;
+  }
 }
+
+// Hàm hỗ trợ tính trung bình đơn hàng mỗi tháng
+
 
 
 
@@ -1398,7 +1515,7 @@ router.get('/order-success-rate', async (req, res) => {
       const count = item.count;
       const amount = item.totalAmount;
 
-      if (status === 'Đã thanh toán' || status === 'Hoàn thành') {
+      if (status === 'Đã thanh toán' || status === 'Hoàn thành' || status === 'Đã nhận') {
         statusStats.success.count += count;
         statusStats.success.amount += amount;
       } else if (status === 'Đang xử lý') {
