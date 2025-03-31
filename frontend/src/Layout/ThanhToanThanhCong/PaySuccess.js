@@ -1,15 +1,20 @@
-import React from 'react';
-import './PaySuccess.scss';
-import { useNavigate } from 'react-router-dom';
+import React, { useEffect } from "react";
+import "./PaySuccess.scss";
+import { useNavigate } from "react-router-dom";
 
 function PaymentSuccess() {
   const navigate = useNavigate();
 
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("success") === "true") {
+      localStorage.clear();
+      window.dispatchEvent(new Event("cartUpdated"));
+    }
+  }, []);
+
   const handleBackToHome = () => {
-    // Xóa toàn bộ dữ liệu trong localStorage
-    localStorage.clear();
-    // Điều hướng về trang chủ
-    navigate('/');
+    navigate("/");
   };
 
   return (
