@@ -1,0 +1,153 @@
+.theloailayout-container {
+  gap: 20px;
+  padding: 10px;
+  overflow: hidden;
+}
+
+.theloailayout {
+
+  padding: 20px 5%;
+}
+
+.category-sidebar {
+  display: block;
+  // flex: 0 0 20%; /* Chiếm 20% chiều rộng màn hình */
+}
+
+.theloaisp {
+  display: grid;
+  grid-template-columns: repeat(4, 330px);
+  gap: 10px;
+  justify-content: center;
+  align-items: center;
+  width: fit-content;
+  margin: 0 auto;
+}
+
+
+.product-name {
+  font-weight: bold;
+  color: #666;
+}
+
+.filter-button {
+  color: #000000;
+  border: none;
+  text-align: center;
+  padding: 10px 20px;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+.category-filter {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: -100%;
+  width: 60%;
+  height: 100%;
+  background-color: #fff;
+  box-shadow: 2px 0 5px rgba(0, 0, 0, 0.2);
+  transition: left 0.3s ease-in-out;
+  z-index: 99;
+}
+
+.category-filter.show {
+  left: 0;
+}
+
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 20px;
+
+  button {
+    background: #007bff;
+    color: white;
+    padding: 8px 16px;
+    border: none;
+    margin: 0 5px;
+    cursor: pointer;
+    border-radius: 5px;
+
+    &:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+    }
+  }
+
+  span {
+    font-size: 16px;
+    margin: 0 10px;
+  }
+}
+.filter-dropdown{
+  margin-bottom:20px;
+  float: right;
+}
+.custom-select {
+  padding: 10px;
+  font-size: 16px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  background: #f8f9fa;
+  cursor: pointer;
+  transition: all 0.3s ease-in-out;
+
+  &:hover {
+    border-color: #007bff;
+  }
+
+  &:focus {
+    outline: none;
+    border-color: #007bff;
+    box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+  }
+}
+
+
+
+@media (max-width: 768px) {
+  .theloailayout-container {
+    padding: 0px 0%;
+  }
+
+  .theloailayout {
+    flex-direction: column;
+    padding: 20px 5%;
+  }
+
+  .category-sidebar {
+    display: none;
+  }
+
+  .filter-button {
+    display: block;
+  }
+
+  .category-filter {
+    display: block;
+  }
+
+  .theloaisp {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+.theloai-tabs button{
+  padding: 5px 5px;
+  background-color: #f8f8f8;
+  border-radius: 5px;
+  transition: all 0.3s ease;
+  font-weight: bold;
+  color: #333;
+}
+.theloai-tabs{
+  display: flex;
+  flex-wrap: wrap;
+  list-style: none; 
+  padding: 0;
+  margin: 0;
+  gap: 10px; 
+  margin: 15px 0;
+}

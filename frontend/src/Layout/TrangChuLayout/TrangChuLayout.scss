@@ -1,10 +1,15 @@
 .divsp {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 10px;
+
   border-radius: 10px;
+  gap: 10px;
   padding: 10px 15%;
-  justify-items: center;
+}
+
+.content {
+  margin-top: 80px;
+
 }
 
 .namesp {
@@ -22,7 +27,7 @@
   border-radius: 10px;
   align-items: center;
   margin: 0 42%;
-  
+
 }
 
 .see-all {
@@ -35,6 +40,12 @@
 
 }
 
+.topic-block-body {
+  display: flex;
+  justify-content: center;
+  margin: 20px 15%;
+}
+
 .divtungsp {
   height: 440px;
   padding: 5px;
@@ -43,24 +54,28 @@
   box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);
   position: relative;
   text-align: center;
-  margin-bottom: 20px; 
+  margin-bottom: 20px;
   display: flex;
   flex-direction: column;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
+
 .name-sp {
   font-size: 15px;
   font-weight: 700;
   color: #000000;
   display: -webkit-box;
-  -webkit-line-clamp: 2; /* Giới hạn tối đa 2 dòng */
+  -webkit-line-clamp: 2;
+  /* Giới hạn tối đa 2 dòng */
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
+
 .divtungsp:hover {
   transform: translateY(-12px);
-  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2); 
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
 }
+
 .divtungsp img {
   width: 100%;
   height: 300px;
@@ -72,7 +87,8 @@
   margin: 5px 0 0 5px;
   width: 150px;
   height: 50px;
-  object-fit: contain; /* Đảm bảo ảnh được thu nhỏ cân đối */
+  object-fit: contain;
+  /* Đảm bảo ảnh được thu nhỏ cân đối */
 }
 
 
@@ -116,21 +132,77 @@
 .original-price {
   color: #000000;
 }
-.pricetong{
+
+.pricetong {
   display: flex;
 }
-.price{
+
+.price {
   font-weight: 500;
   color: red;
 }
+
 .original-price span {
   color: #ccc;
   text-decoration: line-through;
 }
 
+.trangchu_banner {
+  display: flex;
+  justify-content: center;
+}
+
+.trangchu_banner img {
+  max-width: 1200px;
+  width: 100%;
+  height: 100%;
+  border-radius: 8px;
+  margin: 15px;
+}
+
+.search_sanpham {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+
+  label {
+    font-weight: 700;
+    font-size: 23px;
+  }
+}
+
+.div_input_search {
+  display: flex;
+  align-items: center;
+  border-radius: 20px;
+  border: 1px solid #ccc;
+  padding: 10px;
+  width: 300px;
+
+  input {
+    font-size: 16px;
+    border: none;
+    outline: none;
+    flex: 1;
+  }
+
+  button {
+    border: none;
+    outline: none;
+    padding: 10px 15px;
+    background-color: #0066cc;
+    color: #fff;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 15px;
+  }
+}
+
+
 @media (max-width: 768px) {
   .divsp {
-    grid-template-columns: repeat(2, 1fr); 
+    grid-template-columns: repeat(2, 1fr);
     padding: 10px 2%;
   }
 
@@ -141,17 +213,19 @@
     flex-direction: column;
     margin-bottom: 0px;
   }
+
   .divtungsp:hover {
     transform: translateY(-2px);
-    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2); 
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
   }
+
   .divtungsp img {
     height: 250px;
   }
 
   .divpropsp {
-    flex-direction: column; 
-    align-items: flex-start; 
+    flex-direction: column;
+    align-items: flex-start;
   }
 
   .divpropsp p,
@@ -161,5 +235,32 @@
 
   .btnthemgiohang {
     display: none;
+  }
+
+
+
+  .div_sanpham {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .title-product {
+    width: 200px;
+
+  }
+
+  .news-items {
+    display: grid !important;
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .news-item {
+    width: 100% !important;
+  }
+
+  .news-list {
+    margin: 5px !important;
   }
 }

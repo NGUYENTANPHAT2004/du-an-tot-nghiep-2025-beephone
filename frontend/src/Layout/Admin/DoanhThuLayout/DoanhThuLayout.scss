@@ -1,0 +1,250 @@
+.doanhthu-container {
+    padding: 20px;
+    background-color: #f9f9f9;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+  
+  .doanhthu-header {
+    margin-bottom: 20px;
+    border-bottom: 1px solid #ddd;
+    padding-bottom: 10px;
+  }
+  
+  .doanhthu-header h2 {
+    color: #333;
+    margin: 0;
+  }
+  
+  .doanhthu-filter {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+  
+  .date-range-container {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  
+  .doanhthu-input {
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+  }
+  
+  .doanhthu-button {
+    padding: 8px 16px;
+    background-color: #1976d2;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background-color 0.3s;
+  }
+  
+  .doanhthu-button:hover {
+    background-color: #1565c0;
+  }
+  
+  .date-presets {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  
+  .date-presets button {
+    padding: 6px 12px;
+    background-color: #f1f1f1;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 13px;
+    transition: all 0.2s;
+  }
+  
+  .date-presets button:hover {
+    background-color: #e0e0e0;
+  }
+  
+  .doanhthu-select-wrapper {
+    margin-bottom: 20px;
+  }
+  
+  .doanhthu-select {
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+    min-width: 200px;
+  }
+  
+  .doanhthu-chart-wrapper {
+    background-color: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  }
+  
+  .doanhthu-chart-title {
+    text-align: center;
+    margin-bottom: 20px;
+    color: #333;
+  }
+  
+  .loading-indicator {
+    text-align: center;
+    padding: 40px;
+    font-size: 16px;
+    color: #666;
+  }
+  
+  @media (max-width: 768px) {
+    .date-range-container {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+    
+    .doanhthu-input {
+      width: 100%;
+    }
+  }
+  /* Thêm vào file DoanhThuLayout.scss */
+
+/* Phong cách cho thẻ thống kê */
+.stats-summary {
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    margin-bottom: 25px;
+  }
+  
+  .stat-card {
+    background-color: #f8f9fa;
+    padding: 15px;
+    border-radius: 8px;
+    width: calc(20% - 15px);
+    margin-bottom: 15px;
+    text-align: center;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  }
+  
+  .stat-value {
+    font-size: 24px;
+    font-weight: 700;
+    color: #2c7be5;
+    margin-bottom: 5px;
+  }
+  
+  .stat-label {
+    font-size: 14px;
+    color: #6c757d;
+  }
+  
+  /* Phong cách cho mục thông tin bổ sung */
+  .additional-stats {
+    margin-top: 25px;
+    padding: 15px;
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  }
+  
+  .additional-stats h4 {
+    margin-top: 0;
+    margin-bottom: 15px;
+  }
+  
+  .stats-flex {
+    display: flex;
+    flex-wrap: wrap;
+  }
+  
+  .stat-item {
+    width: 33.333%;
+    padding: 8px 0;
+  }
+  
+  .stat-item .stat-label {
+    margin-right: 5px;
+    font-weight: 500;
+    color: #495057;
+  }
+  
+  /* Phong cách cho bảng thống kê */
+  .stats-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 15px;
+  }
+  
+  .stats-table th, .stats-table td {
+    border: 1px solid #dee2e6;
+    padding: 10px;
+    text-align: left;
+  }
+  
+  .stats-table th {
+    background-color: #f8f9fa;
+    font-weight: 600;
+    position: sticky;
+    top: 0;
+  }
+  
+  .stats-table tr:nth-child(even) {
+    background-color: #f9f9f9;
+  }
+  
+  .stats-table tr:hover {
+    background-color: #f2f7ff;
+  }
+  
+  /* Phong cách cho responsive */
+  @media (max-width: 992px) {
+    .stat-card {
+      width: calc(33.333% - 15px);
+    }
+    
+    .stat-item {
+      width: 50%;
+    }
+  }
+  
+  @media (max-width: 768px) {
+    .stat-card {
+      width: calc(50% - 15px);
+    }
+    
+    .stat-item {
+      width: 100%;
+    }
+    
+    .stats-table {
+      font-size: 14px;
+    }
+  }
+  
+  @media (max-width: 576px) {
+    .stat-card {
+      width: 100%;
+    }
+  }
+  
+  /* Phong cách cho thành phần nâng cấp/khuyến nghị */
+  .upgrade-note {
+    background-color: #f8f9fa;
+    border: 1px solid #e9ecef;
+    border-radius: 5px;
+    padding: 15px;
+    margin-top: 20px;
+    color: #495057;
+  }
+  
+  .upgrade-note p {
+    margin: 0;
+  }

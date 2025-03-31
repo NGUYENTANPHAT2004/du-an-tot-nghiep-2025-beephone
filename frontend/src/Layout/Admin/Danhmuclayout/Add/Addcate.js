@@ -1,37 +1,40 @@
 import { Modal } from '../../../../components/Modal';
 import { useState, useEffect } from 'react';
 import "./Addcate.scss"
+
 function AddCate({ isOpen, onClose, fetchData }) {
   const [name, setName] = useState('');
   const [parent, setParent] = useState('');
   const [categories, setCategories] = useState([]); 
   const [error, setError] = useState(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     if (isOpen) {
       fetchCategories();
+      setName('');
+      setParent('');
+      setError(null);
     }
   }, [isOpen]);
 
- 
   const fetchCategories = async () => {
     try {
+      setError(null);
       const response = await fetch('http://localhost:3005/listcate');
       if (response.ok) {
         const data = await response.json();
-        console.log("Dữ liệu từ API:", data);
-        // Sử dụng dữ liệu cây có sẵn trả về từ API
         const flatCategories = flattenCategories(data);
-        console.log("Danh mục phẳng có dấu —:", flatCategories);
         setCategories(flatCategories);
       } else {
-        console.error('Lỗi khi lấy danh mục cha');
+        console.error('Error fetching parent categories');
+        setError('Failed to load category list');
       }
     } catch (error) {
-      console.error('Lỗi kết nối:', error);
+      console.error('Connection error:', error);
+      setError('Connection error. Please check your network.');
     }
   };
-
 
   const flattenCategories = (categoryTree, level = 0, result = []) => {
     categoryTree.forEach(category => {
@@ -43,14 +46,22 @@ function AddCate({ isOpen, onClose, fetchData }) {
     return result;
   };
   
-  
-
   const handleAddCategory = async () => {
+    // Validate inputs
+    if (!name.trim()) {
+      setError('Category name is required');
+      return;
+    }
+
+    setIsSubmitting(true);
+    setError(null);
+
     try {
       const payload = { name };
       if (parent && parent.trim() !== '') {
         payload.parent = parent;
       }
+
       const response = await fetch('http://localhost:3005/createcate', {
         method: 'POST',
         headers: {
@@ -61,38 +72,51 @@ function AddCate({ isOpen, onClose, fetchData }) {
   
       if (!response.ok) {
         const errorData = await response.json();
-        setError(errorData.message);
+        setError(errorData.message || 'Failed to create category');
+        setIsSubmitting(false);
         return;
       }
   
+      // Clear form and close modal
+      setName('');
+      setParent('');
+      setIsSubmitting(false);
       onClose();
-      fetchData(); // Refresh danh sách danh mục
+      
+      // Call the parent's fetchData function to refresh the category list
+      if (fetchData && typeof fetchData === 'function') {
+        fetchData();
+      }
     } catch (error) {
-      console.error('Lỗi khi thêm danh mục:', error);
-      setError('Lỗi kết nối, vui lòng thử lại.');
+      console.error('Error adding category:', error);
+      setError('Connection error. Please try again.');
+      setIsSubmitting(false);
     }
   };
   
-
   return (
     <Modal isOpen={isOpen} onClose={onClose}>
       <div className='add-category'>
-        <h2>Thêm Danh Mục</h2>
+        <h2>Thêm</h2>
 
         {error && <p className='error-message'>{error}</p>}
 
         <div className='input-group'>
-          <label>Tên danh mục:</label>
+          <label>Tên danh mục</label>
           <input
             type='text'
             value={name}
             onChange={(e) => setName(e.target.value)}
-            placeholder='Nhập tên danh mục'
+            placeholder='mời nhập danh mục'
           />
 
-          <label>Danh mục cha:</label>
-          <select className="form-select" value={parent} onChange={(e) => setParent(e.target.value)}>
-            <option value=''>Không có (Danh mục gốc)</option>
+          <label>danh mục cha</label>
+          <select 
+            className="form-select" 
+            value={parent} 
+            onChange={(e) => setParent(e.target.value)}
+          >
+            <option value=''>danh mục gốc</option>
             {categories.map(cat => (
               <option key={cat._id} value={cat._id}>
                 {cat.label}
@@ -102,8 +126,19 @@ function AddCate({ isOpen, onClose, fetchData }) {
         </div>
 
         <div className='button-group'>
-          <button onClick={handleAddCategory} className="btn btn-primary">
-            Thêm
+          <button 
+            onClick={handleAddCategory} 
+            className="btn btn-primary"
+            disabled={isSubmitting}
+          >
+            {isSubmitting ? 'Adding...' : 'Add'}
+          </button>
+          <button 
+            onClick={onClose} 
+            className="btn btn-secondary"
+            disabled={isSubmitting}
+          >
+            Cancel
           </button>
         </div>
       </div>

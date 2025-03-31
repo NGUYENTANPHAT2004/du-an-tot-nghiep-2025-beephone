@@ -3,7 +3,7 @@ import "./Zalo.scss";
 const Zalo = () => {
   return (
     <a
-      href="https://zalo.me/0337252262"
+      href="https://zalo.me/0813783419"
       target="_blank"
       rel="noopener noreferrer"
     >
