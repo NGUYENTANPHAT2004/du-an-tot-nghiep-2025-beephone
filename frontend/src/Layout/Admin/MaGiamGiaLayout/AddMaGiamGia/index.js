@@ -1,1 +1,1 @@
-export { default as AddMaGiamGia } from "./AddMaGiamGia";
+export { default as AddMaGiamGia } from './AddMaGiamGia'
