@@ -25,7 +25,8 @@ router.post('/postloaisp', async (req, res) => {
       hang,
       congsac,
       thongtin,
-      category
+      category,
+      khuyenmai
     } = req.body
     const namekhongdau1 = unicode(name)
     const namekhongdau = removeSpecialChars(namekhongdau1)
@@ -45,7 +46,8 @@ router.post('/postloaisp', async (req, res) => {
       congsac,
       thongtin,
       namekhongdau,
-      category: category
+      category: category,
+      khuyenmai
     })
     cate.theloai.push(tensp._id);
     await cate.save();
@@ -71,7 +73,8 @@ router.post('/putloaisp/:id', async (req, res) => {
       hang,
       congsac,
       thongtin,
-      category // ID category mới
+      category,
+      khuyenmai // ID Category (mới) do FE gửi lên
     } = req.body;
 
     // 1. Tìm LoạiSP cũ
@@ -80,52 +83,82 @@ router.post('/putloaisp/:id', async (req, res) => {
       return res.status(404).json({ message: 'Không tìm thấy thể loại' });
     }
 
-    // 2. (Tùy chọn) Kiểm tra danh mục mới
-    const cateNew = await Category.findById(category);
-    if (!cateNew) {
-      return res.status(400).json({ message: 'Danh mục mới không tồn tại' });
-    }
-    if (cateNew.children.length > 0) {
-      return res.status(400).json({ message: 'Danh mục này không thể chứa thể loại' });
+    // 2. Nếu bạn yêu cầu Category mới phải hợp lệ (tồn tại, không có con,...)
+    //    thì kiểm tra.
+    //    Nếu category là chuỗi rỗng hoặc null, tùy bạn xử lý.
+    if (category) {
+      const cateNew = await Category.findById(category);
+      if (!cateNew) {
+        return res.status(400).json({ message: 'Danh mục mới không tồn tại' });
+      }
+      if (cateNew.children && cateNew.children.length > 0) {
+        return res.status(400).json({ message: 'Danh mục này không thể chứa thể loại' });
+      }
     }
 
-    // 3. Nếu category cũ khác category mới, cần:
-    //    a) Bỏ _id của loaiSpOld ra khỏi theloai[] của Category cũ
-    //    b) Thêm _id của loaiSpOld vào theloai[] của Category mới
-    const oldCategoryId = loaiSpOld.category.toString();
-    const newCategoryId = category.toString();
+    // 3. Kiểm tra Category cũ và mới
+    //    Trường hợp LoạiSP cũ chưa có category => loaiSpOld.category = null/undefined
+    //    Kiểm tra cẩn thận tránh .toString() trên null
+    const oldCategoryId = loaiSpOld.category ? loaiSpOld.category.toString() : null;
+    const newCategoryId = category || null; // FE có thể gửi '' => ta chuyển thành null
 
-    if (oldCategoryId !== newCategoryId) {
+    // Nếu Category cũ khác Category mới -> xóa LoạiSP khỏi theloai[] của cate cũ, thêm vào cate mới
+    if (oldCategoryId && newCategoryId && oldCategoryId !== newCategoryId) {
       // 3a. Tìm Category cũ
       const cateOld = await Category.findById(oldCategoryId);
       if (cateOld) {
+        // Lọc bỏ LoạiSP này trong mảng theloai
         cateOld.theloai = cateOld.theloai.filter(
-          (itemId) => itemId.toString() !== id
+          (itemId) => itemId.toString() !== loaiSpOld._id.toString()
         );
         await cateOld.save();
       }
 
-      // 3b. Thêm _id LoaiSP vào Category mới
-      cateNew.theloai.push(loaiSpOld._id);
-      await cateNew.save();
+      // 3b. Tìm Category mới và push _id LoạiSP vào
+      const cateNew = await Category.findById(newCategoryId);
+      if (cateNew) {
+        cateNew.theloai.push(loaiSpOld._id);
+        await cateNew.save();
+      }
+    }
+
+    // Nếu cũ là null, mới != null => thêm vào cate mới
+    if (!oldCategoryId && newCategoryId) {
+      const cateNew = await Category.findById(newCategoryId);
+      if (cateNew) {
+        cateNew.theloai.push(loaiSpOld._id);
+        await cateNew.save();
+      }
+    }
+
+    // Nếu cũ != null, mới là null => xóa LoạiSP khỏi cate cũ
+    if (oldCategoryId && !newCategoryId) {
+      const cateOld = await Category.findById(oldCategoryId);
+      if (cateOld) {
+        cateOld.theloai = cateOld.theloai.filter(
+          (itemId) => itemId.toString() !== loaiSpOld._id.toString()
+        );
+        await cateOld.save();
+      }
     }
 
     // 4. Cập nhật LoạiSP
-    const namekhongdau1 = unicode(name);
+    const namekhongdau1 = unicode(name || '');
     const namekhongdau = removeSpecialChars(namekhongdau1);
 
-    loaiSpOld.name = name;
-    loaiSpOld.manhinh = manhinh;
-    loaiSpOld.chip = chip;
-    loaiSpOld.ram = ram;
-    loaiSpOld.dungluong = dungluong;
-    loaiSpOld.camera = camera;
-    loaiSpOld.pinsac = pinsac;
-    loaiSpOld.hang = hang;
-    loaiSpOld.congsac = congsac;
-    loaiSpOld.thongtin = thongtin;
+    loaiSpOld.name = name || '';
+    loaiSpOld.manhinh = manhinh || '';
+    loaiSpOld.chip = chip || '';
+    loaiSpOld.ram = ram || '';
+    loaiSpOld.dungluong = dungluong || '';
+    loaiSpOld.camera = camera || '';
+    loaiSpOld.pinsac = pinsac || '';
+    loaiSpOld.hang = hang || '';
+    loaiSpOld.congsac = congsac || '';
+    loaiSpOld.thongtin = thongtin || '';
     loaiSpOld.namekhongdau = namekhongdau;
-    loaiSpOld.category = category;
+    loaiSpOld.category = newCategoryId;
+    loaiSpOld.khuyenmai=khuyenmai || "";// Lưu category (hoặc null) vào LoạiSP
 
     await loaiSpOld.save();
 
@@ -135,79 +168,23 @@ router.post('/putloaisp/:id', async (req, res) => {
     res.status(500).json({ message: `Đã xảy ra lỗi: ${error}` });
   }
 });
-router.get('/theloaisanpham', async (req, res) => {
-  try {
-    const theloai = await LoaiSP.LoaiSP.find().lean()
-    const theloaijson = await Promise.all(
-      theloai.map(async tl => {
-        return {
-          _id: tl._id,
-          name: tl.name,
-          namekhongdau: tl.namekhongdau
-        }
-      })
-    )
-    res.json(theloaijson)
-  } catch (error) {
-    console.log(error)
-  }
-})
-router.get('/theloaiadmin', async (req, res) => {
-  try {
-    const theloai = await LoaiSP.LoaiSP.find().lean()
-    const theloaijson = await Promise.all(
-      theloai.map(async tl => {
-        return {
-          _id: tl._id,
-          name: tl.name,
-          chip: tl.chip,
-          ram: tl.ram,
-          dungluong: tl.dungluong,
-          camera: tl.camera,
-          pinsac: tl.pinsac,
-          hang: tl.hang,
-          congsac: tl.congsac,
-          khuyenmai: tl.khuyenmai
-        }
-      })
-    )
-    res.json(theloaijson)
-  } catch (error) {
-    console.log(error)
-  }
-})
-router.post('/putloaisp/:id', async (req, res) => {
-  try {
-    const id = req.params.id
-    const {
-      name,
-      manhinh,
-      chip,
-      ram,
-      dungluong,
-      camera,
-      pinsac,
-      hang,
-      congsac,
-      thongtin
-    } = req.body
-    const namekhongdau1 = unicode(name)
-    const namekhongdau = removeSpecialChars(namekhongdau1)
 
-    await LoaiSP.LoaiSP.findByIdAndUpdate(id, {
-      name,
-      manhinh,
-      chip,
-      ram,
-      dungluong,
-      camera,
-      pinsac,
-      hang,
-      congsac,
-      thongtin,
-      namekhongdau
-    })
-    res.json({ message: 'sửa thành công' })
+
+router.get('/getchitiettl/:idtheloai', async (req, res) => {
+  try {
+    const idtheloai = req.params.idtheloai
+    const theloai = await LoaiSP.LoaiSP.findById(idtheloai)
+    res.json(theloai)
+  } catch (error) {
+    console.error(error)
+    res.status(500).json({ message: `Đã xảy ra lỗi: ${error}` })
+  }
+})
+router.get('/getchitiet-theloai/:nametheloai', async (req, res) => {
+  try {
+    const nametheloai = req.params.nametheloai
+    const theloai = await LoaiSP.LoaiSP.findOne({namekhongdau : nametheloai})
+    res.json(theloai)
   } catch (error) {
     console.error(error)
     res.status(500).json({ message: `Đã xảy ra lỗi: ${error}` })
@@ -257,52 +234,96 @@ router.post('/deleteloaisp/:id', async (req, res) => {
 
 router.post('/deletehangloatloaisp', async (req, res) => {
   try {
-    const { ids } = req.body 
+    const { ids } = req.body;
 
     if (!ids || !Array.isArray(ids) || ids.length === 0) {
-      return res.status(400).json({ message: 'Danh sách ID không hợp lệ' })
+      return res.status(400).json({ message: 'Danh sách ID không hợp lệ' });
     }
 
-    const loaiSPs = await LoaiSP.LoaiSP.find({ _id: { $in: ids } })
+    const loaiSPs = await LoaiSP.LoaiSP.find({ _id: { $in: ids } });
 
     if (loaiSPs.length === 0) {
       return res
         .status(404)
-        .json({ message: 'Không tìm thấy thể loại nào để xóa' })
+        .json({ message: 'Không tìm thấy thể loại nào để xoá' });
     }
 
     await Promise.all(
-      loaiSPs.map(async loaiSP => {
-        // Xóa các chi tiết sản phẩm liên quan
-        await Sp.ChitietSp.deleteMany({ _id: { $in: loaiSP.chitietsp } })
+      loaiSPs.map(async (loaiSP) => {
+        // Gắn isDeleted = true (xóa mềm)
+        loaiSP.isDeleted = true;
+        await loaiSP.save();
 
-        // Cập nhật Category: loại bỏ _id của loaiSP khỏi mảng theloai
-        if (loaiSP.category) {
-          await Category.updateOne(
-            { _id: loaiSP.category },
-            { $pull: { theloai: loaiSP._id } }
-          )
+        // Gắn isDeleted = true cho các chi tiết sản phẩm liên quan (nếu cần)
+        await Sp.ChitietSp.updateMany(
+          { _id: { $in: loaiSP.chitietsp } },
+          { $set: { isDeleted: true } }
+        );
+
+        // KHÔNG xóa khỏi Category.theloai để vẫn giữ liên kết
+        // Nếu bạn muốn ẩn luôn thì dùng populate có match: { isDeleted: false }
+      })
+    );
+
+    res.json({ message: `Đã xoá mềm ${ids.length} thể loại thành công` });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: `Đã xảy ra lỗi: ${error}` });
+  }
+});
+router.get('/theloaisanpham', async (req, res) => {
+  try {
+    const theloai = await LoaiSP.LoaiSP.find({ isDeleted: false }).lean()
+    const theloaijson = await Promise.all(
+      theloai.map(async tl => {
+        return {
+          _id: tl._id,
+          name: tl.name,
+          namekhongdau: tl.namekhongdau
         }
       })
     )
-
-    // Xóa hàng loạt các LoaiSP
-    await LoaiSP.LoaiSP.deleteMany({ _id: { $in: ids } })
-
-    res.json({ message: `Đã xóa ${ids.length} thể loại thành công` })
+    res.json(theloaijson)
   } catch (error) {
-    console.error(error)
-    res.status(500).json({ message: `Đã xảy ra lỗi: ${error}` })
+    console.log(error)
   }
 })
-router.get('/getchitiettl/:idtheloai', async (req, res) => {
+
+router.get('/theloaiadmin', async (req, res) => {
   try {
-    const idtheloai = req.params.idtheloai
-    const theloai = await LoaiSP.LoaiSP.findById(idtheloai)
-    res.json(theloai)
+    const theloai = await LoaiSP.LoaiSP.find({ isDeleted: false }).lean()
+    const theloaijson = await Promise.all(
+      theloai.map(async tl => {
+        return {
+          _id: tl._id,
+          name: tl.name,
+          chip: tl.chip,
+          ram: tl.ram,
+          dungluong: tl.dungluong,
+          camera: tl.camera,
+          pinsac: tl.pinsac,
+          hang: tl.hang,
+          congsac: tl.congsac,
+          khuyenmai: tl.khuyenmai
+        }
+      })
+    )
+    res.json(theloaijson)
   } catch (error) {
-    console.error(error)
-    res.status(500).json({ message: `Đã xảy ra lỗi: ${error}` })
+    console.log(error)
+    res.status(500).json({ message: 'Lỗi khi tải danh sách thể loại', error: error.message });
   }
 })
+router.post('/restoreloaisp/:id', async (req, res) => {
+  try {
+    const loaiSp = await LoaiSP.LoaiSP.findById(req.params.id);
+    if (!loaiSp) return res.status(404).json({ message: 'Không tìm thấy' });
+    loaiSp.isDeleted = false;
+    await loaiSp.save();
+    res.json({ message: 'Khôi phục thành công' });
+  } catch (error) {
+    res.status(500).json({ message: `Lỗi: ${error}` });
+  }
+});
+
 module.exports = router

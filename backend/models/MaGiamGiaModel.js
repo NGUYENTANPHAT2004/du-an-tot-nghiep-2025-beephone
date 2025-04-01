@@ -6,6 +6,7 @@ const magiamgiaSchema = new db.mongoose.Schema({
   sophantram: { type: Number },
   ngaybatdau: { type: Date },
   ngayketthuc: { type: Date },
+  isdelete: { type: Boolean, default: false }
 })
 
 const magiamgia = db.mongoose.model('magiamgia', magiamgiaSchema)
