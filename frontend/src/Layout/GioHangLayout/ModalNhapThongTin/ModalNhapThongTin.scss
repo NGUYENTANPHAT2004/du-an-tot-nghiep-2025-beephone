@@ -21,3 +21,34 @@
         gap: 10px;
     }
 }
+.stock-error {
+    background-color: #fff2f0;
+    border: 1px solid #ffccc7;
+    border-radius: 4px;
+    padding: 10px 15px;
+    margin-bottom: 15px;
+    
+    p {
+      color: #ff4d4f;
+      margin: 0;
+      font-size: 14px;
+    }
+  }
+  
+  .btndathang {
+    /* Your existing button styles */
+    
+    &.disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      background-color: #d9d9d9;
+      border-color: #d9d9d9;
+      color: rgba(0, 0, 0, 0.25);
+      
+      &:hover {
+        opacity: 0.6;
+        background-color: #d9d9d9;
+        border-color: #d9d9d9;
+      }
+    }
+  }
