@@ -1,5 +1,208 @@
-.div_date_magg{
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
+.addtheloai {
+    width: 100%;
+    max-width: 600px;
+    padding: 20px;
+    
+    h2 {
+      text-align: center;
+      margin-bottom: 20px;
+      color: #333;
+    }
+    
+    .div_input_group {
+      margin-bottom: 20px;
+      
+      .input-group {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+        
+        label {
+          font-weight: 500;
+          margin-bottom: 5px;
+          color: #555;
+        }
+        
+        input[type="text"],
+        input[type="number"],
+        input[type="date"],
+        input[type="time"] {
+          padding: 10px;
+          border: 1px solid #ddd;
+          border-radius: 4px;
+          font-size: 14px;
+          transition: border-color 0.2s;
+          
+          &:focus {
+            outline: none;
+            border-color: #4a90e2;
+          }
+        }
+        
+        .div_date_magg {
+          display: flex;
+          flex-direction: column;
+          gap: 10px;
+          
+          span {
+            font-weight: 500;
+            color: #555;
+          }
+          
+          @media (min-width: 768px) {
+            flex-direction: row;
+            align-items: center;
+            
+            span {
+              margin-right: 10px;
+            }
+            
+            input {
+              flex: 1;
+            }
+          }
+        }
+        
+        .toggle-advanced {
+          margin: 15px 0;
+          text-align: center;
+          
+          .btn-toggle {
+            background-color: transparent;
+            border: none;
+            color: #4a90e2;
+            cursor: pointer;
+            font-weight: 500;
+            padding: 5px 10px;
+            
+            &:hover {
+              text-decoration: underline;
+            }
+          }
+        }
+        
+        .advanced-options {
+          background-color: #f5f7fa;
+          padding: 15px;
+          border-radius: 8px;
+          border: 1px solid #e0e7ff;
+          margin-top: 10px;
+          
+          h3 {
+            margin-bottom: 15px;
+            color: #4a5568;
+            font-size: 16px;
+            text-align: center;
+          }
+          
+          h4 {
+            margin: 15px 0 10px;
+            color: #4a5568;
+            font-size: 14px;
+          }
+          
+          .order-limits {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+          }
+          
+          .golden-hour {
+            margin: 15px 0;
+            
+            .time-inputs {
+              display: flex;
+              flex-direction: column;
+              gap: 10px;
+              
+              @media (min-width: 768px) {
+                flex-direction: row;
+                align-items: center;
+                
+                label {
+                  margin-right: 10px;
+                  width: 70px;
+                }
+                
+                input {
+                  flex: 1;
+                }
+              }
+            }
+          }
+          
+          .usage-options {
+            margin: 15px 0;
+            
+            .checkbox-group {
+              display: flex;
+              align-items: center;
+              margin-bottom: 10px;
+              
+              input[type="checkbox"] {
+                margin-right: 10px;
+                width: 16px;
+                height: 16px;
+              }
+            }
+          }
+          
+          .day-restrictions {
+            margin: 15px 0;
+            
+            .days-checkboxes {
+              display: flex;
+              flex-wrap: wrap;
+              gap: 10px;
+              margin-top: 10px;
+              
+              .day-option {
+                display: flex;
+                align-items: center;
+                width: calc(33.33% - 10px);
+                
+                input[type="checkbox"] {
+                  margin-right: 8px;
+                  width: 16px;
+                  height: 16px;
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+    
+    .button-group {
+      display: flex;
+      justify-content: center;
+      gap: 15px;
+      
+      button {
+        padding: 10px 20px;
+        border: none;
+        border-radius: 4px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: background-color 0.2s;
+        
+        &.btnaddtl {
+          background-color: #4caf50;
+          color: white;
+          
+          &:hover {
+            background-color: #45a049;
+          }
+        }
+        
+        &.btncancel {
+          background-color: #f44336;
+          color: white;
+          
+          &:hover {
+            background-color: #e53935;
+          }
+        }
+      }
+    }
+  }

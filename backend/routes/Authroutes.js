@@ -5,7 +5,9 @@ const jwt = require('jsonwebtoken');
 const { OAuth2Client } = require('google-auth-library');
 const User = require('../models/user.model'); // Đảm bảo schema có `socialLogins`
 const router = express.Router();
-
+const { 
+  generateVoucherForUser, 
+} = require('../socket/handlers/voucherGenerator');
 const GOOGLE_CLIENT_ID = "625355579712-siv3ab624075ufh4uatn695jqe80m5fc.apps.googleusercontent.com";  
 const jwtSecret = "NzNkMjY0NjMtMmU4NS00OWRlLTk3OWItOTM5OTRjZjFlN2Iw";
 
@@ -48,12 +50,32 @@ router.post('/register_auth', async (req, res) => {
       password: hashedPassword, 
       role: role || 'user', 
       phone,
-      socialLogins: {} 
+      socialLogins: {},
+      registrationDate: new Date()
     });
     
     await user.save();
     
-    res.json({ message: 'Đăng ký thành công', user });
+    // Generate a welcome voucher for the new user
+    try {
+      const welcomeVoucher = await generateVoucherForUser(phone, 'new-account', 14); // 14 days expiry
+      
+      res.json({ 
+        message: 'Đăng ký thành công', 
+        user,
+        welcomeVoucher: {
+          code: welcomeVoucher.code,
+          discount: welcomeVoucher.discount,
+          minOrderValue: welcomeVoucher.minOrderValue,
+          expiresAt: welcomeVoucher.expiresAt,
+          message: welcomeVoucher.message
+        }
+      });
+    } catch (voucherError) {
+      console.error('Error generating welcome voucher:', voucherError);
+      // Still register the user even if voucher generation fails
+      res.json({ message: 'Đăng ký thành công', user });
+    }
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: 'Đã xảy ra lỗi' });
