@@ -434,3 +434,255 @@ hr {
     width: unset !important;
   }
 }
+.stock-status {
+  background-color: #f5f5f5;
+  padding: 10px 15px;
+  border-radius: 4px;
+  margin-bottom: 15px;
+  font-size: 14px;
+  
+  .loading-stock {
+    color: #757575;
+    font-style: italic;
+  }
+  
+  .out-of-stock {
+    color: #d32f2f;
+    font-weight: bold;
+  }
+  
+  .low-stock {
+    color: #f57c00;
+    font-weight: bold;
+  }
+  
+  .in-stock {
+    color: #2e7d32;
+    font-weight: bold;
+  }
+}
+
+/* Add disabled button style */
+.divbtn_muagay.disabled {
+  background-color: #9e9e9e;
+  cursor: not-allowed;
+  opacity: 0.7;
+  
+  &:hover {
+    background-color: #9e9e9e;
+  }
+}
+
+/* Stock indicator in mausac_dungluong */
+.mausac_container {
+  .border_mausac {
+    position: relative;
+    
+    &.out-of-stock::after {
+      content: '×';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: rgba(255, 255, 255, 0.7);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #d32f2f;
+      font-size: 18px;
+      font-weight: bold;
+    }
+  }
+}
+.product-tabs {
+  display: flex;
+  border-bottom: 1px solid #ddd;
+  margin-bottom: 20px;
+}
+
+.product-tab {
+  padding: 12px 20px;
+  cursor: pointer;
+  font-weight: 500;
+  color: #666;
+  border-bottom: 2px solid transparent;
+  transition: all 0.3s ease;
+}
+
+.product-tab.active {
+  color: #0066cc;
+  border-bottom: 2px solid #0066cc;
+}
+
+.product-tab:hover {
+  color: #0066cc;
+}
+
+.tab-content {
+  display: none;
+}
+
+.tab-content.active {
+  display: block;
+}
+
+/* Responsive styles for tabs and tech specs */
+@media (max-width: 768px) {
+  .product-tabs {
+    flex-wrap: wrap;
+  }
+  
+  .product-tab {
+    flex: 1 0 33%;
+    text-align: center;
+    padding: 10px;
+    font-size: 14px;
+  }
+  
+  .tech-specs-table td {
+    padding: 10px;
+  }
+  
+  .spec-name {
+    width: 40%;
+  }
+  
+  .spec-value {
+    width: 60%;
+  }
+}
+/* Tab content container */
+.tab-content {
+  display: none;
+}
+
+.tab-content.active {
+  display: block;
+}
+
+/* Technical specifications styling */
+.tech-specs {
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  overflow: hidden;
+  margin-bottom: 20px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.tech-specs-title {
+  background-color: #f7f7f7;
+  padding: 15px 20px;
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: #333;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.tech-specs-content {
+  padding: 0;
+}
+
+.tech-specs-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.tech-specs-table tr {
+  border-bottom: 1px solid #eeeeee;
+}
+
+.tech-specs-table tr:last-child {
+  border-bottom: none;
+}
+
+.tech-specs-table td {
+  padding: 12px 20px;
+}
+
+.spec-name {
+  width: 30%;
+  color: #555;
+  font-weight: 500;
+}
+
+.spec-value {
+  width: 70%;
+  color: #222;
+}
+
+.even-row {
+  background-color: #fafafa;
+}
+
+.odd-row {
+  background-color: #ffffff;
+}
+
+/* Product details styling */
+.product-details {
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  overflow: hidden;
+  margin-bottom: 20px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.product-details-content {
+  padding: 20px;
+  line-height: 1.6;
+  color: #333;
+}
+
+.product-details-content h1,
+.product-details-content h2,
+.product-details-content h3 {
+  margin-top: 15px;
+  margin-bottom: 10px;
+  color: #222;
+}
+
+.product-details-content p {
+  margin-bottom: 15px;
+}
+
+.product-details-content img {
+  max-width: 100%;
+  height: auto;
+  margin: 10px 0;
+  border-radius: 4px;
+}
+
+.product-details-content ul,
+.product-details-content ol {
+  margin-left: 20px;
+  margin-bottom: 15px;
+}
+
+/* Loading state and empty state */
+.tech-specs-content p,
+.product-details-content p {
+  text-align: center;
+  color: #666;
+  font-style: italic;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .spec-name {
+    width: 40%;
+  }
+  
+  .spec-value {
+    width: 60%;
+  }
+  
+  .tech-specs-table td {
+    padding: 10px 15px;
+  }
+  
+  .product-details-content {
+    padding: 15px;
+  }
+}

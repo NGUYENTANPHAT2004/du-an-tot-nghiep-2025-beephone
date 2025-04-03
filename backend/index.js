@@ -15,6 +15,7 @@ const loaisanphamroutes = require('./routes/LoaiSanPhamRoutes')
 const userroutes = require('./routes/UserRouter')
 const authroutes = require("./routes/Authroutes.js")
 const stockrouter = require('./routes/stockrouter')
+const OrderRating = require('./routes/OrderRating')
 const http = require("http")
 const { initSocket } = require('./config/socket');
 const jwtSecret = process.env.JWT_SECRET // Thêm fallback key
@@ -50,6 +51,7 @@ app.use('/', userroutes)
 app.use('/', sanphamroutes)
 app.use('/', authroutes)
 app.use('/', stockrouter)
+app.use('/', OrderRating)
 adminnotifi(io)
 
 // Use server.listen instead of app.listen
