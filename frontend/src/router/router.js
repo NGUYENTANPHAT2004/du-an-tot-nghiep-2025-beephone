@@ -15,6 +15,7 @@ import ChinhSachVanChuyen from "../Layout/DeafaultLayout/HuongDan/ChinhSachVanCh
 import { TinTucLayout } from "../Layout/TinTucLayout";
 import { DanhMucLayout } from "../Layout/DanhMucLayout";
 import LichSuDonHangLayout from "../Layout/lichsudonhang/lichsudonhang";
+import { SanPhamLayout } from "../Layout/Admin/SanPhamLayout";
 const publicRoutes = [
   { path: "/admin", component: AdminLayout, layout: null },
   { path: "/thanhcong", component: PaySuccess },
@@ -34,6 +35,7 @@ const publicRoutes = [
   { path: "/tintuc", component: TinTucLayout },
   { path: "/danh-muc/:slug", component: DanhMucLayout },
   { path: "/orders", component: LichSuDonHangLayout },
+  { path: "/sanpham/:slug", component: SanPhamLayout },
 ];
 const privateRoutes = [];
 export { publicRoutes, privateRoutes };
