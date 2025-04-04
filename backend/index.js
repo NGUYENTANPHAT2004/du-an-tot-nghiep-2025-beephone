@@ -18,6 +18,8 @@ const stockrouter = require('./routes/stockrouter')
 const OrderRating = require('./routes/OrderRating')
 const http = require("http")
 const { initSocket } = require('./config/socket');
+const chatAnalyticsService = require('./socket/chat/services/ChatAnalyticsService');
+const fs = require('fs');
 const jwtSecret = process.env.JWT_SECRET // Thêm fallback key
 console.log(jwtSecret)
 const mongoStoreOptions = {
@@ -39,6 +41,11 @@ app.use(
     // ,cookie: { secure: true }
   })
 );
+const dataDir = path.join(__dirname, 'data');
+if (!fs.existsSync(dataDir)) {
+  fs.mkdirSync(dataDir, { recursive: true });
+  console.log('✅ Đã tạo thư mục dữ liệu cho chat');
+}
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 app.use(methodOverride("_method"));
@@ -52,6 +59,30 @@ app.use('/', sanphamroutes)
 app.use('/', authroutes)
 app.use('/', stockrouter)
 app.use('/', OrderRating)
+const setupDailyAnalytics = () => {
+  const now = new Date();
+  const midnight = new Date(now);
+  midnight.setHours(24, 0, 0, 0);
+  
+  // Tính thời gian đến lúc 0:00
+  const delay = midnight.getTime() - now.getTime();
+  
+  setTimeout(() => {
+    // Chạy lần đầu
+    chatAnalyticsService.updateDailyAnalytics();
+    
+    // Sau đó chạy mỗi ngày
+    setInterval(() => {
+      chatAnalyticsService.updateDailyAnalytics();
+    }, 24 * 60 * 60 * 1000); // 24 giờ
+  }, delay);
+};
+
+// Khởi động tác vụ định kỳ
+setupDailyAnalytics();
+
+// Setup socket handlers
+
 adminnotifi(io)
 
 // Use server.listen instead of app.listen
