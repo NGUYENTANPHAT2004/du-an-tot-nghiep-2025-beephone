@@ -1,0 +1,243 @@
+.blog_container{
+    height: 100%;
+    padding: 10px;
+}
+.btn-voucher {
+    background-color: #28a745;
+    color: white;
+    padding: 8px 12px;
+    border: none;
+    cursor: pointer;
+    border-radius: 5px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 14px;
+    transition: background 0.3s ease;
+  
+    &:hover {
+      background-color: #218838;
+    }
+  }
+  
+  .btn-voucher {
+    background-color: #ffc107;
+    color: black;
+    &:hover {
+      background-color: #e0a800;
+    }
+  }
+  
+  .search-box {
+    display: flex;
+    align-items: center;
+    background: #f1f1f1;
+    border-radius: 8px;
+    padding: 5px;
+    width: 250px;
+    border: 1px solid #ccc;
+  
+    input {
+      flex: 1;
+      border: none;
+      outline: none;
+      padding: 8px;
+      font-size: 14px;
+      background: transparent;
+    }
+  
+    button {
+      background: #007bff;
+      border: none;
+      color: white;
+      padding: 8px 10px;
+      border-radius: 6px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      transition: background 0.3s ease;
+  
+      &:hover {
+        background: #0056b3;
+      }
+    }
+  }
+  .btn-active {
+    background-color: green;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    cursor: pointer;
+  }
+  
+  .btn-inactive {
+    background-color: red;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    cursor: pointer;
+  }
+
+// Role badges
+.role-badge {
+  display: inline-block;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 500;
+  text-align: center;
+  min-width: 80px;
+}
+
+.role-admin {
+  background-color: #ff4d4f;
+  color: white;
+}
+
+.role-manager {
+  background-color: #faad14;
+  color: white;
+}
+
+.role-staff {
+  background-color: #1890ff;
+  color: white;
+}
+
+.role-user {
+  background-color: #52c41a;
+  color: white;
+}
+
+// Status badges
+.status-badge {
+  display: inline-block;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 500;
+  text-align: center;
+  min-width: 80px;
+}
+
+.status-active {
+  background-color: #52c41a;
+  color: white;
+}
+
+.status-inactive {
+  background-color: #d9d9d9;
+  color: #595959;
+}
+
+.status-suspended {
+  background-color: #ff4d4f;
+  color: white;
+}
+
+.status-pending {
+  background-color: #faad14;
+  color: white;
+}
+
+// Action buttons
+.action-buttons {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+}
+
+.btn-role {
+  background-color: #1890ff;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 4px 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  
+  &:hover {
+    background-color: #40a9ff;
+  }
+}
+
+// Modal styles
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background-color: white;
+  border-radius: 8px;
+  padding: 24px;
+  width: 400px;
+  max-width: 90%;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  
+  h2 {
+    margin-top: 0;
+    margin-bottom: 16px;
+    font-size: 18px;
+  }
+  
+  p {
+    margin: 8px 0;
+  }
+}
+
+.role-options {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+  margin: 16px 0;
+  
+  button {
+    padding: 8px 12px;
+    border: 1px solid #d9d9d9;
+    border-radius: 4px;
+    background-color: white;
+    cursor: pointer;
+    transition: all 0.3s;
+    
+    &:hover {
+      border-color: #1890ff;
+      color: #1890ff;
+    }
+    
+    &.active {
+      background-color: #1890ff;
+      color: white;
+      border-color: #1890ff;
+    }
+  }
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 16px;
+  
+  .btn-cancel {
+    padding: 8px 16px;
+    border: 1px solid #d9d9d9;
+    border-radius: 4px;
+    background-color: white;
+    cursor: pointer;
+    
+    &:hover {
+      border-color: #1890ff;
+      color: #1890ff;
+    }
+  }
+}
