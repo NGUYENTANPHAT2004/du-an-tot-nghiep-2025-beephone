@@ -1,20 +1,22 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import { ModalBig } from '../../../../components/ModalBig'
-import { useState, useEffect } from 'react'
-import './HoaDonChiTiet.scss'
-import axios from 'axios';
+import { ModalBig } from "../../../../components/ModalBig";
+import { useState, useEffect } from "react";
+import "./HoaDonChiTiet.scss";
+import axios from "axios";
 
-function HoaDonChiTiet ({ isOpen, onClose, idhoadon }) {
+function HoaDonChiTiet({ isOpen, onClose, idhoadon }) {
   const [hoadon, setHoadon] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchHoaDon = async () => {
       try {
-        const response = await axios.get(`http://localhost:3005/getchitiethd/${idhoadon}`);
+        const response = await axios.get(
+          `http://localhost:3005/getchitiethd/${idhoadon}`
+        );
         setHoadon(response.data);
       } catch (error) {
-        console.error('Error fetching hóa đơn:', error);
+        console.error("Error fetching hóa đơn:", error);
       } finally {
         setLoading(false);
       }
@@ -27,18 +29,18 @@ function HoaDonChiTiet ({ isOpen, onClose, idhoadon }) {
 
   const getStatusClass = (status) => {
     switch (status) {
-      case 'Đã thanh toán':
-      case 'Hoàn thành':
-        return 'success';
-      case 'Đang xử lý':
-        return 'pending';
-      case 'Thanh toán thất bại':
-      case 'Thanh toán hết hạn':
-        return 'failed';
-      case 'Hủy Đơn Hàng':
-        return 'cancelled';
+      case "Đã thanh toán":
+      case "Hoàn thành":
+        return "success";
+      case "Đang xử lý":
+        return "pending";
+      case "Thanh toán thất bại":
+      case "Thanh toán hết hạn":
+        return "failed";
+      case "Hủy Đơn Hàng":
+        return "cancelled";
       default:
-        return '';
+        return "";
     }
   };
 
@@ -62,6 +64,10 @@ function HoaDonChiTiet ({ isOpen, onClose, idhoadon }) {
               <h3>Thông tin người nhận</h3>
               <div className="info-item">
                 <span>Họ tên:</span>
+                <span>{hoadon.name}</span>
+              </div>
+              <div className="info-item">
+                <span>người nhận:</span>
                 <span>{hoadon.nguoinhan}</span>
               </div>
               <div className="info-item">
@@ -70,7 +76,7 @@ function HoaDonChiTiet ({ isOpen, onClose, idhoadon }) {
               </div>
               <div className="info-item">
                 <span>Địa chỉ:</span>
-                <span>{hoadon.address || 'N/A'}</span>
+                <span>{hoadon.address || "N/A"}</span>
               </div>
             </div>
 
@@ -86,7 +92,9 @@ function HoaDonChiTiet ({ isOpen, onClose, idhoadon }) {
               </div>
               <div className="info-item">
                 <span>Phương thức thanh toán:</span>
-                <span>{hoadon.thanhtoan ? 'Đã thanh toán' : 'Chưa thanh toán'}</span>
+                <span>
+                  {hoadon.thanhtoan ? "Đã thanh toán" : "Chưa thanh toán"}
+                </span>
               </div>
             </div>
           </div>
@@ -145,7 +153,9 @@ function HoaDonChiTiet ({ isOpen, onClose, idhoadon }) {
 
           <div className="actions">
             <button className="primary">In hóa đơn</button>
-            <button className="secondary" onClick={onClose}>Đóng</button>
+            <button className="secondary" onClick={onClose}>
+              Đóng
+            </button>
           </div>
         </div>
       )}
@@ -153,4 +163,4 @@ function HoaDonChiTiet ({ isOpen, onClose, idhoadon }) {
   );
 }
 
-export default HoaDonChiTiet; 
+export default HoaDonChiTiet;
