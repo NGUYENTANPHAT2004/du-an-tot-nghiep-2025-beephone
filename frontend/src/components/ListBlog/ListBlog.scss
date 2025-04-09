@@ -1,5 +1,6 @@
 .news-list{
-  margin: 0 15%;
+  margin: 0 10%;
+  margin-bottom: 10px;
 }
 .news-header {
   font-size: 22px;
@@ -11,6 +12,8 @@
 .news-items {
   display: flex;
   gap: 20px;
+  align-items: center;
+  justify-content: center;
 }
 
 .news-item {
@@ -45,4 +48,13 @@
 .news-date {
   font-size: 14px;
   color: gray;
+}
+
+@media screen and (max-width: 768px) {
+  .listblog_container{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+  }
 }

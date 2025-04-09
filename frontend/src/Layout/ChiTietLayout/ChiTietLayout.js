@@ -1,3 +1,12 @@
+<<<<<<< HEAD
+/* eslint-disable react-hooks/exhaustive-deps */
+import React, { useEffect, useState } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import "./ChiTietLayout.scss";
+
+import ListBlog from "../../components/ListBlog/ListBlog";
+import ThanhDinhHuong from "../../components/ThanhDinhHuong/ThanhDinhHuong";
+=======
 import React, { useEffect, useState, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import "./ChiTietLayout.scss";
@@ -6,25 +15,37 @@ import axios from "axios";
 import ListBlog from "../../components/ListBlog/ListBlog";
 import ThanhDinhHuong from "../../components/ThanhDinhHuong/ThanhDinhHuong";
 import ProductRating from "../../components/ProductRating/ProductRating";
+>>>>>>> c1d4eb0142ccb43d71f18e4c79dac8eb7c9e73f6
 import { Helmet } from "react-helmet";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCircleCheck, faGift } from "@fortawesome/free-solid-svg-icons";
 import Slider from "react-slick";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
+<<<<<<< HEAD
+=======
 import { RelatedProducts } from "../Splienquan";
 import ProductRatingsContainer from "../../components/ProductRating/ProductRatingcontainer";
+>>>>>>> c1d4eb0142ccb43d71f18e4c79dac8eb7c9e73f6
 
 const ChiTietLayout = () => {
   const { tieude, loaisp } = useParams();
   const navigate = useNavigate();
   const [product, setProduct] = useState(null);
+<<<<<<< HEAD
+
+  const [isLoading, setIsLoading] = useState(true);
+  const [dungluong, setdungluong] = useState([]);
+  const [dungluong1, setdungluong1] = useState([]);
+  const [mausac1, setmausac1] = useState([]);
+=======
   const [quantity, setQuantity] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isStockLoading, setIsStockLoading] = useState(false);
   const [dungluong, setdungluong] = useState([]);
   const [dungluong1, setdungluong1] = useState("");
   const [mausac1, setmausac1] = useState("");
+>>>>>>> c1d4eb0142ccb43d71f18e4c79dac8eb7c9e73f6
   const [annhmausac, setanhmausac] = useState([]);
   const [pricemausac, setpricemausac] = useState(0);
   const [khuyenmai, setkhuyenmai] = useState(0);
@@ -32,9 +53,12 @@ const ChiTietLayout = () => {
   const [idmausac, setidmausac] = useState("");
   const [idsanpham, setidsanpham] = useState("");
   const [iddungluong, setiddungluong] = useState("");
+<<<<<<< HEAD
+=======
   const [activeTab, setActiveTab] = useState("mota"); // 'mota', 'thongso', 'chitiet'
   const [techSpecs, setTechSpecs] = useState(null);
   const [productRatings, setProductRatings] = useState(null);
+>>>>>>> c1d4eb0142ccb43d71f18e4c79dac8eb7c9e73f6
 
   const [imgsanpham, setimgsanpham] = useState("");
   const [namesanpham, setnamesanpham] = useState("");
@@ -64,6 +88,46 @@ const ChiTietLayout = () => {
         },
       },
     ],
+<<<<<<< HEAD
+  };
+
+  useEffect(() => {
+    if (dungluong.length > 0) {
+      setdungluong1(dungluong[0].name);
+      setiddungluong(dungluong[0]._id);
+      if (dungluong[0].mausac.length > 0) {
+        setmausac1(dungluong[0].mausac[0].name);
+        setidmausac(dungluong[0].mausac[0]._id);
+        setpricemausac(dungluong[0].mausac[0].price);
+        setkhuyenmai(dungluong[0].mausac[0].khuyenmai);
+        setgiagoc(dungluong[0].mausac[0].giagoc);
+      }
+    }
+  }, [dungluong]);
+
+  const handleChangeDungLuong = (id, name) => {
+    setiddungluong(id);
+    setdungluong1(name);
+
+    const dungLuongMoi = dungluong.find((dl) => dl.name === name);
+    if (!dungLuongMoi) return;
+
+    const mauHienTai = dungLuongMoi.mausac.find((mau) => mau.name === mausac1);
+
+    if (mauHienTai) {
+      setidmausac(mauHienTai._id);
+      setpricemausac(mauHienTai.price);
+      setkhuyenmai(mauHienTai.khuyenmai);
+      setgiagoc(mauHienTai.giagoc);
+    } else if (dungLuongMoi.mausac.length > 0) {
+      setmausac1(dungLuongMoi.mausac[0].name);
+      setidmausac(dungLuongMoi.mausac[0]._id);
+      setpricemausac(dungLuongMoi.mausac[0].price);
+      setkhuyenmai(dungLuongMoi.mausac[0].khuyenmai);
+      setgiagoc(dungLuongMoi.mausac[0].giagoc);
+    }
+=======
+>>>>>>> c1d4eb0142ccb43d71f18e4c79dac8eb7c9e73f6
   };
 
   // Sử dụng useCallback để tối ưu hàm fetchStock
@@ -360,6 +424,31 @@ const ChiTietLayout = () => {
     } catch (error) {
       console.error("Lỗi khi lấy ảnh màu sắc:", error);
     }
+<<<<<<< HEAD
+  };
+
+  useEffect(() => {
+    fetchdungluong();
+    fetchProduct();
+  }, [tieude]);
+
+  useEffect(() => {
+    fetchanhmausac();
+  }, [idmausac]);
+
+  if (isLoading) {
+    return <p>Đang tải dữ liệu...</p>;
+  }
+
+  if (!product) {
+    return <p>Không tìm thấy sản phẩm!</p>;
+  }
+
+  const handleBuyNow = () => {
+    if (!dungluong1) {
+      alert("Vui lòng chọn dung lượng!");
+      return;
+=======
   }, [idmausac]);
 
   // Tối ưu hàm fetch đánh giá sản phẩm
@@ -417,6 +506,7 @@ const ChiTietLayout = () => {
   useEffect(() => {
     if (idsanpham) {
       fetchProductRatings();
+>>>>>>> c1d4eb0142ccb43d71f18e4c79dac8eb7c9e73f6
     }
   }, [idsanpham, fetchProductRatings]);
 
@@ -443,6 +533,9 @@ const ChiTietLayout = () => {
         return;
       }
 
+<<<<<<< HEAD
+    const newItem = {
+=======
       if (!pricemausac) {
         alert("Vui lòng chọn giá phù hợp với màu sắc!");
         return;
@@ -550,6 +643,7 @@ const ChiTietLayout = () => {
       mausac1,
       pricemausac,
       dungluong,
+>>>>>>> c1d4eb0142ccb43d71f18e4c79dac8eb7c9e73f6
       idsanpham,
       namesanpham,
       imgsanpham,
@@ -572,6 +666,13 @@ const ChiTietLayout = () => {
     } else {
       return <span className="in-stock">Còn hàng</span>;
     }
+<<<<<<< HEAD
+    window.dispatchEvent(new Event("cartUpdated"));
+  };
+
+  return (
+    <div className="container-chitiet">
+=======
   }, [quantity, isStockLoading]);
 
   if (isLoading) {
@@ -588,6 +689,7 @@ const ChiTietLayout = () => {
         Tình trạng: <strong>{renderStockStatus()}</strong>
       </div>
 
+>>>>>>> c1d4eb0142ccb43d71f18e4c79dac8eb7c9e73f6
       <Helmet>
         <title>{product.name} - Shopdunk</title>
       </Helmet>
@@ -619,6 +721,14 @@ const ChiTietLayout = () => {
             <div className="product-name-chitiet">{product.name}</div>
             <div className="divratedanhgia_container">
               <div className="divratedanhgia">
+<<<<<<< HEAD
+                <div className="startdangia">
+                  <img src="/star.png" alt="" width={15} height={15} />
+                  <img src="/star.png" alt="" width={15} height={15} />
+                  <img src="/star.png" alt="" width={15} height={15} />
+                  <img src="/star.png" alt="" width={15} height={15} />
+                  <img src="/star.png" alt="" width={15} height={15} />
+=======
                 <ProductRating
                   productId={idsanpham}
                   size="medium"
@@ -632,7 +742,9 @@ const ChiTietLayout = () => {
                       ({productRatings.totalRatings})
                     </span>
                   )}
+>>>>>>> c1d4eb0142ccb43d71f18e4c79dac8eb7c9e73f6
                 </div>
+                <div className="danhgiarate">Đánh giá</div>
               </div>
             </div>
             <div className="chitietprice">
@@ -645,6 +757,29 @@ const ChiTietLayout = () => {
                 <span className="old-price">{giagoc.toLocaleString()}đ</span>
               )}
             </div>
+<<<<<<< HEAD
+            <div class="note_VAT">(Đã bao gồm VAT)</div>
+
+            <div className="mausac_dungluong">
+              <div class="note_tieude">Dung lượng:</div>
+
+              <div className="dungluong_chitiet">
+                {dungluong.map((item, index) => (
+                  <>
+                    <div className="dungluong_container" key={index}>
+                      <div
+                        className={
+                          dungluong1 === item.name
+                            ? "dungluong_item dungluong_item_active"
+                            : "dungluong_item"
+                        }
+                        onClick={() =>
+                          handleChangeDungLuong(item._id, item.name)
+                        }
+                      >
+                        <span>{item.name}</span>
+                      </div>
+=======
             <div className="note_VAT">(Đã bao gồm VAT)</div>
 
             <div className="mausac_dungluong">
@@ -667,10 +802,40 @@ const ChiTietLayout = () => {
                           : ""}
                         {item.name}
                       </span>
+>>>>>>> c1d4eb0142ccb43d71f18e4c79dac8eb7c9e73f6
                     </div>
                   </div>
                 ))}
               </div>
+<<<<<<< HEAD
+              <div class="note_tieude">Màu sắc:</div>
+
+              <div className="mausac_chitiet">
+                {dungluong.map((item, index) => (
+                  <>
+                    <div className="dungluong_container" key={index}>
+                      <div className="mausac_container">
+                        {dungluong1 === item.name &&
+                          item.mausac.map((mau, row) => (
+                            <div
+                              className={
+                                mausac1 === mau.name
+                                  ? `border_mausac border_mausac1`
+                                  : `border_mausac`
+                              }
+                              key={row}
+                              onClick={() => {
+                                setmausac1(mau.name);
+                                setidmausac(mau._id);
+                                setpricemausac(mau.price);
+                                setkhuyenmai(mau.khuyenmai);
+                                setgiagoc(mau.giagoc);
+                              }}
+                            >
+                              <div
+                                style={{ backgroundColor: `${mau.name}` }}
+                              ></div>
+=======
               <div className="note_tieude">Màu sắc:</div>
 
               <div className="mausac_chitiet">
@@ -699,6 +864,7 @@ const ChiTietLayout = () => {
                                     ⟳
                                   </span>
                                 )}
+>>>>>>> c1d4eb0142ccb43d71f18e4c79dac8eb7c9e73f6
                             </div>
                           </div>
                         ))}
@@ -708,6 +874,30 @@ const ChiTietLayout = () => {
               </div>
             </div>
           </div>
+<<<<<<< HEAD
+          <div className="short-des">
+            <p className="title">
+              <FontAwesomeIcon icon={faGift} />
+              Ưu đãi
+            </p>
+            <div className="short-description">
+              <div className="short-description-header">
+                <span>
+                  ( Khuyến mãi dự kiến áp dụng{" "}
+                  <strong>đến 23h59 | 28/2/2025</strong>&nbsp;)
+                </span>
+              </div>
+              <hr />
+              <div style={{ display: "flex" }}>
+                <div className="short-description-content">
+                  <div className="event_price">
+                    Ưu đãi mùa yêu Valentine 10/2 - 17/2 giảm thêm
+                  </div>
+                  <div className="event_value">100,000 ₫</div>
+                  <div>
+                    Áp dụng màu Ultramarine (Xanh Lưu Ly). Được áp dụng cùng
+                    ZaloPay. Không áp dụng cùng CTKM khác.
+=======
 
           {/* Product Tabs Navigation */}
           <div className="product-tabs">
@@ -770,6 +960,7 @@ const ChiTietLayout = () => {
                       Áp dụng màu Ultramarine (Xanh Lưu Ly). Được áp dụng cùng
                       ZaloPay. Không áp dụng cùng CTKM khác.
                     </div>
+>>>>>>> c1d4eb0142ccb43d71f18e4c79dac8eb7c9e73f6
                   </div>
                 </div>
                 <hr />
@@ -865,6 +1056,103 @@ const ChiTietLayout = () => {
                   </span>
                 </p>
               </div>
+<<<<<<< HEAD
+              <hr />
+              <p className="pchitiet">
+                <strong className="pstrong">I. Ưu đãi thanh toán&nbsp;</strong>
+              </p>
+              <p className="pchitiet lh-2">
+                <span style={{ color: "#000000" }}>
+                  <img src="/tichxanh.jpe" alt="" width={16} height={17} />
+                  Hỗ trợ trả góp
+                  <strong> 0% </strong>
+                  lãi suất, 0 phụ phí
+                  <span style={{ color: "#007edb" }}> (xem chi tiết)</span>
+                </span>
+              </p>
+              <p className="pchitiet lh-2">
+                <span style={{ color: "#000000" }}>
+                  <img src="/tichxanh.jpe" alt="" width={16} height={17} />
+                  Giảm đến
+                  <strong> 400.000đ </strong>
+                  khi thanh toán qua
+                  <strong> QR ZaloPay </strong>
+                  (SL có hạn)
+                </span>
+              </p>
+              <p className="pchitiet lh-2">
+                <span style={{ color: "#000000" }}>
+                  <img src="/tichxanh.jpe" alt="" width={16} height={17} />
+                  Giảm đến
+                  <strong> 200.000đ </strong>
+                  khi thanh toán qua
+                  <strong> Kredivo </strong>
+                </span>
+              </p>
+              <p className="pchitiet">
+                <strong className="pstrong">II. Ưu đãi mua kèm &nbsp;</strong>
+              </p>
+              <p className="pchitiet lh-2">
+                <span style={{ color: "#000000" }}>
+                  <img src="/tichxanh.jpe" alt="" width={16} height={17} />
+                  <strong> Ốp chính hãng Apple iPhone 16 series </strong>
+                  giảm
+                  <strong> 100.000đ </strong>
+                </span>
+              </p>
+              <p className="pchitiet lh-2">
+                <span style={{ color: "#000000" }}>
+                  <img src="/tichxanh.jpe" alt="" width={16} height={17} />
+                  <strong> Sản phẩm Apple, phụ kiên </strong>
+                  giảm đên
+                  <strong> 80% </strong>
+                  <span style={{ color: "#007edb" }}>(xem chi tiết)</span>
+                </span>
+              </p>
+              <p className="pchitiet lh-2">
+                <span style={{ color: "#000000" }}>
+                  <img src="/tichxanh.jpe" alt="" width={16} height={17} />
+                  Mua combo phụ kiện
+                  <strong> Non Apple </strong>
+                  giảm đến
+                  <strong> 200.000đ </strong>
+                </span>
+              </p>
+              <p className="pchitiet lh-2">
+                <span style={{ color: "#000000" }}>
+                  <img src="/tichxanh.jpe" alt="" width={16} height={17} />
+                  Giảm đến
+                  <strong> 20% </strong>
+                  khi mua các gói bảo hành
+                  <span style={{ color: "#007edb" }}> (xem chi tiết)</span>
+                </span>
+              </p>
+              <p className="pchitiet">
+                <strong className="pstrong">III. Ưu đãi khác &nbsp;</strong>
+              </p>
+              <p className="pchitiet lh-2">
+                <span style={{ color: "#000000" }}>
+                  <img src="/tichxanh.jpe" alt="" width={16} height={17} />
+                  Duy nhất tại ShopDunk, hỗ trợ mở thẻ tín dụng Sacombank hạn
+                  mức lên tới
+                  <strong> 25 triệu </strong>
+                  dành cho HS-SV
+                </span>
+              </p>
+              <p className="pchitiet lh-2">
+                <span style={{ color: "#000000" }}>
+                  <img src="/tichxanh.jpe" alt="" width={16} height={17} />
+                  Trợ giá lên đời đến
+                  <strong> 20% </strong>
+                  <span style={{ color: "#007edb" }}>(xem chi tiết)</span>
+                </span>
+              </p>
+            </div>
+          </div>
+          <div className="divbtn_muagay" onClick={handleBuyNow}>
+            MUA NGAY
+          </div>
+=======
             </div>
           </div>
 
@@ -991,6 +1279,7 @@ const ChiTietLayout = () => {
               ? "HẾT HÀNG"
               : "MUA NGAY"}
           </div>
+>>>>>>> c1d4eb0142ccb43d71f18e4c79dac8eb7c9e73f6
           <div className="short-des">
             <p className="pchitiet lh-2">
               <span style={{ color: "#000000" }}>
@@ -1012,7 +1301,11 @@ const ChiTietLayout = () => {
                 />
                 <span>
                   {" "}
+<<<<<<< HEAD
+                  Miễn phí 1 đổi 1 trong 30 ngày đầu tiên (nếu có lỗi do NSX)
+=======
                   Miễn phí 1 đổi 1 trong 30 ngày đầu tiên (nếu có lỗi do NSX)
+>>>>>>> c1d4eb0142ccb43d71f18e4c79dac8eb7c9e73f6
                 </span>
               </span>
             </p>
@@ -1023,7 +1316,11 @@ const ChiTietLayout = () => {
                   className="icontichxanh"
                 />
                 <span> Bảo hành chính hãng 1 năm</span>
+<<<<<<< HEAD
+                <span style={{ color: "#007edb" }}> (chi tiết)</span>
+=======
                 <span style={{ color: "#007edb" }}> (chi tiết)</span>
+>>>>>>> c1d4eb0142ccb43d71f18e4c79dac8eb7c9e73f6
               </span>
             </p>
             <p className="pchitiet lh-2">
@@ -1033,7 +1330,11 @@ const ChiTietLayout = () => {
                   className="icontichxanh"
                 />
                 <span> Giao hàng nhanh toàn quốc</span>
+<<<<<<< HEAD
+                <span style={{ color: "#007edb" }}> (chi tiết)</span>
+=======
                 <span style={{ color: "#007edb" }}> (chi tiết)</span>
+>>>>>>> c1d4eb0142ccb43d71f18e4c79dac8eb7c9e73f6
               </span>
             </p>
             <p className="pchitiet lh-2">
@@ -1043,7 +1344,11 @@ const ChiTietLayout = () => {
                   className="icontichxanh"
                 />
                 <span> Tax Refund For Foreingers</span>
+<<<<<<< HEAD
+                <span style={{ color: "#007edb" }}> (chi tiết)</span>
+=======
                 <span style={{ color: "#007edb" }}> (chi tiết)</span>
+>>>>>>> c1d4eb0142ccb43d71f18e4c79dac8eb7c9e73f6
               </span>
             </p>
           </div>
@@ -1052,7 +1357,58 @@ const ChiTietLayout = () => {
       <div className="category-sidebar">
         <ListBlog />
       </div>
-      <RelatedProducts category={loaisp} currentProductId={idsanpham} />
+
+      {/* <div className='chitiet-footer'>
+        <div className='footer-icons'>
+          <div className='icon-item'>
+            <CiDeliveryTruck
+              style={{
+                color: '#823905',
+                fontSize: '35px',
+                display: 'inline-block'
+              }}
+            />
+            <p>MIỄN PHÍ VẬN CHUYỂN</p>
+          </div>
+          <div className='icon-item'>
+            <TfiReload
+              style={{
+                color: '#823905',
+                fontSize: '35px',
+                display: 'inline-block'
+              }}
+            />
+            <p>NHẬN ĐỔI TRẢ HÀNG</p>
+          </div>
+          <div className='icon-item'>
+            <AiOutlineDollar
+              style={{
+                color: '#823905',
+                fontSize: '35px',
+                display: 'inline-block'
+              }}
+            />
+            <p>GIÁ BÁN TỐT NHẤT</p>
+          </div>
+          <div className='icon-item'>
+            <FiLifeBuoy
+              style={{
+                color: '#823905',
+                fontSize: '35px',
+                display: 'inline-block'
+              }}
+            />
+            <p>BẢO HÀNH TRỌN ĐỜI</p>
+          </div>
+        </div>
+        <div className='footer-image'>
+          <img
+            src='https://dogovinhdinh.vn/wp-content/uploads/2020/10/banner.jpg'
+            alt='Logo'
+            className='img-footer'
+          />
+        </div>
+      </div> */}
     </div>
   );
 };

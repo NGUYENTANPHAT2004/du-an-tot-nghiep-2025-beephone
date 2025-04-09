@@ -1,13 +1,20 @@
-.floatingbuton{
-    position: fixed;
-    bottom: 50px;
-    right: 50px;
+.floatingbuton {
+  position: fixed;
+  bottom: 50px;
+  right: 50px;
 }
+
 .header-navbar {
-    display: flex;
-    flex-direction: column; 
-  
-    @media (max-width: 768px) {
-      flex-direction: column-reverse; // Đảo thứ tự
-    }
+  display: flex;
+  flex-direction: column;
+  position: fixed;
+  top: 0;
+  width: 100%;
+  z-index: 10000;
+}
+
+@media (max-width: 768px) {
+  .header-navbar {
+    flex-direction: column-reverse;
   }
+}
