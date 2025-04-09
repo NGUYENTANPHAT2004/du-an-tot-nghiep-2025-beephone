@@ -59,6 +59,7 @@ app.use('/', sanphamroutes)
 app.use('/', authroutes)
 app.use('/', stockrouter)
 app.use('/', OrderRating)
+app.use('/', loyaltyPointsRoutes)
 const setupDailyAnalytics = () => {
   const now = new Date();
   const midnight = new Date(now);
