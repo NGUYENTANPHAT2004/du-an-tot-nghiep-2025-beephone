@@ -1,192 +1,209 @@
 /**
- * Main entry point for chat socket functionality
+ * Chat message handlers
  */
-require('dotenv').config();
-const { 
-  handleIncomingMessage, 
-  handleInitChat, 
-  handleMessageFeedback, 
-  handleGetHistory, 
-  handleEndChat 
-} = require('./chat/handlers/Chathandle');
+const ChatController = require('../../chat/ChatController');
 
 /**
- * Initialize chat socket handlers
- * @param {Object} io - Socket.io instance
+ * Initialize a new chat session
+ * @param {Object} socket - Socket connection
+ * @param {Object} data - Session initialization data
  */
-const initChatHandlers = (io) => {
-  // Create a namespace for chat
-  const chatNamespace = io.of('/chat');
-
-  // Add connection event listeners
-  chatNamespace.on('connection', (socket) => {
-    console.log(`✅ Kết nối chat mới: ${socket.id}`);
+const handleInitChat = async (socket, data) => {
+  try {
+    console.log('🟢 Initializing chat session');
     
-    // Lưu thông tin client vào socket để dễ dàng theo dõi
-    const clientInfo = {
-      ip: socket.handshake.address,
-      userAgent: socket.handshake.headers['user-agent'],
-      time: new Date().toISOString()
+    // Parse user data from socket or request data
+    const userData = {
+      userId: socket.user?._id || data?.userId,
+      guestInfo: (!socket.user && data?.guestInfo) ? data.guestInfo : null
     };
-    socket.clientInfo = clientInfo;
     
-    // Thêm xử lý để khôi phục phiên nếu có sessionId từ client
-    if (socket.handshake.query.sessionId) {
-      socket.sessionId = socket.handshake.query.sessionId;
-      socket.join(socket.sessionId);
-      console.log(`🔄 Khôi phục phiên chat: ${socket.sessionId}`);
-      
-      // Thông báo cho client rằng đã khôi phục phiên thành công
-      socket.emit('session_restored', {
-        sessionId: socket.sessionId,
-        timestamp: new Date().toISOString()
-      });
+    // Create new session
+    const session = await ChatController.createSession(userData, socket.clientInfo);
+    
+    // Join room with session ID
+    const sessionId = session._id.toString();
+    socket.sessionId = sessionId;
+    socket.join(sessionId);
+    
+    // Notify client
+    socket.emit('chat_initialized', {
+      sessionId,
+      timestamp: new Date().toISOString()
+    });
+    
+    console.log(`✅ Chat session initialized: ${sessionId}`);
+  } catch (error) {
+    console.error('❌ Error initializing chat:', error);
+    socket.emit('chat_error', {
+      error: 'initialization_error',
+      message: error.message || 'Could not initialize chat session',
+      timestamp: new Date().toISOString()
+    });
+  }
+};
+
+/**
+ * Process an incoming user message
+ * @param {Object} socket - Socket connection
+ * @param {Object} io - Socket.io instance or namespace
+ * @param {Object} data - Message data
+ */
+const handleIncomingMessage = async (socket, io, data) => {
+  try {
+    if (!data || !data.message) {
+      throw new Error('Invalid message data');
     }
     
-    // Thêm ping/pong để giữ kết nối
-    socket.on('ping', (callback) => {
-      if (typeof callback === 'function') {
-        callback({ status: 'ok', time: new Date().toISOString() });
-      }
+    // Use socket's sessionId if not provided in data
+    const sessionId = data.sessionId || socket.sessionId;
+    
+    if (!sessionId) {
+      throw new Error('No active session');
+    }
+    
+    console.log(`📨 Processing message in session ${sessionId}: "${data.message.substring(0, 30)}..."`);
+    
+    // Process message
+    const userId = socket.user?._id || null;
+    const guestInfo = (!socket.user && data.guestInfo) ? data.guestInfo : null;
+    
+    // Indicate AI is typing
+    socket.emit('ai_typing');
+    
+    const response = await ChatController.processMessage(
+      sessionId,
+      data.message,
+      userId,
+      guestInfo,
+      socket.clientInfo
+    );
+    
+    // Send response back to user
+    socket.emit('ai_response', {
+      ...response,
+      sessionId,
+      timestamp: new Date().toISOString()
     });
     
-    // Initialize chat
-    socket.on('init_chat', (data) => {
-      try {
-        handleInitChat(socket, data);
-      } catch (error) {
-        console.error('❌ Lỗi khi khởi tạo chat:', error);
-        socket.emit('chat_error', {
-          error: 'initialization_error',
-          message: error.message || 'Không thể khởi tạo phiên chat',
-          timestamp: new Date().toISOString()
-        });
-      }
+    console.log(`✅ Processed message in session ${sessionId}`);
+  } catch (error) {
+    console.error('❌ Error processing message:', error);
+    socket.emit('chat_error', {
+      error: 'message_processing_error',
+      message: error.message || 'Could not process message',
+      timestamp: new Date().toISOString()
     });
-    
-    // User message handler with improved error handling
-    socket.on('user_message', (data) => {
-      try {
-        // Kiểm tra dữ liệu trước khi xử lý
-        if (!data || !data.message) {
-          throw new Error('Tin nhắn không hợp lệ');
-        }
-        
-        // Thêm sessionId từ socket nếu client không cung cấp
-        if (!data.sessionId && socket.sessionId) {
-          data.sessionId = socket.sessionId;
-        }
-        
-        // Gửi trạng thái "đang gõ" đến client
-        socket.emit('ai_typing');
-        
-        // Xử lý tin nhắn
-        handleIncomingMessage(socket, chatNamespace, data);
-      } catch (error) {
-        console.error('❌ Lỗi khi xử lý tin nhắn:', error);
-        socket.emit('chat_error', {
-          error: 'message_processing_error',
-          message: error.message || 'Không thể xử lý tin nhắn',
-          timestamp: new Date().toISOString()
-        });
-      }
-    });
-    
-    // Message feedback handler with improved error handling
-    socket.on('message_feedback', (data) => {
-      try {
-        if (!data || !data.messageId) {
-          throw new Error('Dữ liệu phản hồi không hợp lệ');
-        }
-        handleMessageFeedback(socket, data);
-      } catch (error) {
-        console.error('❌ Lỗi khi xử lý phản hồi:', error);
-        socket.emit('chat_error', {
-          error: 'feedback_error',
-          message: error.message || 'Không thể lưu phản hồi',
-          timestamp: new Date().toISOString()
-        });
-      }
-    });
-    
-    // Get chat history with improved error handling
-    socket.on('get_history', (data = {}) => {
-      try {
-        // Sử dụng sessionId từ socket nếu client không cung cấp
-        if (!data.sessionId && socket.sessionId) {
-          data.sessionId = socket.sessionId;
-        }
-        
-        if (!data.sessionId) {
-          throw new Error('Thiếu sessionId');
-        }
-        
-        handleGetHistory(socket, data);
-      } catch (error) {
-        console.error('❌ Lỗi khi lấy lịch sử chat:', error);
-        socket.emit('chat_error', {
-          error: 'history_error',
-          message: error.message || 'Không thể lấy lịch sử chat',
-          timestamp: new Date().toISOString()
-        });
-      }
-    });
-    
-    // End chat session with improved error handling
-    socket.on('end_chat', () => {
-      try {
-        if (!socket.sessionId) {
-          throw new Error('Không có phiên chat đang hoạt động');
-        }
-        
-        handleEndChat(socket);
-      } catch (error) {
-        console.error('❌ Lỗi khi kết thúc phiên chat:', error);
-        socket.emit('chat_error', {
-          error: 'end_session_error',
-          message: error.message || 'Không thể kết thúc phiên chat',
-          timestamp: new Date().toISOString()
-        });
-      }
-    });
-    
-    // Disconnect handler with improved error handling
-    socket.on('disconnect', (reason) => {
-      console.log(`❌ Ngắt kết nối chat: ${socket.id}, lý do: ${reason}`);
-      
-      // End session if active
-      if (socket.sessionId) {
-        handleEndChat(socket).catch(error => {
-          console.error('Lỗi khi tự động kết thúc phiên chat:', error);
-        });
-      }
-    });
-  });
-
-  console.log('✅ Khởi tạo chat handlers thành công');
-  return chatNamespace;
+  }
 };
 
 /**
- * Gửi thông báo đến một phiên chat cụ thể
- * @param {Object} io - Socket.io instance
- * @param {string} sessionId - ID của phiên chat
- * @param {string} event - Tên sự kiện
- * @param {any} data - Dữ liệu để gửi
+ * Save user feedback about an AI message
+ * @param {Object} socket - Socket connection
+ * @param {Object} data - Feedback data
  */
-const sendToSession = (io, sessionId, event, data) => {
-  if (!io || !sessionId) return;
-  
-  const chatNamespace = io.of('/chat');
-  chatNamespace.to(sessionId).emit(event, {
-    ...data,
-    sessionId,
-    timestamp: new Date().toISOString()
-  });
+const handleMessageFeedback = async (socket, data) => {
+  try {
+    if (!data || !data.messageId) {
+      throw new Error('Invalid feedback data');
+    }
+    
+    await ChatController.saveFeedback(
+      data.messageId,
+      data.isHelpful,
+      data.comment || ''
+    );
+    
+    socket.emit('feedback_received', {
+      messageId: data.messageId,
+      status: 'success',
+      timestamp: new Date().toISOString()
+    });
+    
+    console.log(`✅ Feedback saved for message ${data.messageId}`);
+  } catch (error) {
+    console.error('❌ Error saving feedback:', error);
+    socket.emit('chat_error', {
+      error: 'feedback_error',
+      message: error.message || 'Could not save feedback',
+      timestamp: new Date().toISOString()
+    });
+  }
 };
 
-// Export the initialization function and utilities
-module.exports = { 
-  initChatHandlers,
-  sendToSession
+/**
+ * Retrieve chat history for a session
+ * @param {Object} socket - Socket connection
+ * @param {Object} data - Request data containing sessionId
+ */
+const handleGetHistory = async (socket, data = {}) => {
+  try {
+    const sessionId = data.sessionId || socket.sessionId;
+    
+    if (!sessionId) {
+      throw new Error('No session ID provided');
+    }
+    
+    const history = await ChatController.getSessionHistory(sessionId);
+    
+    socket.emit('chat_history', {
+      sessionId,
+      messages: history,
+      timestamp: new Date().toISOString()
+    });
+    
+    console.log(`✅ Chat history retrieved for session ${sessionId}`);
+  } catch (error) {
+    console.error('❌ Error retrieving chat history:', error);
+    socket.emit('chat_error', {
+      error: 'history_error',
+      message: error.message || 'Could not retrieve chat history',
+      timestamp: new Date().toISOString()
+    });
+  }
+};
+
+/**
+ * End a chat session
+ * @param {Object} socket - Socket connection
+ */
+const handleEndChat = async (socket) => {
+  try {
+    if (!socket.sessionId) {
+      throw new Error('No active session');
+    }
+    
+    await ChatController.endSession(socket.sessionId);
+    
+    socket.emit('chat_ended', {
+      sessionId: socket.sessionId,
+      timestamp: new Date().toISOString()
+    });
+    
+    // Leave room
+    socket.leave(socket.sessionId);
+    console.log(`✅ Chat session ended: ${socket.sessionId}`);
+    
+    // Clear session
+    const oldSessionId = socket.sessionId;
+    socket.sessionId = null;
+    
+    return oldSessionId;
+  } catch (error) {
+    console.error('❌ Error ending chat session:', error);
+    socket.emit('chat_error', {
+      error: 'end_session_error',
+      message: error.message || 'Could not end chat session',
+      timestamp: new Date().toISOString()
+    });
+    return null;
+  }
+};
+
+module.exports = {
+  handleInitChat,
+  handleIncomingMessage,
+  handleMessageFeedback,
+  handleGetHistory,
+  handleEndChat
 };
