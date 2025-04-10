@@ -11,7 +11,7 @@ const { ProductSizeStock } = require('../models/ProductSizeStockmodel')
 const { 
   generateVoucherForUser, 
   isFirstOrderVoucherEligible, 
-  isThirdOrderVoucherEligible 
+  isThirdOrderVoucherEligible
 } = require('../socket/handlers/voucherGenerator');
 const db = require('../models/db')
 const Category = require('../models/CategoryModel');
@@ -35,7 +35,7 @@ function sortObject (obj) {
 
 router.get('/gethoadon', async (req, res) => {
   try {
-    const hoadon = await HoaDon.hoadon.find().lean()
+    const hoadon = await HoaDon.hoadon.find({}).lean()
     res.json(hoadon)
   } catch (error) {
     console.error(error)
@@ -47,7 +47,7 @@ router.post('/deletehoaddon', async (req, res) => {
   try {
     const { ids } = req.body
     
-    // Find orders that might need inventory restoration before deleting
+    // Find orders that might need inventory restoration before soft deleting
     const ordersToDelete = await HoaDon.hoadon.find({ _id: { $in: ids } })
     
     // Restore inventory for orders that reduced inventory but weren't completed
@@ -58,63 +58,85 @@ router.post('/deletehoaddon', async (req, res) => {
       }
     }
     
-    await HoaDon.hoadon.deleteMany({ _id: { $in: ids } })
+    // Soft delete by updating isDeleted flag
+    await HoaDon.hoadon.updateMany(
+      { _id: { $in: ids } },
+      { $set: { isDeleted: true } }
+    )
+    
     res.json({ message: 'Xóa hóa đơn thành công' })
   } catch (error) {
     console.error(error)
     res.status(500).json({ message: 'Lỗi trong quá trình xóa' })
   }
 })
-
-// Helper function to restore inventory
-// Improved helper function to restore inventory
-async function restoreInventory(sanphams) {
+async function restoreInventory(sanphams, session = null) {
   if (!sanphams || !Array.isArray(sanphams) || sanphams.length === 0) {
-    console.log('No products to restore in inventory');
+    console.log('Không có sản phẩm để khôi phục tồn kho');
     return;
   }
   
-  const failedRestores = [];
+  const options = session ? { session } : {};
+  const restoredItems = [];
   
-  for (const sanpham of sanphams) {
-    try {
-      if (!sanpham || !sanpham.idsp || !sanpham.dungluong || !sanpham.soluong) {
-        console.warn('Invalid product data for inventory restore:', sanpham);
-        continue;
+  try {
+    for (const sanpham of sanphams) {
+      try {
+        if (!sanpham || !sanpham.idsp || !sanpham.dungluong || !sanpham.soluong) {
+          console.warn('Dữ liệu sản phẩm không hợp lệ:', sanpham);
+          continue;
+        }
+        
+        const { idsp, soluong, dungluong, idmausac } = sanpham;
+        
+        // Tìm sản phẩm trong kho với atomic update
+        const result = await ProductSizeStock.findOneAndUpdate(
+          {
+            productId: idsp,
+            dungluongId: dungluong,
+            mausacId: idmausac,
+            unlimitedStock: { $ne: true } // Chỉ cập nhật nếu không phải hàng không giới hạn
+          },
+          {
+            $inc: { quantity: soluong }
+          },
+          {
+            new: true,
+            ...options
+          }
+        );
+        
+        if (result) {
+          restoredItems.push({
+            productId: idsp,
+            dungluongId: dungluong, 
+            mausacId: idmausac,
+            quantity: soluong,
+            newQuantity: result.quantity
+          });
+          console.log(`Đã khôi phục ${soluong} sản phẩm ${idsp} vào kho, số lượng mới: ${result.quantity}`);
+        } else {
+          console.log(`Không tìm thấy hoặc là hàng không giới hạn: ${idsp}, size: ${dungluong}, color: ${idmausac}`);
+        }
+      } catch (error) {
+        console.error(`Lỗi khi khôi phục sản phẩm ${sanpham?.idsp} vào kho:`, error);
       }
-      
-      const { idsp, soluong, dungluong, idmausac } = sanpham;
-      
-      const stockItem = await ProductSizeStock.findOne({
-        productId: idsp,
-        dungluongId: dungluong,
-        mausacId: idmausac
-      });
-      
-      if (stockItem && !stockItem.unlimitedStock) {
-        stockItem.quantity += soluong;
-        await stockItem.save();
-        console.log(`Restored ${soluong} items to inventory for product ${idsp}`);
-      } else {
-        console.log(`Stock item not found or has unlimited stock for product ${idsp}, dungluong: ${dungluong}, mausac: ${idmausac}`);
-      }
-    } catch (error) {
-      console.error(`Error restoring inventory for product ${sanpham?.idsp}:`, error);
-      failedRestores.push(sanpham);
     }
-  }
-  
-  // Log if any items failed to be restored
-  if (failedRestores.length > 0) {
-    console.error(`Failed to restore ${failedRestores.length} product(s) to inventory`);
+    
+    console.log(`Đã khôi phục ${restoredItems.length}/${sanphams.length} sản phẩm vào kho`);
+    return restoredItems;
+  } catch (error) {
+    console.error('Lỗi khi khôi phục tồn kho:', error);
+    throw error;
   }
 }
-
-// Improved helper function to reduce inventory
 async function reduceInventory(sanphams) {
   if (!sanphams || !Array.isArray(sanphams) || sanphams.length === 0) {
     throw new Error('No products to reduce in inventory');
   }
+  
+  const session = await db.mongoose.startSession();
+  session.startTransaction();
   
   const reducedItems = [];
   
@@ -126,56 +148,55 @@ async function reduceInventory(sanphams) {
       
       const { idsp, soluong, dungluong, idmausac } = sanpham;
       
+      // Lấy bản ghi và version hiện tại
       const stockItem = await ProductSizeStock.findOne({
         productId: idsp,
         dungluongId: dungluong,
         mausacId: idmausac
-      });
+      }).session(session);
       
-      if (stockItem) {
-        if (!stockItem.unlimitedStock) {
-          if (stockItem.quantity < soluong) {
-            // Roll back any inventory reductions made so far
-            for (const item of reducedItems) {
-              await ProductSizeStock.findByIdAndUpdate(
-                item.stockId,
-                { $inc: { quantity: item.quantity } }
-              );
-            }
-            
-            throw new Error(`Sản phẩm không đủ số lượng trong kho. Hiện chỉ còn ${stockItem.quantity} sản phẩm.`);
-          }
-          
-          stockItem.quantity -= soluong;
-          await stockItem.save();
-          reducedItems.push({ 
-            stockId: stockItem._id, 
-            quantity: soluong 
-          });
-        }
-      } else {
-        console.log(`Không tìm thấy thông tin tồn kho cho sản phẩm: ${idsp}, dungluong: ${dungluong}, mausac: ${idmausac}`);
+      if (!stockItem) {
+        throw new Error(`Không tìm thấy thông tin tồn kho cho sản phẩm: ${idsp} ${dungluong} ${idmausac}`);
       }
-    }
-  } catch (error) {
-    // If there's an error during reduction and we already reduced some items,
-    // restore those items before propagating the error
-    if (reducedItems.length > 0) {
-      console.error('Error during inventory reduction, rolling back changes:', error);
       
-      for (const item of reducedItems) {
-        try {
-          await ProductSizeStock.findByIdAndUpdate(
-            item.stockId,
-            { $inc: { quantity: item.quantity } }
-          );
-        } catch (restoreErr) {
-          console.error(`Critical error: Failed to restore inventory for stock item ${item.stockId}:`, restoreErr);
-          // Continue to try restoring other items even if this one failed
+      if (!stockItem.unlimitedStock && stockItem.quantity < soluong) {
+        throw new Error(`Sản phẩm không đủ số lượng trong kho. Hiện chỉ còn ${stockItem.quantity} sản phẩm.`);
+      }
+      
+      if (!stockItem.unlimitedStock) {
+        const result = await ProductSizeStock.findOneAndUpdate(
+          {
+            _id: stockItem._id,
+            __v: stockItem.__v  
+          },
+          {
+            $inc: { quantity: -soluong }
+          },
+          {
+            new: true,
+            session
+          }
+        );
+        
+        if (!result) {
+          throw new Error(`Xung đột version khi cập nhật tồn kho cho sản phẩm: ${idsp}`);
         }
+        
+        reducedItems.push({
+          stockId: result._id,
+          quantity: soluong
+        });
       }
     }
     
+    await session.commitTransaction();
+    session.endSession();
+    return true;
+  } catch (error) {
+    await session.abortTransaction();
+    session.endSession();
+    
+    console.error('Lỗi khi giảm tồn kho:', error);
     throw error;
   }
 }
@@ -193,7 +214,7 @@ router.post('/posthoadon', async (req, res) => {
       ghichu,
       magiamgia,
       sanphams,
-      userId // ✅ nhận thêm từ body
+      userId // userId từ token authentication 
     } = req.body;
 
     const hoadon = new HoaDon.hoadon({
@@ -205,7 +226,7 @@ router.post('/posthoadon', async (req, res) => {
       ngaymua: moment().toISOString(),
       trangthai: 'Đang xử lý',
       tongtien: 0,
-      userId: userId || null // ✅ gán userId nếu có
+      userId: userId || null // gán userId nếu có
     });
 
     let tongtien = 0;
@@ -220,18 +241,14 @@ router.post('/posthoadon', async (req, res) => {
     hoadon.tongtien = tongtien;
 
     if (magiamgia) {
-      const magiamgia1 = await MaGiamGia.magiamgia.findOne({ magiamgia });
-      const ngayHienTai = moment();
-      const ngayKetThuc = moment(magiamgia1.ngayketthuc);
-
-      if (ngayHienTai.isAfter(ngayKetThuc)) {
-        return res.json({ message: 'Mã giảm giá đã hết hạn' });
+      // Sử dụng hàm validateVoucher đã cập nhật, truyền thêm userId
+      const validationResult = await validateVoucher(magiamgia, phone, tongtien, userId);
+      
+      if (!validationResult.valid) {
+        return res.status(400).json({ message: validationResult.message });
       }
-
-      const daSuDung = await HoaDon.hoadon.findOne({ phone, magiamgia });
-      if (daSuDung) {
-        return res.status(400).json({ message: 'Bạn đã sử dụng mã giảm giá này' });
-      }
+      
+      const magiamgia1 = validationResult.voucher;
 
       hoadon.magiamgia = magiamgia;
       const giamGia = magiamgia1.sophantram / 100;
@@ -249,7 +266,7 @@ router.post('/posthoadon', async (req, res) => {
   }
 });
 
-async function validateVoucher(magiamgia, phone, totalAmount) {
+async function validateVoucher(magiamgia, phone, totalAmount, userId = null) {
   if (!magiamgia) return { valid: false, message: 'Không có mã giảm giá' };
   
   const voucher = await MaGiamGia.magiamgia.findOne({ magiamgia });
@@ -319,10 +336,28 @@ async function validateVoucher(magiamgia, phone, totalAmount) {
     }
   }
   
-  // Check if serverWide or one-time-per-user restriction
-  if (!voucher.isServerWide && voucher.isOneTimePerUser) {
-    // Check if user has already used this voucher
-    if (voucher.appliedUsers && voucher.appliedUsers.includes(phone)) {
+  // Kiểm tra nếu đây là voucher cá nhân (không phải server-wide)
+  if (!voucher.isServerWide) {
+    // Kiểm tra xem voucher có thuộc về userId nào không
+    if (voucher.userId && voucher.userId.toString() !== userId) {
+      return { 
+        valid: false, 
+        message: 'Mã giảm giá này chỉ dành cho chủ sở hữu' 
+      };
+    }
+    
+    // Kiểm tra xem số điện thoại có trong danh sách người dùng được chỉ định không
+    if (voucher.intended_users && voucher.intended_users.length > 0) {
+      if (!voucher.intended_users.includes(phone)) {
+        return { 
+          valid: false, 
+          message: 'Mã giảm giá không dành cho tài khoản này' 
+        };
+      }
+    }
+    
+    // Nếu là voucher một lần, kiểm tra xem đã sử dụng chưa
+    if (voucher.isOneTimePerUser && voucher.appliedUsers && voucher.appliedUsers.includes(phone)) {
       return { valid: false, message: 'Bạn đã sử dụng mã giảm giá này' };
     }
   }
@@ -352,11 +387,11 @@ router.post('/create_payment_url', async (req, res) => {
   let vnpUrl = config.get('vnp_Url')
   let returnUrl = config.get('vnp_ReturnUrl')
   let orderId = moment(date).format('DDHHmmss')
-  let amount = req.body.amount
+  let amount = req.body.amount  // Lấy amount từ frontend (đã bao gồm phí vận chuyển)
   let bankCode = req.body.bankCode
 
   let locale = req.body.language || 'vn'
-  const { name,nguoinhan, phone, sex, giaotannoi, address, ghichu, magiamgia, sanphams, userId } =
+  const { name, nguoinhan, phone, sex, giaotannoi, address, ghichu, magiamgia, sanphams, userId } =
     req.body
 
   let currCode = 'VND'
@@ -369,7 +404,7 @@ router.post('/create_payment_url', async (req, res) => {
   vnp_Params['vnp_TxnRef'] = orderId
   vnp_Params['vnp_OrderInfo'] = 'Thanh toan cho ma GD:' + orderId
   vnp_Params['vnp_OrderType'] = 'other'
-  vnp_Params['vnp_Amount'] = amount * 100
+  vnp_Params['vnp_Amount'] = amount * 100  // Sử dụng amount từ frontend
   vnp_Params['vnp_ReturnUrl'] = returnUrl
   vnp_Params['vnp_IpAddr'] = ipAddr
   vnp_Params['vnp_CreateDate'] = createDate
@@ -385,33 +420,41 @@ router.post('/create_payment_url', async (req, res) => {
     giaotannoi,
     ngaymua,
     trangthai: 'Đang xử lý',
-    tongtien: 0,
+    tongtien: amount,  // Lưu amount vào tongtien thay vì tính lại
     orderId,
     thanhtoan: false,
-    userId: userId || null // Explicitly set to false initially
+    userId: userId || null
   })
 
   hoadon.maHDL = 'HD' + hoadon._id.toString().slice(-4)
-  let tongtien = 0
+  
+  // Vẫn cần tính tongtien_sanpham để lưu thông tin sản phẩm vào hóa đơn
+  let tongtien_sanpham = 0
 
   for (const sanpham of sanphams) {
     const { idsp, soluong, dungluong, idmausac, price, mausac } = sanpham
+    const productDetails = await SanPham.ChitietSp.findById(idsp);
+    const dungluongDetails = await DungLuong.dungluong.findById(dungluong);
     hoadon.sanpham.push({
       idsp,
       soluong,
       price,
       dungluong,
-      idmausac, // Make sure to store idmausac
-      mausac
+      idmausac,
+      mausac,
+      productSnapshot: {
+        name: productDetails ? productDetails.name : "Sản phẩm không xác định",
+        image: productDetails ? productDetails.image : "",
+        dungluongName: dungluongDetails ? dungluongDetails.name : "",
+        mausacName: mausac || ""
+      }
     })
-    tongtien += price * soluong
+    tongtien_sanpham += price * soluong
   }
-  
-  hoadon.tongtien = tongtien
 
   if (magiamgia) {
-    // Use the enhanced validation function
-    const validationResult = await validateVoucher(magiamgia, phone, tongtien);
+    // Sử dụng amount làm cơ sở tính mã giảm giá (bao gồm cả phí vận chuyển)
+    const validationResult = await validateVoucher(magiamgia, phone, amount);
     
     if (!validationResult.valid) {
       return res.json({ message: validationResult.message });
@@ -421,17 +464,15 @@ router.post('/create_payment_url', async (req, res) => {
     
     hoadon.magiamgia = magiamgia;
     const giamGia = magiamgia1.sophantram / 100;
-    hoadon.tongtien = tongtien - tongtien * giamGia;
-    vnp_Params['vnp_Amount'] = hoadon.tongtien * 100;
+    // Áp dụng giảm giá vào amount
+    const discountedAmount = amount - amount * giamGia;
+    hoadon.tongtien = discountedAmount;
+    vnp_Params['vnp_Amount'] = discountedAmount * 100;
     
-    // If this is a one-time-per-user voucher, add user to appliedUsers array
     if (magiamgia1.isOneTimePerUser && !magiamgia1.appliedUsers.includes(phone)) {
       magiamgia1.appliedUsers.push(phone);
       await magiamgia1.save();
     }
-  } else {
-    hoadon.tongtien = tongtien;
-    vnp_Params['vnp_Amount'] = tongtien * 100;
   }
 
   if (giaotannoi) {
@@ -449,8 +490,6 @@ router.post('/create_payment_url', async (req, res) => {
     await hoadon.save();
     
     // Create an expiration timeout for the order payment
-    // If payment is not completed within 15 minutes, inventory will be restored 
-    // and order status updated
     setTimeout(async () => {
       try {
         const order = await HoaDon.hoadon.findById(hoadon._id);
@@ -484,6 +523,9 @@ router.post('/create_payment_url', async (req, res) => {
   res.json(vnpUrl)
 })
 
+// Trong HoaDonRoutes.js, cập nhật phần xử lý voucher sau thanh toán thành công
+
+// Cập nhật đoạn code trong route /vnpay_return
 router.get('/vnpay_return', async (req, res) => {
   let vnp_Params = req.query
 
@@ -526,18 +568,82 @@ router.get('/vnpay_return', async (req, res) => {
       
       await hoadon.save();
       
-      // Check for first-time purchase or every third purchase
+      // Tích điểm thưởng cho đơn hàng thành công
       try {
-        const userPhone = hoadon.phone;
+        const orderTotal = hoadon.tongtien;
+        const userId = hoadon.userId;
+        const phone = hoadon.phone;
         
-        // Check if this is their first order
-        if (await isFirstOrderVoucherEligible(userPhone)) {
-          await generateVoucherForUser(userPhone, 'first-order');
+        // Chỉ tích điểm cho user đã đăng nhập (có userId)
+        if (userId) {
+          try {
+            const userInfo = await User.User.findById(userId);
+            let userEmail = null;
+            if (userInfo && userInfo.email) {
+              userEmail = userInfo.email;
+            }
+            
+            // Gọi API tích điểm với thông tin người dùng
+            const axios = require('axios');
+            const pointsResponse = await axios.post('http://localhost:3005/loyalty/award-points', {
+              userId: userId,
+              phone: phone,
+              email: userEmail,
+              orderId: hoadon._id.toString(),
+              orderAmount: orderTotal,
+              orderDate: hoadon.ngaymua
+            });
+            
+            if (pointsResponse.data.success) {
+              console.log(`Đã tích ${pointsResponse.data.pointsEarned} điểm thưởng cho đơn hàng ${hoadon._id}`);
+              
+              // Thông báo qua socket cho người dùng về điểm thưởng nếu có socket.io
+              if (typeof io !== 'undefined' && userId) {
+                io.to(userId).emit('pointsEarned', {
+                  phone: phone,
+                  pointsEarned: pointsResponse.data.pointsEarned,
+                  newPointsTotal: pointsResponse.data.newPointsTotal,
+                  tier: pointsResponse.data.tier
+                });
+                
+                // Kiểm tra nếu người dùng vừa lên hạng
+                if (pointsResponse.data.previousTier && pointsResponse.data.previousTier !== pointsResponse.data.tier) {
+                  io.to(userId).emit('tierUpgrade', {
+                    phone: phone,
+                    newTier: pointsResponse.data.tier,
+                    previousTier: pointsResponse.data.previousTier
+                  });
+                }
+              }
+            }
+          } catch (userError) {
+            console.error('Error fetching user info:', userError);
+            // Tiếp tục mà không cần dừng quy trình
+          }
+        } else {
+          console.log('Bỏ qua tích điểm: Đơn hàng của khách vãng lai (không có userId)');
         }
+      } catch (pointsError) {
+        console.error('Lỗi khi tích điểm thưởng:', pointsError);
+        // Tiếp tục xử lý - không fail đơn hàng chỉ vì lỗi tích điểm
+      }
+      
+      // Chỉ phát voucher cho user đã đăng nhập (có userId)
+      try {
+        const userId = hoadon.userId;
         
-        // Check if this is their third, sixth, ninth, etc. order
-        if (await isThirdOrderVoucherEligible(userPhone)) {
-          await generateVoucherForUser(userPhone, 'third-order');
+        if (userId) {
+          // Check if this is their first order
+          if (await isFirstOrderVoucherEligible(userId)) {
+            await generateVoucherForUser(userId, 'first-order');
+          }
+          
+          // Check if this is their third, sixth, ninth, etc. order
+          if (await isThirdOrderVoucherEligible(userId)) {
+            await generateVoucherForUser(userId, 'third-order');
+          }
+        } else {
+          console.log('Bỏ qua phát voucher: Đơn hàng của khách vãng lai (không có userId)');
         }
       } catch (error) {
         console.error('Error generating automatic voucher:', error);
@@ -618,57 +724,148 @@ router.get('/checknewvouchers/:phone', async (req, res) => {
 
 router.post('/settrangthai/:idhoadon', async (req, res) => {
   try {
-    const idhoadon = req.params.idhoadon
-    const { trangthai } = req.body
-    const hoadon = await HoaDon.hoadon.findById(idhoadon)
+    const idhoadon = req.params.idhoadon;
+    const { trangthai, thanhtoan } = req.body;
+    
+    // Tìm đơn hàng hiện tại
+    const hoadon = await HoaDon.hoadon.findById(idhoadon);
     
     if (!hoadon) {
       return res.status(404).json({ message: 'Không tìm thấy hóa đơn' });
     }
     
-    // Check if the order is being canceled
-    if (trangthai === 'Hủy Đơn Hàng' && hoadon.trangthai !== 'Hủy Đơn Hàng') {
-      // Only restore inventory if the order was not already canceled and payment was successful
-      // For unpaid orders, we've already reduced inventory so need to restore it
-      if (hoadon.thanhtoan) {
-        // Paid orders also need inventory restoration when canceled
-        await restoreInventory(hoadon.sanpham);
-      } else if (hoadon.trangthai !== 'Thanh toán thất bại' && hoadon.trangthai !== 'Thanh toán hết hạn') {
-        // Unpaid orders (except those marked as failed/expired) need inventory restoration
+    const oldTrangthai = hoadon.trangthai;
+    const oldThanhtoan = hoadon.thanhtoan; // false = chưa thanh toán/thất bại
+    
+    // Trường hợp 1: Hủy đơn hàng
+    if (trangthai === 'Hủy Đơn Hàng' && oldTrangthai !== 'Hủy Đơn Hàng') {
+      // Kiểm tra xem đơn hàng đã giảm tồn kho chưa
+      // Đã giảm kho nếu: đã thanh toán HOẶC trạng thái không phải thất bại/hết hạn
+      const inventoryWasReduced = oldThanhtoan || 
+                                  (!oldThanhtoan && 
+                                   oldTrangthai !== 'Thanh toán thất bại' && 
+                                   oldTrangthai !== 'Thanh toán hết hạn');
+      
+      if (inventoryWasReduced) {
+        console.log(`Khôi phục tồn kho khi hủy đơn hàng ${idhoadon}`);
         await restoreInventory(hoadon.sanpham);
       }
     }
     
-    // Update order status
-    hoadon.trangthai = trangthai
-    await hoadon.save()
-    res.json(hoadon)
+    // Trường hợp 2: Đánh dấu thất bại thanh toán (nếu chưa hủy và đã giảm tồn kho)
+    if (trangthai === 'Thanh toán thất bại' && 
+        oldTrangthai !== 'Thanh toán thất bại' && 
+        oldTrangthai !== 'Hủy Đơn Hàng' &&
+        oldTrangthai !== 'Thanh toán hết hạn') {
+      
+      console.log(`Khôi phục tồn kho khi đánh dấu thất bại thanh toán ${idhoadon}`);
+      await restoreInventory(hoadon.sanpham);
+    }
+    
+    // Trường hợp 3: Trả hàng sau khi đã nhận
+    if (oldTrangthai === 'Đã nhận' && trangthai === 'Trả hàng/Hoàn tiền') {
+      console.log(`Khôi phục tồn kho khi trả hàng ${idhoadon}`);
+      await restoreInventory(hoadon.sanpham);
+    }
+    
+    // Trường hợp 4: Từ trạng thái thất bại/hết hạn/hủy sang trạng thái thành công
+    // (trường hợp khách hàng quyết định thanh toán lại sau khi thất bại)
+    if ((oldTrangthai === 'Thanh toán thất bại' || 
+         oldTrangthai === 'Thanh toán hết hạn' || 
+         oldTrangthai === 'Hủy Đơn Hàng') && 
+        trangthai === 'Đã thanh toán' && 
+        thanhtoan === true) {
+      
+      console.log(`Giảm tồn kho khi đơn hàng được thanh toán lại ${idhoadon}`);
+      try {
+        await reduceInventory(hoadon.sanpham);
+      } catch (error) {
+        // Nếu không đủ tồn kho, không cho chuyển trạng thái
+        return res.status(400).json({ 
+          message: 'Không thể thanh toán lại đơn hàng do tồn kho không đủ',
+          error: error.message
+        });
+      }
+    }
+    
+    // Cập nhật trạng thái đơn hàng
+    hoadon.trangthai = trangthai;
+    if (typeof thanhtoan === 'boolean') {
+      hoadon.thanhtoan = thanhtoan;
+    }
+    
+    // Ghi lại lịch sử thay đổi trạng thái (nếu cần)
+    if (!hoadon.statusHistory) {
+      hoadon.statusHistory = [];
+    }
+    
+    hoadon.statusHistory.push({
+      from: oldTrangthai,
+      to: trangthai,
+      thanhtoan: hoadon.thanhtoan,
+      date: new Date(),
+      note: req.body.note || ''
+    });
+    
+    await hoadon.save();
+    res.json(hoadon);
   } catch (error) {
-    console.error(error)
-    res.status(500).json({ message: 'lỗi' })
+    console.error('Lỗi khi cập nhật trạng thái đơn hàng:', error);
+    res.status(500).json({ 
+      message: 'Lỗi khi cập nhật trạng thái đơn hàng', 
+      error: error.message 
+    });
   }
-})
+});
+
+// In webbandienthoai-main/routes/HoaDonRoutes.js
+// Modify the getchitiethd route:
 
 router.get('/getchitiethd/:idhoadon', async (req, res) => {
   try {
-    const idhoadon = req.params.idhoadon
+    const idhoadon = req.params.idhoadon;
 
-    const hoadon = await HoaDon.hoadon.findById(idhoadon)
+    const hoadon = await HoaDon.hoadon.findOne({ _id: idhoadon });
+    if (!hoadon) {
+      return res.status(404).json({ message: 'Không tìm thấy hóa đơn' });
+    }
+    
+    // Use product snapshots if available, otherwise fall back to database lookup
     const hoadonsanpham = await Promise.all(
       hoadon.sanpham.map(async sanpham => {
-        const sanpham1 = await SanPham.ChitietSp.findById(sanpham.idsp)
-        const dungluong = await DungLuong.dungluong.findById(sanpham.dungluong)
-        return {
-          namesanpham: sanpham1.name,
-          dungluong: dungluong.name,
-          mausac: sanpham.mausac,
-          soluong: sanpham.soluong,
-          price: sanpham.price
+        // If we have a product snapshot, use it
+        if (sanpham.productSnapshot && sanpham.productSnapshot.name) {
+          return {
+            idsp: sanpham.idsp,
+            namesanpham: sanpham.productSnapshot.name,
+            dungluong: sanpham.productSnapshot.dungluongName || 'Unknown Size',
+            mausac: sanpham.productSnapshot.mausacName || sanpham.mausac,
+            soluong: sanpham.soluong,
+            price: sanpham.price,
+            image: sanpham.productSnapshot.image
+          };
+        } 
+        // Otherwise, fall back to database lookup (for backward compatibility)
+        else {
+          const sanpham1 = await SanPham.ChitietSp.findById(sanpham.idsp);
+          const dungluong = await DungLuong.dungluong.findById(sanpham.dungluong);
+          return {
+            idsp: sanpham.idsp,
+            namesanpham: sanpham1 ? sanpham1.name : 'Unknown Product',
+            dungluong: dungluong ? dungluong.name : 'Unknown Size',
+            mausac: sanpham.mausac,
+            soluong: sanpham.soluong,
+            price: sanpham.price,
+            image: sanpham1 ? sanpham1.image : null
+          };
         }
       })
-    )
+    );
+    
     const hoadonjson = {
-      nguoinhan : hoadon.nguoinhan,
+      _id: hoadon._id,
+      maHDL: hoadon.maHDL,
+      nguoinhan: hoadon.nguoinhan,
       name: hoadon.name,
       phone: hoadon.phone,
       sex: hoadon.sex,
@@ -680,13 +877,14 @@ router.get('/getchitiethd/:idhoadon', async (req, res) => {
       trangthai: hoadon.trangthai,
       tongtien: hoadon.tongtien,
       hoadonsanpham: hoadonsanpham
-    }
-    res.json(hoadonjson)
+    };
+    
+    res.json(hoadonjson);
   } catch (error) {
-    console.error(error)
-    res.status(500).json({ message: 'Lỗi khi lấy thông tin hóa đơn' })
+    console.error(error);
+    res.status(500).json({ message: 'Lỗi khi lấy thông tin hóa đơn' });
   }
-})
+});
 
 router.get('/getdoanhthu', async (req, res) => {
   try {
@@ -1460,7 +1658,7 @@ router.post('/gethoadonuser', async (req, res) => {
       return res.status(400).json({ message: 'Thiếu userId' });
     }
 
-    const hoadons = await HoaDon.hoadon.find({ userId }).sort({ ngaymua: -1 });
+    const hoadons = await HoaDon.hoadon.find({ userId, isDeleted: { $ne: true } }).sort({ ngaymua: -1 });
 
     if (!hoadons || hoadons.length === 0) {
       return res.status(200).json({
@@ -1469,7 +1667,53 @@ router.post('/gethoadonuser', async (req, res) => {
       });
     }
 
-    res.json({ hoadons });
+    // Process orders to use product snapshots
+    const processedHoadons = await Promise.all(hoadons.map(async (hoadon) => {
+      // Include additional order detail fields as needed
+      const sanitizedHoadon = {
+        _id: hoadon._id,
+        maHDL: hoadon.maHDL,
+        name: hoadon.name,
+        phone: hoadon.phone,
+        nguoinhan: hoadon.nguoinhan,
+        ngaymua: moment(hoadon.ngaymua).format('DD/MM/YYYY'),
+        trangthai: hoadon.trangthai,
+        tongtien: hoadon.tongtien,
+        thanhtoan: hoadon.thanhtoan,
+        // Process sanpham array to use snapshots
+        sanpham: await Promise.all(hoadon.sanpham.map(async item => {
+          // If we have a product snapshot, use it
+          if (item.productSnapshot && item.productSnapshot.name) {
+            return {
+              idsp: item.idsp,
+              name: item.productSnapshot.name,
+              image: item.productSnapshot.image,
+              dungluong: item.productSnapshot.dungluongName,
+              mausac: item.productSnapshot.mausacName || item.mausac,
+              soluong: item.soluong,
+              price: item.price
+            };
+          } 
+          // Otherwise fall back to database lookup
+          else {
+            const sanpham1 = await SanPham.ChitietSp.findById(item.idsp);
+            const dungluong = await DungLuong.dungluong.findById(item.dungluong);
+            return {
+              idsp: item.idsp,
+              name: sanpham1 ? sanpham1.name : 'Sản phẩm không xác định',
+              image: sanpham1 ? sanpham1.image : null,
+              dungluong: dungluong ? dungluong.name : 'Unknown Size',
+              mausac: item.mausac,
+              soluong: item.soluong,
+              price: item.price
+            };
+          }
+        }))
+      };
+      return sanitizedHoadon;
+    }));
+
+    res.json({ hoadons: processedHoadons });
   } catch (error) {
     console.error('Lỗi khi lấy đơn hàng theo user:', error);
     res.status(500).json({ message: 'Lỗi server khi lấy hóa đơn người dùng' });
