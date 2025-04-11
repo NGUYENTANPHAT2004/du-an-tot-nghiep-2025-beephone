@@ -572,23 +572,14 @@ router.get('/vnpay_return', async (req, res) => {
       try {
         const orderTotal = hoadon.tongtien;
         const userId = hoadon.userId;
-        const phone = hoadon.phone;
         
         // Chỉ tích điểm cho user đã đăng nhập (có userId)
         if (userId) {
           try {
-            const userInfo = await User.User.findById(userId);
-            let userEmail = null;
-            if (userInfo && userInfo.email) {
-              userEmail = userInfo.email;
-            }
-            
-            // Gọi API tích điểm với thông tin người dùng
+            // Gọi API tích điểm chỉ với userId
             const axios = require('axios');
             const pointsResponse = await axios.post('http://localhost:3005/loyalty/award-points', {
               userId: userId,
-              phone: phone,
-              email: userEmail,
               orderId: hoadon._id.toString(),
               orderAmount: orderTotal,
               orderDate: hoadon.ngaymua
@@ -600,7 +591,7 @@ router.get('/vnpay_return', async (req, res) => {
               // Thông báo qua socket cho người dùng về điểm thưởng nếu có socket.io
               if (typeof io !== 'undefined' && userId) {
                 io.to(userId).emit('pointsEarned', {
-                  phone: phone,
+                  userId: userId,
                   pointsEarned: pointsResponse.data.pointsEarned,
                   newPointsTotal: pointsResponse.data.newPointsTotal,
                   tier: pointsResponse.data.tier
@@ -609,7 +600,7 @@ router.get('/vnpay_return', async (req, res) => {
                 // Kiểm tra nếu người dùng vừa lên hạng
                 if (pointsResponse.data.previousTier && pointsResponse.data.previousTier !== pointsResponse.data.tier) {
                   io.to(userId).emit('tierUpgrade', {
-                    phone: phone,
+                    userId: userId,
                     newTier: pointsResponse.data.tier,
                     previousTier: pointsResponse.data.previousTier
                   });
@@ -617,7 +608,7 @@ router.get('/vnpay_return', async (req, res) => {
               }
             }
           } catch (userError) {
-            console.error('Error fetching user info:', userError);
+            console.error('Error processing points:', userError);
             // Tiếp tục mà không cần dừng quy trình
           }
         } else {
