@@ -15,15 +15,15 @@
   padding: 0;
   display: block;
   position: relative;
-  
+
   // Category with submenu
   &.has-submenu {
     position: relative;
-    
-    // Desktop: show indicator for items with children 
+
+    // Desktop: show indicator for items with children
     @media (min-width: 769px) {
       &:after {
-        content: '';
+        content: "";
         position: absolute;
         top: 50%;
         right: 10px;
@@ -31,13 +31,13 @@
       }
     }
   }
-  
+
   // Header with link and toggle button
   .category-header {
     display: flex;
     align-items: center;
     position: relative;
-    
+
     .category-link {
       flex: 1;
       padding: 10px 15px;
@@ -46,19 +46,19 @@
       font-size: 14px;
       transition: all var(--transition-speed) ease;
       display: block;
-      
+
       &:hover {
         background-color: var(--category-hover-bg);
         color: var(--category-hover-text);
       }
-      
+
       .category-name {
         display: block;
         overflow: hidden;
         text-overflow: ellipsis;
       }
     }
-    
+
     // Toggle button for submenu
     .toggle-button {
       background: none;
@@ -72,102 +72,102 @@
       color: var(--icon-color);
       transition: all var(--transition-speed) ease;
       z-index: 5; /* Ensure buttons are clickable */
-      
+
       &:hover {
         color: var(--icon-hover);
       }
-      
+
       .toggle-icon {
         font-size: 12px;
         transition: transform var(--transition-speed) ease;
-        
+
         &.active {
           transform: rotate(180deg);
         }
       }
-      
+
       /* Hide toggle button on desktop for non-mobile view */
       @media (min-width: 769px) {
         display: none;
       }
     }
   }
-  
+
   // Active state
   &.is-active {
     > .category-header {
       background-color: var(--category-active-bg);
-      
+
       .category-link {
         color: var(--category-active-text);
         font-weight: 500;
       }
-      
+
       .toggle-button {
         color: var(--category-active-text);
       }
     }
   }
-  
+
   // Subcategory list
   .subcategory-list {
     list-style: none;
     margin: 0;
     padding: 0;
-    
+
     // Desktop: position absolute for submenus
-@media (min-width: 769px) {
-  .category-item {
-    position: relative;
-
-    .subcategory-list {
-      position: absolute;
-      top: 0;
-      left: 100%;
-      min-width: 220px;
-      background-color: white;
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-      border-radius: 0 8px 8px 0;
-      opacity: 0;
-      visibility: hidden;
-      transform: translateX(-10px);
-      transition: all var(--transition-speed) ease;
-      z-index: 1000;
-
-      // ✨ Xử lý cấp submenu kế tiếp (level 2, 3...)
+    @media (min-width: 769px) {
       .category-item {
+        position: relative;
+
+        .subcategory-list {
+          position: absolute;
+          top: 0;
+          left: 100%;
+          min-width: 220px;
+          background-color: white;
+          box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+          border-radius: 0 8px 8px 0;
+          opacity: 0;
+          visibility: hidden;
+          transform: translateX(-10px);
+          transition: all var(--transition-speed) ease;
+          z-index: 1000;
+
+          // ✨ Xử lý cấp submenu kế tiếp (level 2, 3...)
+          .category-item {
+            &:hover > .subcategory-list {
+              opacity: 1;
+              visibility: visible;
+              transform: translateX(0);
+            }
+
+            .subcategory-list {
+              left: 100%; // để lùi sang phải tiếp tục
+              top: 0;
+            }
+          }
+        }
+
+        // Cấp đầu tiên vẫn cần hiển thị khi hover
         &:hover > .subcategory-list {
+          display: block;
           opacity: 1;
           visibility: visible;
           transform: translateX(0);
         }
-
-        .subcategory-list {
-          left: 100%; // để lùi sang phải tiếp tục
-          top: 0;
-        }
       }
     }
-
-    // Cấp đầu tiên vẫn cần hiển thị khi hover
-    &:hover > .subcategory-list {
-      display: block;
-      opacity: 1;
-      visibility: visible;
-      transform: translateX(0);
-    }
-  }
-}
 
     // Mobile: hide by default, show when active
     @media (max-width: 768px) {
       display: none;
       background-color: rgba(0, 0, 0, 0.03);
-      
+
       &.active {
         display: block;
       }
-      
+
       .category-item {
         .category-header {
           .category-link {
@@ -177,7 +177,7 @@
       }
     }
   }
-  
+
   // Show submenu on hover for desktop
   @media (min-width: 769px) {
     &:hover > .subcategory-list {
@@ -201,7 +201,7 @@
 @media (min-width: 769px) {
   .category-item {
     position: relative;
-  
+
     // Khi hover 1 cấp
     &:hover > .subcategory-list {
       display: block;
@@ -209,25 +209,25 @@
       visibility: visible;
       transform: translateX(0);
     }
-  
+
     .subcategory-list {
       // positioning for submenu
       position: absolute;
       top: 0;
       left: 100%;
       // ...
-  
+
       // Nested submenu handling
       .category-item {
         position: relative;
-  
+
         &:hover > .subcategory-list {
           display: block;
           opacity: 1;
           visibility: visible;
           transform: translateX(0);
         }
-  
+
         .subcategory-list {
           top: 0;
           left: 100%; // cứ đẩy sang phải
