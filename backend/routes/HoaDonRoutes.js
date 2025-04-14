@@ -269,6 +269,7 @@ router.post('/posthoadon', async (req, res) => {
 async function validateVoucher(magiamgia, phone, totalAmount, userId = null) {
   if (!magiamgia) return { valid: false, message: 'Không có mã giảm giá' };
   
+  // Find the voucher
   const voucher = await MaGiamGia.magiamgia.findOne({ magiamgia });
   if (!voucher) return { valid: false, message: 'Mã giảm giá không tồn tại' };
   
@@ -336,29 +337,82 @@ async function validateVoucher(magiamgia, phone, totalAmount, userId = null) {
     }
   }
   
-  // Kiểm tra nếu đây là voucher cá nhân (không phải server-wide)
+  // For non-server-wide vouchers, check user restrictions
   if (!voucher.isServerWide) {
-    // Kiểm tra xem voucher có thuộc về userId nào không
-    if (voucher.userId && voucher.userId.toString() !== userId) {
-      return { 
-        valid: false, 
-        message: 'Mã giảm giá này chỉ dành cho chủ sở hữu' 
-      };
-    }
-    
-    // Kiểm tra xem số điện thoại có trong danh sách người dùng được chỉ định không
-    if (voucher.intended_users && voucher.intended_users.length > 0) {
-      if (!voucher.intended_users.includes(phone)) {
+    // Check if this is a user-specific voucher (has userId)
+    if (voucher.userId && userId) {
+      // Compare as strings to avoid type issues
+      if (voucher.userId.toString() !== userId.toString()) {
         return { 
           valid: false, 
-          message: 'Mã giảm giá không dành cho tài khoản này' 
+          message: 'Mã giảm giá này chỉ dành cho chủ sở hữu' 
         };
       }
     }
     
-    // Nếu là voucher một lần, kiểm tra xem đã sử dụng chưa
-    if (voucher.isOneTimePerUser && voucher.appliedUsers && voucher.appliedUsers.includes(phone)) {
-      return { valid: false, message: 'Bạn đã sử dụng mã giảm giá này' };
+    // Check if user is in intended_users list
+    if (userId && voucher.intended_users && voucher.intended_users.length > 0) {
+      // Convert to string for comparison
+      const userIdStr = userId.toString();
+      const isIntendedUser = voucher.intended_users.some(id => 
+        id && id.toString() === userIdStr
+      );
+      
+      if (!isIntendedUser) {
+        // If we don't find the user by ID but we have a phone number, 
+        // we should look up the user using the phone as backup during transition
+        let foundByPhone = false;
+        
+        if (phone) {
+          // Get the user by phone
+          const User = require('../models/user.model');
+          const user = await User.User.findOne({ phone });
+          
+          if (user) {
+            // Check if this user's ID is in the intended_users
+            foundByPhone = voucher.intended_users.some(id => 
+              id && id.toString() === user._id.toString()
+            );
+          }
+        }
+        
+        if (!foundByPhone) {
+          return { 
+            valid: false, 
+            message: 'Mã giảm giá không dành cho tài khoản này' 
+          };
+        }
+      }
+    }
+    
+    // Check if a one-time voucher has been used by this user
+    if (voucher.isOneTimePerUser && voucher.appliedUsers && voucher.appliedUsers.length > 0) {
+      if (userId) {
+        // Check by userId
+        const userIdStr = userId.toString();
+        const hasUsed = voucher.appliedUsers.some(id => 
+          id && id.toString() === userIdStr
+        );
+        
+        if (hasUsed) {
+          return { valid: false, message: 'Bạn đã sử dụng mã giảm giá này' };
+        }
+      } else if (phone) {
+        // Fallback to checking by phone during transition
+        // Get user by phone
+        const User = require('../models/user.model');
+        const user = await User.User.findOne({ phone });
+        
+        if (user) {
+          const hasUsed = voucher.appliedUsers.some(id => 
+            id && id.toString() === user._id.toString()
+          );
+          
+          if (hasUsed) {
+            return { valid: false, message: 'Bạn đã sử dụng mã giảm giá này' };
+          }
+        }
+      }
     }
   }
   
