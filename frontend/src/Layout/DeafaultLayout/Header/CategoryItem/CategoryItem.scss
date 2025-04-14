@@ -1,109 +1,242 @@
-/* CategoryItem.scss */
+:root {
+  --category-text: #333333;
+  --category-hover-bg: #f5f5f7;
+  --category-hover-text: #0f79af;
+  --category-active-bg: #edf5fa;
+  --category-active-text: #0f79af;
+  --category-border: #e0e0e0;
+  --icon-color: #777777;
+  --icon-hover: #0f79af;
+  --transition-speed: 0.25s;
+}
 
-/* Styles for submenu items */
-.menu-item {
+.category-item {
+  margin: 0;
+  padding: 0;
+  display: block;
   position: relative;
   
-  a {
-    display: block;
-    padding: 8px 12px;
-    color: #fff;
-    text-decoration: none;
-    transition: background-color 0.2s ease;
-    white-space: nowrap;
-  }
-
-  /* Hover effect for all menu items */
-  &:hover > a {
-    background-color: #be8c45;
-    text-decoration: none;
-  }
-
-  /* Styles specific to items with submenus */
+  // Category with submenu
   &.has-submenu {
-    /* Default hide submenu */
-    .submenu {
-      display: none;
-      position: absolute;
-      top: 0;
-      left: 100%;
-      min-width: 200px;
-      background-color: #6f6f6f;
-      list-style: none;
-      margin: 0;
-      padding: 0;
-      z-index: 9999;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-      
-      /* First level submenu position */
-      &:first-child {
-        top: 100%;
-        left: 0;
-      }
-      
-      /* Ensure items stack properly */
-      li {
-        width: 100%;
-        
-        a {
-          padding: 8px 15px;
-          display: block;
-          
-          &:hover {
-            background-color: #be8c45;
-          }
-        }
+    position: relative;
+    
+    // Desktop: show indicator for items with children 
+    @media (min-width: 769px) {
+      &:after {
+        content: '';
+        position: absolute;
+        top: 50%;
+        right: 10px;
+        transform: translateY(-50%);
       }
     }
-
-    /* Desktop view: Show submenu on hover */
-    @media (min-width: 769px) {
-      &:hover > .submenu {
+  }
+  
+  // Header with link and toggle button
+  .category-header {
+    display: flex;
+    align-items: center;
+    position: relative;
+    
+    .category-link {
+      flex: 1;
+      padding: 10px 15px;
+      color: var(--category-text);
+      text-decoration: none;
+      font-size: 14px;
+      transition: all var(--transition-speed) ease;
+      display: block;
+      
+      &:hover {
+        background-color: var(--category-hover-bg);
+        color: var(--category-hover-text);
+      }
+      
+      .category-name {
         display: block;
+        overflow: hidden;
+        text-overflow: ellipsis;
       }
     }
     
-    /* Mobile view: Show submenu when active class is present */
-    @media (max-width: 768px) {
-      > a:after {
-        content: '+';
-        margin-left: 5px;
+    // Toggle button for submenu
+    .toggle-button {
+      background: none;
+      border: none;
+      padding: 10px;
+      margin-right: 5px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      color: var(--icon-color);
+      transition: all var(--transition-speed) ease;
+      z-index: 5; /* Ensure buttons are clickable */
+      
+      &:hover {
+        color: var(--icon-hover);
       }
       
-      &.submenu-active {
-        > .submenu {
-          display: block;
-          position: static;
-          box-shadow: none;
-          background-color: rgba(0,0,0,0.1);
-          padding-left: 15px;
-        }
+      .toggle-icon {
+        font-size: 12px;
+        transition: transform var(--transition-speed) ease;
         
-        > a:after {
-          content: '-';
+        &.active {
+          transform: rotate(180deg);
         }
       }
       
-      &:hover > .submenu {
+      /* Hide toggle button on desktop for non-mobile view */
+      @media (min-width: 769px) {
         display: none;
       }
     }
   }
+  
+  // Active state
+  &.is-active {
+    > .category-header {
+      background-color: var(--category-active-bg);
+      
+      .category-link {
+        color: var(--category-active-text);
+        font-weight: 500;
+      }
+      
+      .toggle-button {
+        color: var(--category-active-text);
+      }
+    }
+  }
+  
+  // Subcategory list
+  .subcategory-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    
+    // Desktop: position absolute for submenus
+@media (min-width: 769px) {
+  .category-item {
+    position: relative;
+
+    .subcategory-list {
+      position: absolute;
+      top: 0;
+      left: 100%;
+      min-width: 220px;
+      background-color: white;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+      border-radius: 0 8px 8px 0;
+      opacity: 0;
+      visibility: hidden;
+      transform: translateX(-10px);
+      transition: all var(--transition-speed) ease;
+      z-index: 1000;
+
+      // ✨ Xử lý cấp submenu kế tiếp (level 2, 3...)
+      .category-item {
+        &:hover > .subcategory-list {
+          opacity: 1;
+          visibility: visible;
+          transform: translateX(0);
+        }
+
+        .subcategory-list {
+          left: 100%; // để lùi sang phải tiếp tục
+          top: 0;
+        }
+      }
+    }
+
+    // Cấp đầu tiên vẫn cần hiển thị khi hover
+    &:hover > .subcategory-list {
+      display: block;
+      opacity: 1;
+      visibility: visible;
+      transform: translateX(0);
+    }
+  }
 }
 
-/* Mobile-specific adjustments */
-@media (max-width: 768px) {
-  .menu-item {
-    &.has-submenu {
-      .submenu {
-        width: 100%;
-        
-        li {
-          a {
-            padding-left: 25px;
+    // Mobile: hide by default, show when active
+    @media (max-width: 768px) {
+      display: none;
+      background-color: rgba(0, 0, 0, 0.03);
+      
+      &.active {
+        display: block;
+      }
+      
+      .category-item {
+        .category-header {
+          .category-link {
+            padding-left: 30px;
           }
         }
       }
     }
   }
+  
+  // Show submenu on hover for desktop
+  @media (min-width: 769px) {
+    &:hover > .subcategory-list {
+      opacity: 1;
+      visibility: visible;
+      transform: translateX(0);
+    }
+  }
 }
+
+/* Ensure parent category styles don't affect subcategories */
+.submenu-container {
+  .submenu-list {
+    .category-item {
+      position: relative;
+    }
+  }
+}
+
+/* Make sure the link is clickable on desktop */
+@media (min-width: 769px) {
+  .category-item {
+    position: relative;
+  
+    // Khi hover 1 cấp
+    &:hover > .subcategory-list {
+      display: block;
+      opacity: 1;
+      visibility: visible;
+      transform: translateX(0);
+    }
+  
+    .subcategory-list {
+      // positioning for submenu
+      position: absolute;
+      top: 0;
+      left: 100%;
+      // ...
+  
+      // Nested submenu handling
+      .category-item {
+        position: relative;
+  
+        &:hover > .subcategory-list {
+          display: block;
+          opacity: 1;
+          visibility: visible;
+          transform: translateX(0);
+        }
+  
+        .subcategory-list {
+          top: 0;
+          left: 100%; // cứ đẩy sang phải
+        }
+      }
+    }
+  }
+}
+
+/* Extra styles to add to CategoryItem.scss for desktop hover effects */
+
+/* Desktop arrow icon */

@@ -482,6 +482,7 @@ router.post('/loyalty/combine-points', async (req, res) => {
 
 // 4. Đổi điểm lấy voucher
 // Cập nhật route POST /loyalty/redeem trong LoyaltyPointsRoutes.js
+// 4. Đổi điểm lấy voucher - Cải tiến xử lý
 router.post('/loyalty/redeem', ensureUserPoints, async (req, res) => {
   try {
     const { redemptionId } = req.body;
@@ -494,72 +495,196 @@ router.post('/loyalty/redeem', ensureUserPoints, async (req, res) => {
       });
     }
     
-    // Lấy thông tin lựa chọn đổi điểm
-    const redemptionOption = await PointsRedemption.findById(redemptionId)
-      .populate('voucherId', 'magiamgia sophantram ngaybatdau ngayketthuc minOrderValue maxOrderValue');
+    // Gói toàn bộ quá trình trong một transaction
+    const session = await db.mongoose.startSession();
+    session.startTransaction();
     
-    if (!redemptionOption) {
-      return res.status(404).json({
-        success: false,
-        message: 'Không tìm thấy quà đổi điểm'
+    try {
+      // Lấy thông tin lựa chọn đổi điểm
+      const redemptionOption = await PointsRedemption.findById(redemptionId)
+        .populate('voucherId', 'magiamgia sophantram ngaybatdau ngayketthuc minOrderValue maxOrderValue')
+        .session(session);
+      
+      if (!redemptionOption) {
+        await session.abortTransaction();
+        session.endSession();
+        return res.status(404).json({
+          success: false,
+          message: 'Không tìm thấy quà đổi điểm'
+        });
+      }
+      
+      // Kiểm tra xem lựa chọn còn hoạt động không
+      const now = new Date();
+      if (!redemptionOption.isActive || 
+          redemptionOption.remainingQuantity <= 0 ||
+          now < redemptionOption.startDate || 
+          now > redemptionOption.endDate) {
+        await session.abortTransaction();
+        session.endSession();
+        return res.status(400).json({
+          success: false,
+          message: 'Quà đổi điểm không còn khả dụng hoặc đã hết hạn'
+        });
+      }
+      
+      // Kiểm tra tính đủ điều kiện của cấp thành viên
+      if (redemptionOption.availableTiers.length > 0 && 
+          !redemptionOption.availableTiers.includes(userPoints.tier)) {
+        await session.abortTransaction();
+        session.endSession();
+        return res.status(403).json({
+          success: false,
+          message: `Quà đổi điểm chỉ dành cho hạng ${redemptionOption.availableTiers.join(', ')}`
+        });
+      }
+      
+      // Kiểm tra xem người dùng có đủ điểm không
+      if (userPoints.availablePoints < redemptionOption.pointsCost) {
+        await session.abortTransaction();
+        session.endSession();
+        return res.status(400).json({
+          success: false,
+          message: `Bạn cần ${redemptionOption.pointsCost} điểm để đổi quà này. Hiện bạn chỉ có ${userPoints.availablePoints} điểm khả dụng.`
+        });
+      }
+      
+      // Kiểm tra giới hạn đổi điểm cho mỗi người dùng
+      const queryCondition = { 
+        redemptionId: redemptionOption._id,
+        status: { $in: ['active', 'used'] }
+      };
+      
+      // Sử dụng userId nếu có, nếu không thì dùng phone
+      if (userPoints.userId) {
+        queryCondition.userId = userPoints.userId;
+      } else {
+        queryCondition.phone = userPoints.phone;
+      }
+      
+      const userRedemptionCount = await RedemptionHistory.countDocuments(queryCondition).session(session);
+      
+      if (userRedemptionCount >= redemptionOption.limitPerUser) {
+        await session.abortTransaction();
+        session.endSession();
+        return res.status(400).json({
+          success: false,
+          message: `Bạn đã đạt giới hạn đổi quà ${redemptionOption.limitPerUser} lần cho ưu đãi này`
+        });
+      }
+      
+      // Kiểm tra mã giảm giá liên kết
+      if (!redemptionOption.voucherId) {
+        await session.abortTransaction();
+        session.endSession();
+        return res.status(400).json({
+          success: false,
+          message: 'Không tìm thấy mã giảm giá liên kết với quà đổi điểm này'
+        });
+      }
+      
+      // Lấy thông tin mã giảm giá
+      const voucher = await magiamgia.findById(redemptionOption.voucherId).session(session);
+      if (!voucher) {
+        await session.abortTransaction();
+        session.endSession();
+        return res.status(404).json({
+          success: false,
+          message: 'Không tìm thấy mã giảm giá liên kết'
+        });
+      }
+      if (!voucher.intended_users) {
+        voucher.intended_users = [];
+      }
+      
+      if (userPoints.userId && !voucher.intended_users.includes(userPoints.userId.toString())) {
+        voucher.intended_users.push(userPoints.userId.toString())
+      }
+      
+      await voucher.save({ session });
+      redemptionOption.remainingQuantity = Math.max(0, redemptionOption.remainingQuantity - 1);
+      await redemptionOption.save({ session });
+      const redemptionHistory = new RedemptionHistory({
+        userId: userPoints.userId,
+        phone: userPoints.phone,
+        email: userPoints.email,
+        redemptionId: redemptionOption._id,
+        voucherId: voucher._id,
+        pointsSpent: redemptionOption.pointsCost,
+        voucherCode: voucher.magiamgia,
+        expiryDate: voucher.ngayketthuc,
+        status: 'active'
       });
-    }
-    
-    // Kiểm tra xem lựa chọn còn hoạt động không
-    if (!redemptionOption.isActive || redemptionOption.remainingQuantity <= 0) {
-      return res.status(400).json({
-        success: false,
-        message: 'Quà đổi điểm không còn khả dụng'
+      
+      await redemptionHistory.save({ session });
+      
+      // Trừ điểm từ tài khoản người dùng
+      userPoints.availablePoints -= redemptionOption.pointsCost;
+      
+      // Thêm vào lịch sử
+      userPoints.pointsHistory.push({
+        amount: -redemptionOption.pointsCost,
+        type: 'redeemed',
+        voucherId: voucher._id,
+        reason: `Đổi ${redemptionOption.pointsCost} điểm lấy ${redemptionOption.name}`,
+        date: new Date()
       });
-    }
-    
-    // Kiểm tra xem ngày hiện tại có nằm trong thời gian đổi điểm không
-    const now = new Date();
-    if (now < redemptionOption.startDate || now > redemptionOption.endDate) {
-      return res.status(400).json({
-        success: false,
-        message: 'Quà đổi điểm không trong thời gian khả dụng'
+      
+      // Trừ từ điểm sắp hết hạn (cũ nhất trước)
+      let pointsToDeduct = redemptionOption.pointsCost;
+      userPoints.expiringPoints.sort((a, b) => a.expiryDate - b.expiryDate);
+      
+      for (let i = 0; i < userPoints.expiringPoints.length; i++) {
+        if (pointsToDeduct <= 0) break;
+        
+        const entry = userPoints.expiringPoints[i];
+        if (entry.points <= pointsToDeduct) {
+          pointsToDeduct -= entry.points;
+          entry.points = 0;
+        } else {
+          entry.points -= pointsToDeduct;
+          pointsToDeduct = 0;
+        }
+      }
+      
+      // Xóa các mục có 0 điểm
+      userPoints.expiringPoints = userPoints.expiringPoints.filter(entry => entry.points > 0);
+      
+      userPoints.lastUpdated = new Date();
+      await userPoints.save({ session });
+      
+      // Hoàn thành giao dịch
+      await session.commitTransaction();
+      session.endSession();
+      
+      res.json({
+        success: true,
+        message: 'Đổi điểm thành công',
+        voucher: {
+          code: voucher.magiamgia,
+          name: redemptionOption.name,
+          description: redemptionOption.description,
+          value: redemptionOption.voucherValue,
+          type: redemptionOption.voucherType,
+          minOrderValue: redemptionOption.minOrderValue || voucher.minOrderValue,
+          expiryDate: voucher.ngayketthuc,
+          pointsUsed: redemptionOption.pointsCost
+        },
+        remainingPoints: userPoints.availablePoints,
+        redemptionId: redemptionHistory._id // Thêm ID của bản ghi đổi điểm để người dùng tham chiếu
       });
+    } catch (error) {
+      // Nếu có lỗi, hủy bỏ giao dịch
+      await session.abortTransaction();
+      session.endSession();
+      throw error;
     }
-    
-    // Kiểm tra tính đủ điều kiện của cấp thành viên
-    if (redemptionOption.availableTiers.length > 0 && 
-        !redemptionOption.availableTiers.includes(userPoints.tier)) {
-      return res.status(403).json({
-        success: false,
-        message: `Quà đổi điểm chỉ dành cho hạng ${redemptionOption.availableTiers.join(', ')}`
-      });
-    }
-    
-    // Kiểm tra xem người dùng có đủ điểm không
-    if (userPoints.availablePoints < redemptionOption.pointsCost) {
-      return res.status(400).json({
-        success: false,
-        message: `Bạn cần ${redemptionOption.pointsCost} điểm để đổi quà này. Hiện bạn chỉ có ${userPoints.availablePoints} điểm khả dụng.`
-      });
-    }
-    
-    // Kiểm tra giới hạn đổi điểm cho mỗi người dùng
-    const userRedemptionCount = await RedemptionHistory.countDocuments({
-      userId: userPoints.userId,
-      redemptionId: redemptionOption._id,
-      status: { $in: ['active', 'used'] }
-    });
-    
-    if (userRedemptionCount >= redemptionOption.limitPerUser) {
-      return res.status(400).json({
-        success: false,
-        message: `Bạn đã đạt giới hạn đổi quà ${redemptionOption.limitPerUser} lần cho ưu đãi này`
-      });
-    }
-    
-    // ... Phần còn lại của mã giữ nguyên
-    // Cập nhật mã giảm giá, tạo bản ghi lịch sử, trừ điểm người dùng, etc.
   } catch (error) {
     console.error('Lỗi khi đổi điểm:', error);
     res.status(500).json({
       success: false,
-      message: 'Lỗi khi đổi điểm thưởng'
+      message: 'Lỗi khi đổi điểm thưởng',
+      error: error.message
     });
   }
 });
