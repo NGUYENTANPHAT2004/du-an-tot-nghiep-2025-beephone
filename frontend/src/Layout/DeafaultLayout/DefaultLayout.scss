@@ -1,13 +1,225 @@
-.floatingbuton{
-    position: fixed;
-    bottom: 50px;
-    right: 50px;
+:root {
+  --primary-color: #0f79af;
+  --primary-hover: #0d6796;
+  --accent-color: #ff6b00;
+  --text-light: #ffffff;
+  --text-dark: #212121;
+  --background-dark: #242424;
+  --background-light: #ffffff;
+  --shadow-color: rgba(0, 0, 0, 0.15);
+  --shadow-darker: rgba(0, 0, 0, 0.25);
+  --border-radius: 8px;
+  --transition-speed: 0.3s;
 }
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: 'Roboto', Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.container-default {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
 .header-navbar {
-    display: flex;
-    flex-direction: column; 
+  display: flex;
+  flex-direction: column;
+  position: fixed;
+  top: 0;
+  width: 100%;
+  z-index: 1000;
+  box-shadow: 0 2px 10px var(--shadow-color);
+}
+
+.content {
+  flex: 1;
+  margin-top: 110px; // Adjust based on your header height
+  padding: 20px 0;
+  background-color: #f5f5f7;
   
-    @media (max-width: 768px) {
-      flex-direction: column-reverse; // Đảo thứ tự
+  @media (max-width: 768px) {
+    margin-top: 100px; // Adjust for mobile
+    padding: 15px 0;
+  }
+}
+
+// Floating Buttons
+.floating-buttons {
+  position: fixed;
+  bottom: 30px;
+  right: 30px;
+  z-index: 999;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+.toggle-button {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 60px;
+  height: 60px;
+  background-color: var(--primary-color);
+  color: white;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 24px;
+  box-shadow: 0 4px 10px var(--shadow-color);
+  transition: all var(--transition-speed) ease;
+  position: relative;
+  z-index: 10;
+  
+  &:hover {
+    background-color: var(--primary-hover);
+    transform: scale(1.05);
+  }
+  
+  // Pulse animation
+  &::after {
+    content: '';
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    background: inherit;
+    opacity: 0.7;
+    z-index: -1;
+    animation: togglePulse 2s infinite;
+  }
+}
+
+@keyframes togglePulse {
+  0% {
+    transform: scale(1);
+    opacity: 0.7;
+  }
+  70% {
+    transform: scale(1.3);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 0;
+  }
+}
+
+.floating-menu {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  margin-bottom: 15px;
+  animation: floatIn var(--transition-speed) ease-out;
+}
+
+.floating-item {
+  position: relative;
+  transition: transform 0.2s ease;
+  
+  &:hover {
+    transform: translateX(-5px);
+    
+    .floating-tooltip {
+      opacity: 1;
+      transform: translateX(-10px);
     }
   }
+}
+
+.floating-tooltip {
+  position: absolute;
+  right: 100%;
+  top: 50%;
+  transform: translateY(-50%) translateX(0);
+  background-color: var(--background-dark);
+  color: var(--text-light);
+  padding: 6px 10px;
+  border-radius: 4px;
+  font-size: 12px;
+  white-space: nowrap;
+  margin-right: 10px;
+  opacity: 0;
+  transition: all 0.2s ease;
+  pointer-events: none;
+  
+  &::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    right: -6px;
+    transform: translateY(-50%);
+    border-width: 6px 0 6px 6px;
+    border-style: solid;
+    border-color: transparent transparent transparent var(--background-dark);
+  }
+}
+
+@keyframes floatIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+// Scroll to top button
+.scroll-to-top {
+  position: fixed;
+  bottom: 30px;
+  left: 30px;
+  width: 45px;
+  height: 45px;
+  background-color: var(--background-dark);
+  color: var(--text-light);
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  box-shadow: 0 2px 10px var(--shadow-color);
+  transition: all var(--transition-speed) ease;
+  z-index: 999;
+  
+  &:hover {
+    background-color: var(--accent-color);
+    transform: translateY(-5px);
+  }
+  
+  .arrow {
+    font-size: 20px;
+    font-weight: bold;
+  }
+}
+
+// Mobile adjustments
+@media (max-width: 768px) {
+  .floating-buttons {
+    bottom: 20px;
+    right: 20px;
+  }
+  
+  .toggle-button {
+    width: 50px;
+    height: 50px;
+    font-size: 20px;
+  }
+  
+  .scroll-to-top {
+    bottom: 20px;
+    left: 20px;
+    width: 40px;
+    height: 40px;
+    
+    .arrow {
+      font-size: 18px;
+    }
+  }
+}

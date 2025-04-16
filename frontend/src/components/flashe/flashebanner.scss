@@ -1,0 +1,269 @@
+.flashsale-banner {
+  display: block;
+  text-decoration: none;
+  margin: 20px 0;
+  background: linear-gradient(135deg, #ff512f, #dd2476);
+  border-radius: 10px;
+  overflow: hidden;
+  color: white;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+
+  &:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
+  }
+
+  &.loading {
+    height: 200px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 30px;
+
+    svg {
+      color: white;
+    }
+  }
+
+  &.custom-banner {
+    position: relative;
+    height: auto;
+
+    img {
+      width: 100%;
+      display: block;
+    }
+
+    .banner-timer {
+      position: absolute;
+      bottom: 20px;
+      right: 20px;
+      background-color: rgba(0, 0, 0, 0.7);
+      padding: 10px 15px;
+      border-radius: 25px;
+      display: flex;
+      align-items: center;
+
+      svg {
+        margin-right: 10px;
+      }
+
+      .timer-digits {
+        font-family: "Courier New", monospace;
+        font-size: 18px;
+        font-weight: bold;
+      }
+    }
+  }
+
+  .banner-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 20px;
+
+    .flashsale-title {
+      display: flex;
+      align-items: center;
+
+      svg {
+        font-size: 24px;
+        margin-right: 10px;
+        animation: flash 1.5s infinite;
+      }
+
+      h2 {
+        margin: 0;
+        font-size: 22px;
+        text-transform: uppercase;
+      }
+    }
+
+    .flashsale-timer {
+      display: flex;
+      align-items: center;
+
+      svg {
+        margin-right: 10px;
+        font-size: 18px;
+      }
+
+      .timer-container {
+        display: flex;
+        align-items: center;
+
+        .timer-block {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          background-color: rgba(255, 255, 255, 0.2);
+          padding: 5px 10px;
+          border-radius: 5px;
+
+          .time {
+            font-size: 18px;
+            font-weight: bold;
+            font-family: "Courier New", monospace;
+          }
+
+          .label {
+            font-size: 12px;
+            margin-top: 2px;
+          }
+        }
+
+        .timer-divider {
+          margin: 0 5px;
+          font-weight: bold;
+        }
+      }
+    }
+  }
+
+  .products-preview {
+    display: flex;
+    overflow-x: auto;
+    padding: 15px;
+    background-color: white;
+    scrollbar-width: thin;
+
+    &::-webkit-scrollbar {
+      height: 5px;
+    }
+
+    &::-webkit-scrollbar-track {
+      background: #f1f1f1;
+    }
+
+    &::-webkit-scrollbar-thumb {
+      background: #888;
+      border-radius: 10px;
+    }
+
+    .product-item {
+      flex: 0 0 220px;
+      margin-right: 15px;
+      background-color: white;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+
+      .product-image {
+        position: relative;
+        height: 180px;
+        overflow: hidden;
+
+        img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+          transition: transform 0.3s ease;
+        }
+
+        .discount-badge {
+          position: absolute;
+          top: 10px;
+          right: 10px;
+          background-color: #ff4c29;
+          color: white;
+          font-weight: bold;
+          padding: 5px 10px;
+          border-radius: 20px;
+          font-size: 14px;
+        }
+      }
+
+      .product-info {
+        padding: 12px;
+
+        .product-name {
+          margin: 0 0 8px 0;
+          font-size: 14px;
+          color: #333;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+
+        .product-price {
+          margin-bottom: 10px;
+
+          .sale-price {
+            font-size: 16px;
+            font-weight: bold;
+            color: #ff4c29;
+            margin-right: 8px;
+          }
+
+          .original-price {
+            font-size: 14px;
+            color: #999;
+            text-decoration: line-through;
+          }
+        }
+
+        .product-progress {
+          .progress-text {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5px;
+            font-size: 12px;
+            color: #666;
+
+            span:last-child {
+              color: #ff4c29;
+              font-weight: bold;
+            }
+          }
+
+          .progress-bar {
+            height: 5px;
+            background-color: #f1f1f1;
+            border-radius: 10px;
+            overflow: hidden;
+
+            .progress-fill {
+              height: 100%;
+              background: linear-gradient(90deg, #ff512f, #dd2476);
+              border-radius: 10px;
+            }
+          }
+        }
+      }
+
+      &:hover .product-image img {
+        transform: scale(1.05);
+      }
+    }
+
+    .view-more {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      min-width: 120px;
+      color: #333;
+      font-size: 14px;
+      font-weight: 500;
+
+      .arrow {
+        margin-top: 10px;
+        font-size: 24px;
+        color: #ff4c29;
+      }
+    }
+  }
+}
+
+@keyframes flash {
+  0%,
+  50%,
+  100% {
+    opacity: 1;
+  }
+  25%,
+  75% {
+    opacity: 0.5;
+  }
+}

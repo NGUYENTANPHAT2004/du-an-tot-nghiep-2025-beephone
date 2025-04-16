@@ -687,3 +687,8 @@ const FlashSaleForm = ({ isEdit, flashSale, onClose, onSubmit }) => {
     </div>
   );
 };
+<<<<<<< HEAD
+=======
+
+export default FlashSaleForm;
+>>>>>>> main

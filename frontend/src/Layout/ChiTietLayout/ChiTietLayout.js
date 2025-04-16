@@ -1,530 +1,391 @@
-/* eslint-disable react-hooks/rules-of-hooks */
-/* eslint-disable react-hooks/exhaustive-deps */
-import React, { useEffect, useState } from 'react'
-import { useParams, useNavigate } from 'react-router-dom'
-import './ChiTietLayout.scss'
+import React, { useState, useEffect } from "react";
+import { useParams } from "react-router-dom";
+import axios from "axios";
+import ProductFlashSale from "../../components/flashe/ProductFlashSale";
+import { useFlashSale } from "../../context/Flashecontext";
 
-import ListBlog from '../../components/ListBlog/ListBlog'
-import ThanhDinhHuong from '../../components/ThanhDinhHuong/ThanhDinhHuong'
-import { Helmet } from 'react-helmet'
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faCircleCheck, faGift } from '@fortawesome/free-solid-svg-icons'
-import Slider from 'react-slick'
-import 'slick-carousel/slick/slick.css'
-import 'slick-carousel/slick/slick-theme.css'
+// Các import khác...
 
 const ChiTietLayout = () => {
-  const { tieude, loaisp } = useParams()
-  const navigate = useNavigate()
-  const [product, setProduct] = useState(null)
+  const { loaisp, tieude } = useParams();
+  const [productData, setProductData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [dungLuongs, setDungLuongs] = useState([]);
+  const [selectedDungLuong, setSelectedDungLuong] = useState(null);
+  const [mauSacs, setMauSacs] = useState([]);
+  const [selectedMauSac, setSelectedMauSac] = useState(null);
+  const [stockInfo, setStockInfo] = useState({
+    status: "loading",
+    quantity: 0,
+  });
 
-  const [isLoading, setIsLoading] = useState(true)
-  const [dungluong, setdungluong] = useState([])
-  const [dungluong1, setdungluong1] = useState([])
-  const [mausac1, setmausac1] = useState([])
-  const [annhmausac, setanhmausac] = useState([])
-  const [pricemausac, setpricemausac] = useState(0)
-  const [khuyenmai, setkhuyenmai] = useState(0)
-  const [giagoc, setgiagoc] = useState(0)
-  const [idmausac, setidmausac] = useState('')
-  const [idsanpham, setidsanpham] = useState('')
-  const [iddungluong, setiddungluong] = useState('')
+  // State cho Flash Sale
+  const [isInFlashSale, setIsInFlashSale] = useState(false);
+  const [flashSalePrice, setFlashSalePrice] = useState(null);
+  const { checkProductInFlashSale, updateProductQuantity } = useFlashSale();
 
-  const [imgsanpham, setimgsanpham] = useState("");
-  const [namesanpham, setnamesanpham] = useState("");
+  // Fetch dữ liệu sản phẩm
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        const response = await axios.get(
+          `http://localhost:3005/chitietsanpham/${tieude}`
+        );
+        setProductData(response.data);
 
-  const settings = {
-    dots: true,
-    infinite: true,
-    speed: 500,
-    slidesToShow: 5,
-    slidesToScroll: 1,
-    autoplay: true,
-    autoplaySpeed: 3000,
-    responsive: [
-      {
-        breakpoint: 1024,
-        settings: {
-          slidesToShow: 2,
-        },
-      },
-      {
-        breakpoint: 768,
-        settings: {
-          slidesToShow: 1
+        // Lấy dung lượng của sản phẩm
+        const dlResponse = await axios.get(
+          `http://localhost:3005/dungluongmay/${loaisp}`
+        );
+        setDungLuongs(
+          dlResponse.data.filter((dl) => dl.mausac && dl.mausac.length > 0)
+        );
+
+        // Chọn dung lượng đầu tiên theo mặc định
+        if (dlResponse.data.length > 0) {
+          setSelectedDungLuong(dlResponse.data[0]);
+          setMauSacs(dlResponse.data[0].mausac);
+
+          // Chọn màu sắc đầu tiên theo mặc định
+          if (
+            dlResponse.data[0].mausac &&
+            dlResponse.data[0].mausac.length > 0
+          ) {
+            setSelectedMauSac(dlResponse.data[0].mausac[0]);
+
+            // Kiểm tra tồn kho
+            checkStock(
+              response.data._id,
+              dlResponse.data[0]._id,
+              dlResponse.data[0].mausac[0]._id
+            );
+
+            // Kiểm tra Flash Sale
+            checkFlashSale(
+              response.data._id,
+              dlResponse.data[0]._id,
+              dlResponse.data[0].mausac[0]._id
+            );
+          }
         }
+      } catch (error) {
+        console.error("Lỗi khi tải dữ liệu:", error);
+      } finally {
+        setLoading(false);
       }
-    ]
-  }
-
-  useEffect(() => {
-    if (dungluong.length > 0) {
-      setdungluong1(dungluong[0].name);
-      setiddungluong(dungluong[0]._id);
-      if (dungluong[0].mausac.length > 0) {
-        setmausac1(dungluong[0].mausac[0].name);
-        setidmausac(dungluong[0].mausac[0]._id);
-        setpricemausac(dungluong[0].mausac[0].price);
-        setkhuyenmai(dungluong[0].mausac[0].khuyenmai);
-        setgiagoc(dungluong[0].mausac[0].giagoc);
-      }
-    }
-  }, [dungluong])
-
-  const handleChangeDungLuong = (id, name) => {
-    setiddungluong(id);
-    setdungluong1(name);
-
-    const dungLuongMoi = dungluong.find((dl) => dl.name === name);
-    if (!dungLuongMoi) return;
-
-    const mauHienTai = dungLuongMoi.mausac.find((mau) => mau.name === mausac1);
-
-    if (mauHienTai) {
-      setidmausac(mauHienTai._id);
-      setpricemausac(mauHienTai.price);
-      setkhuyenmai(mauHienTai.khuyenmai);
-      setgiagoc(mauHienTai.giagoc);
-    } else if (dungLuongMoi.mausac.length > 0) {
-      setmausac1(dungLuongMoi.mausac[0].name);
-      setidmausac(dungLuongMoi.mausac[0]._id);
-      setpricemausac(dungLuongMoi.mausac[0].price);
-      setkhuyenmai(dungLuongMoi.mausac[0].khuyenmai);
-      setgiagoc(dungLuongMoi.mausac[0].giagoc);
-    }
-  };
-
-  const fetchdungluong = async () => {
-    try {
-      const response = await fetch(
-        `http://localhost:3005/dungluongmay/${loaisp}`
-      );
-      if (response.ok) {
-        const data = await response.json();
-        setdungluong(data);
-      }
-    } catch (error) {
-      console.error(error);
-    }
-  };
-
-  const fetchProduct = async () => {
-    try {
-      setIsLoading(true);
-      const response = await fetch(
-        `http://localhost:3005/chitietsanpham/${tieude}`
-      );
-      const data = await response.json();
-      if (response.ok) {
-        setProduct(data);
-        setidsanpham(data._id);
-        setnamesanpham(data.name);
-        setimgsanpham(data.image);
-      } else {
-        console.error("Không tìm thấy sản phẩm");
-      }
-    } catch (error) {
-      console.error("Lỗi khi gọi API:", error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const fetchanhmausac = async () => {
-    try {
-      const response = await fetch(
-        `http://localhost:3005/getanhmausac/${idmausac}`
-      );
-      const data = await response.json();
-      if (response.ok) {
-        setanhmausac(data);
-      }
-    } catch (error) {
-      console.error(error);
-    }
-  }
-
-  useEffect(() => {
-    fetchdungluong()
-    fetchProduct()
-  }, [tieude])
-
-  useEffect(() => {
-    fetchanhmausac()
-  }, [idmausac])
-
-  if (isLoading) {
-    return <p>Đang tải dữ liệu...</p>;
-  }
-
-  if (!product) {
-    return <p>Không tìm thấy sản phẩm!</p>;
-  }
-
-  const handleBuyNow = () => {
-    if (!dungluong1) {
-      alert("Vui lòng chọn dung lượng!");
-      return;
-    }
-
-    if (!mausac1) {
-      alert("Vui lòng chọn màu sắc!");
-      return;
-    }
-
-    const dungLuongHienTai = dungluong.find((dl) => dl.name === dungluong1);
-    const validColors = dungLuongHienTai
-      ? dungLuongHienTai.mausac.map((mau) => mau.name)
-      : [];
-
-    if (!validColors.includes(mausac1)) {
-      alert("Màu sắc không hợp lệ với dung lượng đã chọn!");
-      return;
-    }
-
-    if (!pricemausac) {
-      alert("Vui lòng chọn giá phù hợp với màu sắc!");
-      return;
-    }
-
-    // Check stock availability
-    if (quantity === 0 || quantity === "0" || quantity === "Hết hàng") {
-      alert("Sản phẩm đã hết hàng!");
-      return;
-    }
-
-    // Check stock availability
-    if (quantity === 0 || quantity === '0' || quantity === 'Hết hàng') {
-      alert('Sản phẩm đã hết hàng!')
-      return
-    }
-
-    const newItem = {
-      idsanpham,
-      namesanpham,
-      imgsanpham,
-      iddungluong,
-      dungluong: dungluong1,
-      mausac: mausac1,
-      pricemausac,
     };
 
-    let cart = JSON.parse(localStorage.getItem("cart")) || [];
+    fetchData();
+  }, [loaisp, tieude]);
 
-    const isExist = cart.some(
-      (item) =>
-        item.idsanpham === idsanpham &&
-        item.dungluong === dungluong1 &&
-        item.mausac === mausac1
-    );
+  // Hàm kiểm tra tồn kho
+  const checkStock = async (productId, dungluongId, mausacId) => {
+    try {
+      setStockInfo({ status: "loading", quantity: 0 });
+      const response = await axios.get(
+        `http://localhost:3005/stock/${productId}/${dungluongId}/${mausacId}`
+      );
 
-    if (!isExist) {
-      cart.push(newItem);
-      localStorage.setItem("cart", JSON.stringify(cart));
-      navigate("/cart");
-    } else {
-      alert("Sản phẩm này đã có trong giỏ hàng!");
+      if (response.data.unlimitedStock) {
+        setStockInfo({ status: "in-stock", quantity: "Không giới hạn" });
+      } else if (response.data.stock > 10) {
+        setStockInfo({ status: "in-stock", quantity: response.data.stock });
+      } else if (response.data.stock > 0) {
+        setStockInfo({ status: "low-stock", quantity: response.data.stock });
+      } else {
+        setStockInfo({ status: "out-of-stock", quantity: 0 });
+      }
+    } catch (error) {
+      console.error("Lỗi khi kiểm tra tồn kho:", error);
+      setStockInfo({ status: "error", quantity: 0 });
     }
-    window.dispatchEvent(new Event('cartUpdated'))
+  };
+
+  // Kiểm tra Flash Sale
+  const checkFlashSale = async (productId, dungluongId, mausacId) => {
+    try {
+      const result = await checkProductInFlashSale(
+        productId,
+        dungluongId,
+        mausacId
+      );
+
+      if (result.inFlashSale) {
+        setIsInFlashSale(true);
+        setFlashSalePrice(result.flashSaleInfo.salePrice);
+      } else {
+        setIsInFlashSale(false);
+        setFlashSalePrice(null);
+      }
+    } catch (error) {
+      console.error("Lỗi khi kiểm tra Flash Sale:", error);
+      setIsInFlashSale(false);
+    }
+  };
+
+  // Xử lý khi thay đổi dung lượng
+  const handleDungLuongChange = (dungluong) => {
+    setSelectedDungLuong(dungluong);
+    setMauSacs(dungluong.mausac);
+
+    // Reset màu sắc khi thay đổi dung lượng
+    if (dungluong.mausac && dungluong.mausac.length > 0) {
+      setSelectedMauSac(dungluong.mausac[0]);
+
+      // Kiểm tra tồn kho và Flash Sale khi thay đổi dung lượng
+      if (productData) {
+        checkStock(productData._id, dungluong._id, dungluong.mausac[0]._id);
+        checkFlashSale(productData._id, dungluong._id, dungluong.mausac[0]._id);
+      }
+    } else {
+      setSelectedMauSac(null);
+      setStockInfo({ status: "out-of-stock", quantity: 0 });
+      setIsInFlashSale(false);
+    }
+  };
+
+  // Xử lý khi thay đổi màu sắc
+  const handleMauSacChange = (mausac) => {
+    setSelectedMauSac(mausac);
+
+    // Kiểm tra tồn kho và Flash Sale khi thay đổi màu sắc
+    if (productData && selectedDungLuong) {
+      checkStock(productData._id, selectedDungLuong._id, mausac._id);
+      checkFlashSale(productData._id, selectedDungLuong._id, mausac._id);
+    }
+  };
+
+  // Xử lý khi thêm vào giỏ hàng
+  const handleAddToCart = async () => {
+    if (!productData || !selectedDungLuong || !selectedMauSac) {
+      alert("Vui lòng chọn dung lượng và màu sắc");
+      return;
+    }
+
+    if (stockInfo.status === "out-of-stock") {
+      alert("Sản phẩm đã hết hàng");
+      return;
+    }
+
+    try {
+      // Thêm sản phẩm vào giỏ hàng
+      const cartItem = {
+        idsp: productData._id,
+        name: productData.name,
+        image: productData.image,
+        price: isInFlashSale ? flashSalePrice : selectedMauSac.price,
+        dungluong: selectedDungLuong._id,
+        tenDungLuong: selectedDungLuong.name,
+        idmausac: selectedMauSac._id,
+        mausac: selectedMauSac.name,
+        soluong: 1,
+        isFlashSale: isInFlashSale,
+      };
+
+      // Xử lý thêm vào giỏ hàng - code hiện có
+
+      // Nếu là sản phẩm Flash Sale, cập nhật số lượng trong Flash Sale
+      if (isInFlashSale) {
+        const result = await updateProductQuantity(
+          // flashSaleId sẽ được lấy từ kết quả của hàm checkProductInFlashSale
+          // Bạn có thể lưu flashSaleId vào state khi gọi checkFlashSale
+          flashSaleId,
+          productData._id,
+          selectedDungLuong._id,
+          selectedMauSac._id,
+          1
+        );
+
+        if (!result.success) {
+          alert(result.message || "Không thể cập nhật số lượng Flash Sale");
+          return;
+        }
+      }
+
+      // Cập nhật tồn kho
+      await axios.post("http://localhost:3005/stock/update", {
+        productId: productData._id,
+        dungluongId: selectedDungLuong._id,
+        mausacId: selectedMauSac._id,
+        quantity: 1,
+      });
+
+      // Cập nhật lại thông tin tồn kho sau khi thêm vào giỏ hàng
+      checkStock(productData._id, selectedDungLuong._id, selectedMauSac._id);
+
+      alert("Đã thêm sản phẩm vào giỏ hàng");
+    } catch (error) {
+      console.error("Lỗi khi thêm vào giỏ hàng:", error);
+      alert("Lỗi khi thêm vào giỏ hàng");
+    }
+  };
+
+  // Render component
+  if (loading) {
+    return <div>Đang tải...</div>;
+  }
+
+  if (!productData) {
+    return <div>Không tìm thấy sản phẩm</div>;
   }
 
   return (
-    <div className='container-chitiet'>
-      <Helmet>
-        <title>{product.name} - Shopdunk</title>
-      </Helmet>
-      <ThanhDinhHuong
-        breadcrumbs={[
-          { label: "Trang Chủ", link: "/" },
-          { label: product.name, link: `/chitietsanpham/${tieude}` },
-        ]}
-      />
+    <div className="container-chitiet">
+      {/* Các phần Header và Navigation */}
 
       <div className="main">
-        <div className="product-image">
-          <div>
-            <img src={product.image} alt={product.name} className="pdt-img" />
+        <div className="product-detail">
+          <div className="product-image">
+            {/* Hiển thị hình ảnh sản phẩm */}
+            <img
+              src={productData.image}
+              alt={productData.name}
+              className="pdt-img"
+            />
           </div>
-          <div className="anhchay">
-            <Slider {...settings}>
-              {annhmausac.map((anh, index) => (
-                <div className="banner_item" key={index}>
-                  <img src={`${anh}`} alt="Banner 1" className="anhchay-img" />
-                </div>
-              ))}
-            </Slider>
-          </div>
-        </div>
 
-        <div className='product-detail'>
-          <div className='product-info'>
-            <div className='product-name-chitiet'>{product.name}</div>
-            <div className='divratedanhgia_container'>
-              <div className='divratedanhgia'>
-                <div className='startdangia'>
-                  <img src='/star.png' alt='' width={15} height={15} />
-                  <img src='/star.png' alt='' width={15} height={15} />
-                  <img src='/star.png' alt='' width={15} height={15} />
-                  <img src='/star.png' alt='' width={15} height={15} />
-                  <img src='/star.png' alt='' width={15} height={15} />
-                </div>
-              </div>
-            </div>
+          <div className="product-info">
+            <h1 className="product-name-chitiet">{productData.name}</h1>
+
+            {/* Hiển thị Flash Sale nếu sản phẩm đang trong Flash Sale */}
+            {isInFlashSale &&
+              productData &&
+              selectedDungLuong &&
+              selectedMauSac && (
+                <ProductFlashSale
+                  productId={productData._id}
+                  dungluongId={selectedDungLuong._id}
+                  mausacId={selectedMauSac._id}
+                />
+              )}
+
+            {/* Hiển thị giá */}
             <div className="chitietprice">
-              <span className="current-price">
-                {pricemausac ? pricemausac.toLocaleString() : 0}đ
-              </span>
-              {khuyenmai === 0 ? (
-                <div></div>
+              {isInFlashSale ? (
+                <>
+                  <span className="current-price">
+                    {flashSalePrice.toLocaleString("vi-VN")}đ
+                  </span>
+                  <span className="old-price">
+                    {selectedMauSac
+                      ? selectedMauSac.price.toLocaleString("vi-VN")
+                      : productData.price.toLocaleString("vi-VN")}
+                    đ
+                  </span>
+                </>
               ) : (
-                <span className="old-price">{giagoc.toLocaleString()}đ</span>
+                <span className="current-price">
+                  {selectedMauSac
+                    ? selectedMauSac.price.toLocaleString("vi-VN")
+                    : productData.price.toLocaleString("vi-VN")}
+                  đ
+                </span>
               )}
             </div>
-            <div class='note_VAT'>(Đã bao gồm VAT)</div>
 
-            <div className='mausac_dungluong'>
-              <div class='note_tieude'>Dung lượng:</div>
-
-              <div className="dungluong_chitiet">
-                {dungluong.map((item, index) => (
-                  <>
-                    <div className='dungluong_container' key={index}>
-                      <div
-                        className={
-                          dungluong1 === item.name
-                            ? 'dungluong_item dungluong_item_active'
-                            : 'dungluong_item'
-                        }
-                        onClick={() =>
-                          handleChangeDungLuong(item._id, item.name)
-                        }
-                      >
-                        <span>{item.name}</span>
-                      </div>
-                    </div>
-                  </>
-                ))}
-              </div>
-              <div class='note_tieude'>Màu sắc:</div>
-
-              <div className='mausac_chitiet'>
-                {dungluong.map((item, index) => (
-                  <>
-                    <div className='dungluong_container' key={index}>
-                      <div className='mausac_container'>
-                        {dungluong1 === item.name &&
-                          item.mausac.map((mau, row) => (
-                            <div
-                              className={
-                                mausac1 === mau.name
-                                  ? `border_mausac border_mausac1`
-                                  : `border_mausac`
-                              }
-                              key={row}
-                              onClick={() => {
-                                setmausac1(mau.name)
-                                setidmausac(mau._id)
-                                setpricemausac(mau.price)
-                                setkhuyenmai(mau.khuyenmai)
-                                setgiagoc(mau.giagoc)
-                              }}
-                            >
-                              <div
-                                style={{ backgroundColor: `${mau.name}` }}
-                              ></div>
-                            </div>
-                          ))}
-                      </div>
-                    </div>
-                  </>
-                ))}
-              </div>
-            </div>
-          </div>
-          <div className='short-des'>
-            <p className='title'>
-              <FontAwesomeIcon icon={faGift} />
-              Ưu đãi
-            </p>
-            <div className='short-description'>
-              <div className='short-description-header'>
-                <span>
-                  ( Khuyến mãi dự kiến áp dụng{' '}
-                  <strong>đến 23h59 | 28/2/2025</strong>&nbsp;)
+            {/* Hiển thị trạng thái tồn kho */}
+            <div className="stock-status">
+              {stockInfo.status === "loading" && (
+                <span className="loading-stock">Đang kiểm tra tồn kho</span>
+              )}
+              {stockInfo.status === "in-stock" && (
+                <span className="in-stock">
+                  Còn hàng{" "}
+                  {stockInfo.quantity !== "Không giới hạn"
+                    ? `(${stockInfo.quantity})`
+                    : ""}
                 </span>
-              </div>
-              <hr />
-              <div style={{ display: 'flex' }}>
-                <div className='short-description-content'>
-                  <div className='event_price'>
-                    Ưu đãi mùa yêu Valentine 10/2 - 17/2 giảm thêm
+              )}
+              {stockInfo.status === "low-stock" && (
+                <span className="low-stock">
+                  Sắp hết hàng (Chỉ còn {stockInfo.quantity})
+                </span>
+              )}
+              {stockInfo.status === "out-of-stock" && (
+                <span className="out-of-stock">Hết hàng</span>
+              )}
+            </div>
+
+            {/* Phần chọn dung lượng và màu sắc */}
+            <div className="mausac_dungluong">
+              {dungLuongs.length > 0 && (
+                <div className="dungluong_container">
+                  <div className="mausac_chitiet">
+                    <p>Dung lượng:</p>
                   </div>
-                  <div className='event_value'>100,000 ₫</div>
-                  <div>
-                    Áp dụng màu Ultramarine (Xanh Lưu Ly). Được áp dụng cùng
-                    ZaloPay. Không áp dụng cùng CTKM khác.
+                  <div className="dungluong_chitiet">
+                    {dungLuongs.map((dungluong) => (
+                      <div
+                        key={dungluong._id}
+                        className={`dungluong_item ${
+                          selectedDungLuong &&
+                          selectedDungLuong._id === dungluong._id
+                            ? "dungluong_item_active"
+                            : ""
+                        }`}
+                        onClick={() => handleDungLuongChange(dungluong)}
+                      >
+                        <span>{dungluong.name}</span>
+                      </div>
+                    ))}
                   </div>
                 </div>
-              </div>
-              <hr />
-              <p className='pchitiet'>
-                <strong className='pstrong'>I. Ưu đãi thanh toán&nbsp;</strong>
-              </p>
-              <p className='pchitiet lh-2'>
-                <span style={{ color: '#000000' }}>
-                  <img src='/tichxanh.jpe' alt='' width={16} height={17} />
-                  Hỗ trợ trả góp
-                  <strong> 0% </strong>
-                  lãi suất, 0 phụ phí
-                  <span style={{ color: '#007edb' }}> (xem chi tiết)</span>
-                </span>
-              </p>
-              <p className='pchitiet lh-2'>
-                <span style={{ color: '#000000' }}>
-                  <img src='/tichxanh.jpe' alt='' width={16} height={17} />
-                  Giảm đến
-                  <strong> 400.000đ </strong>
-                  khi thanh toán qua
-                  <strong> QR ZaloPay </strong>
-                  (SL có hạn)
-                </span>
-              </p>
-              <p className='pchitiet lh-2'>
-                <span style={{ color: '#000000' }}>
-                  <img src='/tichxanh.jpe' alt='' width={16} height={17} />
-                  Giảm đến
-                  <strong> 200.000đ </strong>
-                  khi thanh toán qua
-                  <strong> Kredivo </strong>
-                </span>
-              </p>
-              <p className='pchitiet'>
-                <strong className='pstrong'>II. Ưu đãi mua kèm &nbsp;</strong>
-              </p>
-              <p className='pchitiet lh-2'>
-                <span style={{ color: '#000000' }}>
-                  <img src='/tichxanh.jpe' alt='' width={16} height={17} />
-                  <strong> Ốp chính hãng Apple iPhone 16 series </strong>
-                  giảm
-                  <strong> 100.000đ </strong>
-                </span>
-              </p>
-              <p className='pchitiet lh-2'>
-                <span style={{ color: '#000000' }}>
-                  <img src='/tichxanh.jpe' alt='' width={16} height={17} />
-                  <strong> Sản phẩm Apple, phụ kiên </strong>
-                  giảm đên
-                  <strong> 80% </strong>
-                  <span style={{ color: '#007edb' }}>(xem chi tiết)</span>
-                </span>
-              </p>
-              <p className='pchitiet lh-2'>
-                <span style={{ color: '#000000' }}>
-                  <img src='/tichxanh.jpe' alt='' width={16} height={17} />
-                  Mua combo phụ kiện
-                  <strong> Non Apple </strong>
-                  giảm đến
-                  <strong> 200.000đ </strong>
-                </span>
-              </p>
-              <p className='pchitiet lh-2'>
-                <span style={{ color: '#000000' }}>
-                  <img src='/tichxanh.jpe' alt='' width={16} height={17} />
-                  Giảm đến
-                  <strong> 20% </strong>
-                  khi mua các gói bảo hành
-                  <span style={{ color: '#007edb' }}> (xem chi tiết)</span>
-                </span>
-              </p>
-              <p className='pchitiet'>
-                <strong className='pstrong'>III. Ưu đãi khác &nbsp;</strong>
-              </p>
-              <p className='pchitiet lh-2'>
-                <span style={{ color: '#000000' }}>
-                  <img src='/tichxanh.jpe' alt='' width={16} height={17} />
-                  Duy nhất tại ShopDunk, hỗ trợ mở thẻ tín dụng Sacombank hạn
-                  mức lên tới
-                  <strong> 25 triệu </strong>
-                  dành cho HS-SV
-                </span>
-              </p>
-              <p className='pchitiet lh-2'>
-                <span style={{ color: '#000000' }}>
-                  <img src='/tichxanh.jpe' alt='' width={16} height={17} />
-                  Trợ giá lên đời đến
-                  <strong> 20% </strong>
-                  <span style={{ color: '#007edb' }}>(xem chi tiết)</span>
-                </span>
-              </p>
+              )}
+
+              {mauSacs && mauSacs.length > 0 && (
+                <div className="mausac_container">
+                  <div className="mausac_chitiet">
+                    <p>Màu sắc:</p>
+                  </div>
+                  <div className="mausac_chitiet">
+                    {mauSacs.map((mausac) => (
+                      <div
+                        key={mausac._id}
+                        className={`border_mausac ${
+                          selectedMauSac && selectedMauSac._id === mausac._id
+                            ? "border_mausac1"
+                            : ""
+                        } ${
+                          stockInfo.status === "out-of-stock"
+                            ? "out-of-stock"
+                            : ""
+                        }`}
+                        onClick={() => handleMauSacChange(mausac)}
+                        title={mausac.name}
+                      >
+                        <div style={{ backgroundColor: mausac.name }}></div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
-          </div>
-          <div className='divbtn_muagay' onClick={handleBuyNow}>
-            MUA NGAY
-          </div>
-          <div className='short-des'>
-            <p className='pchitiet lh-2'>
-              <span style={{ color: '#000000' }}>
-                <FontAwesomeIcon
-                  icon={faCircleCheck}
-                  className="icontichxanh"
-                />
-                <span>
-                  {" "}
-                  Bộ sản phẩm gồm: Hộp, Sách hướng dẫn, Cây lấy sim, Cáp Type C
-                </span>
-              </span>
-            </p>
-            <p className="pchitiet lh-2">
-              <span style={{ color: "#000000" }}>
-                <FontAwesomeIcon
-                  icon={faCircleCheck}
-                  className="icontichxanh"
-                />
-                <span>
-                  {' '}
-                  Miễn phí 1 đổi 1 trong 30 ngày đầu tiên (nếu có lỗi do NSX)
-                </span>
-              </span>
-            </p>
-            <p className="pchitiet lh-2">
-              <span style={{ color: "#000000" }}>
-                <FontAwesomeIcon
-                  icon={faCircleCheck}
-                  className="icontichxanh"
-                />
-                <span> Bảo hành chính hãng 1 năm</span>
-                <span style={{ color: '#007edb' }}> (chi tiết)</span>
-              </span>
-            </p>
-            <p className="pchitiet lh-2">
-              <span style={{ color: "#000000" }}>
-                <FontAwesomeIcon
-                  icon={faCircleCheck}
-                  className="icontichxanh"
-                />
-                <span> Giao hàng nhanh toàn quốc</span>
-                <span style={{ color: '#007edb' }}> (chi tiết)</span>
-              </span>
-            </p>
-            <p className="pchitiet lh-2">
-              <span style={{ color: "#000000" }}>
-                <FontAwesomeIcon
-                  icon={faCircleCheck}
-                  className="icontichxanh"
-                />
-                <span> Tax Refund For Foreingers</span>
-                <span style={{ color: '#007edb' }}> (chi tiết)</span>
-              </span>
-            </p>
+
+            {/* Nút mua hàng */}
+            <div
+              className={`divbtn_muagay ${
+                stockInfo.status === "out-of-stock" ? "disabled" : ""
+              }`}
+              onClick={
+                stockInfo.status !== "out-of-stock"
+                  ? handleAddToCart
+                  : undefined
+              }
+            >
+              {stockInfo.status === "out-of-stock"
+                ? "HẾT HÀNG"
+                : isInFlashSale
+                ? "MUA NGAY - GIÁ FLASH SALE"
+                : "MUA NGAY"}
+            </div>
+
+            {/* Các phần khác của trang chi tiết sản phẩm */}
           </div>
         </div>
       </div>
-      <div className="category-sidebar">
-        <ListBlog />
-      </div>
-      <RelatedProducts category={loaisp} currentProductId={idsanpham} />
     </div>
   );
 };
 
-export default ChiTietLayout
+export default ChiTietLayout;

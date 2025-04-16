@@ -1,0 +1,166 @@
+.product-flash-sale {
+  margin: 15px 0;
+  border: 1px solid #ff5252;
+  border-radius: 8px;
+  overflow: hidden;
+  background-color: #fff8f8;
+  box-shadow: 0 2px 8px rgba(255, 82, 82, 0.15);
+
+  .flash-sale-banner {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: linear-gradient(135deg, #ff512f, #dd2476);
+    color: white;
+    padding: 10px 15px;
+
+    .flash-sale-title {
+      display: flex;
+      align-items: center;
+
+      .flash-icon {
+        font-size: 20px;
+        margin-right: 8px;
+        animation: flash 1.5s infinite;
+      }
+
+      span {
+        font-weight: bold;
+        font-size: 16px;
+        text-transform: uppercase;
+      }
+    }
+
+    .flash-sale-timer {
+      display: flex;
+      align-items: center;
+
+      svg {
+        margin-right: 8px;
+      }
+
+      .timer-digits {
+        font-family: "Courier New", monospace;
+        font-weight: bold;
+        font-size: 16px;
+
+        span {
+          display: inline-block;
+        }
+      }
+    }
+  }
+
+  .flash-sale-details {
+    padding: 12px 15px;
+
+    .flash-sale-price {
+      display: flex;
+      align-items: center;
+      margin-bottom: 10px;
+
+      .sale-price {
+        font-size: 20px;
+        font-weight: bold;
+        color: #ff512f;
+        margin-right: 10px;
+      }
+
+      .original-price {
+        font-size: 16px;
+        text-decoration: line-through;
+        color: #999;
+        margin-right: 10px;
+      }
+
+      .discount-badge {
+        background-color: #ff512f;
+        color: white;
+        font-weight: bold;
+        font-size: 14px;
+        padding: 3px 8px;
+        border-radius: 12px;
+      }
+    }
+
+    .flash-sale-progress {
+      .progress-text {
+        display: flex;
+        justify-content: space-between;
+        font-size: 14px;
+        margin-bottom: 5px;
+
+        span:last-child {
+          font-weight: 500;
+          color: #ff512f;
+        }
+      }
+
+      .progress-bar {
+        height: 8px;
+        background-color: #f1f1f1;
+        border-radius: 4px;
+        overflow: hidden;
+
+        .progress-fill {
+          height: 100%;
+          background: linear-gradient(90deg, #ff512f, #dd2476);
+          border-radius: 4px;
+        }
+      }
+    }
+  }
+
+  .view-all-flash-sales {
+    display: block;
+    text-align: center;
+    padding: 10px;
+    background-color: rgba(255, 82, 82, 0.1);
+    color: #ff512f;
+    text-decoration: none;
+    font-weight: 500;
+    border-top: 1px dashed #ffcdd2;
+    transition: background-color 0.2s;
+
+    &:hover {
+      background-color: rgba(255, 82, 82, 0.2);
+    }
+  }
+}
+
+@keyframes flash {
+  0%,
+  50%,
+  100% {
+    opacity: 1;
+  }
+  25%,
+  75% {
+    opacity: 0.5;
+  }
+}
+
+@media (max-width: 768px) {
+  .product-flash-sale {
+    .flash-sale-banner {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 8px;
+      padding: 10px;
+
+      .flash-sale-timer {
+        width: 100%;
+        justify-content: flex-start;
+      }
+    }
+
+    .flash-sale-details {
+      padding: 10px;
+
+      .flash-sale-price {
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+    }
+  }
+}
