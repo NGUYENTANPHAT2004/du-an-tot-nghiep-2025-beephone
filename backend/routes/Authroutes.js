@@ -17,6 +17,7 @@ const generateToken = (user) => {
 };
 
 // 🔹 Đăng ký tài khoản
+// Sửa lại phần xử lý voucher chào mừng trong phần đăng ký
 router.post('/register_auth', async (req, res) => {
   try {
     const { username, email, password, role, phone } = req.body;
@@ -56,9 +57,9 @@ router.post('/register_auth', async (req, res) => {
     
     await user.save();
     
-    // Generate a welcome voucher for the new user
+    // Generate a welcome voucher for the new user - Chỉ phát cho user đã đăng ký
     try {
-      const welcomeVoucher = await generateVoucherForUser(phone, 'new-account', 14); // 14 days expiry
+      const welcomeVoucher = await generateVoucherForUser(user._id, 'new-account', 14); // 14 days expiry
       
       res.json({ 
         message: 'Đăng ký thành công', 
@@ -194,6 +195,35 @@ router.put('/auth/updateStatus/:id', async (req, res) => {
     }
 
     res.json({ message: 'Cập nhật trạng thái thành công', user: updatedUser });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Lỗi server' });
+  }
+});
+
+// API cập nhật role người dùng
+router.put('/auth/updateRole/:id', async (req, res) => {
+  try {
+    const { role } = req.body;
+    const userId = req.params.id;
+
+    // Kiểm tra role hợp lệ
+    const validRoles = ['user', 'admin', 'manager', 'staff'];
+    if (!validRoles.includes(role)) {
+      return res.status(400).json({ message: 'Vai trò không hợp lệ' });
+    }
+
+    const updatedUser = await User.User.findByIdAndUpdate(
+      userId,
+      { role },
+      { new: true }
+    );
+
+    if (!updatedUser) {
+      return res.status(404).json({ message: 'Không tìm thấy người dùng' });
+    }
+
+    res.json({ message: 'Cập nhật vai trò thành công', user: updatedUser });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: 'Lỗi server' });
