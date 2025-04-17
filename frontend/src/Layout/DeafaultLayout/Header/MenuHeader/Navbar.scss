@@ -19,7 +19,7 @@
 // Main navbar styles
 .navbar-modern {
   width: 100%;
-  font-family: 'Roboto', Arial, sans-serif;
+  font-family: "Roboto", Arial, sans-serif;
   box-shadow: 0 2px 10px var(--shadow-color);
   z-index: 1000;
 }
@@ -27,7 +27,7 @@
 // Top bar with logo and header
 .topbar {
   backdrop-filter: blur(100px); // hiệu ứng mờ
-  -webkit-backdrop-filter: blur(100px); 
+  -webkit-backdrop-filter: blur(100px);
   background-color: var(--topbar-bg);
   padding: 10px 0;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
@@ -39,29 +39,29 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    
+
     @media (max-width: 768px) {
       padding: 0 15px;
     }
   }
-  
+
   .logo-container {
     flex: 0 0 auto;
-    
+
     .logo-link {
       display: block;
-      
+
       .logo-image {
         height: 40px;
         display: block;
-        
+
         @media (max-width: 480px) {
           height: 32px;
         }
       }
     }
   }
-  
+
   .header-wrapper {
     flex: 1;
     display: flex;
@@ -73,7 +73,7 @@
 .menu-bar {
   background-color: var(--navbar-bg);
   color: var(--navbar-text);
-  
+
   .menu-container {
     max-width: 1300px;
     margin: 0 auto;
@@ -81,12 +81,12 @@
     display: flex;
     align-items: center;
     position: relative;
-    
+
     @media (max-width: 768px) {
       padding: 0 15px;
     }
   }
-  
+
   // Mobile menu toggle button
   .menu-toggle {
     display: flex;
@@ -97,21 +97,21 @@
     font-size: 16px;
     padding: 12px 0;
     cursor: pointer;
-    
+
     .toggle-text {
       margin-left: 8px;
       font-weight: 500;
     }
-    
+
     @media (min-width: 769px) {
       display: none;
     }
   }
-  
+
   // Menu wrapper
   .menu-wrapper {
     display: flex;
-    
+
     @media (max-width: 768px) {
       .menu-backdrop {
         position: fixed;
@@ -125,20 +125,20 @@
         opacity: 0;
         transition: opacity var(--transition-speed) ease;
       }
-      
+
       &.menu-open {
         .menu-backdrop {
           visibility: visible;
           opacity: 1;
         }
-        
+
         .main-menu {
           transform: translateX(0);
         }
       }
     }
   }
-  
+
   // Main menu
   .main-menu {
     @media (max-width: 768px) {
@@ -154,7 +154,7 @@
       transform: translateX(-100%);
       transition: transform var(--transition-speed) ease;
       overflow-y: auto;
-      
+
       .mobile-menu-header {
         display: flex;
         align-items: center;
@@ -163,7 +163,7 @@
         background-color: var(--navbar-bg);
         color: var(--navbar-text);
         font-weight: 500;
-        
+
         .close-menu {
           background: none;
           border: none;
@@ -175,29 +175,29 @@
       }
     }
   }
-  
+
   // Menu list
   .menu-list {
     display: flex;
     list-style: none;
     margin: 0;
     padding: 0;
-    
+
     @media (max-width: 768px) {
       flex-direction: column;
       width: 100%;
     }
-    
+
     // Menu items
     .menu-item {
       position: relative;
-      
+
       @media (max-width: 768px) {
         border-bottom: 1px solid var(--submenu-border);
       }
-      
+
       // Links in menu
-      .menu-link, 
+      .menu-link,
       .menu-button {
         display: flex;
         align-items: center;
@@ -207,46 +207,46 @@
         white-space: nowrap;
         font-size: 15px;
         transition: background-color var(--transition-speed) ease;
-        
+
         &:hover {
           background-color: var(--navbar-hover);
         }
-        
+
         @media (max-width: 768px) {
           color: var(--submenu-text);
           width: 100%;
           justify-content: space-between;
           padding: 15px;
-          
+
           &:hover {
             background-color: var(--submenu-hover-bg);
             color: var(--submenu-hover-text);
           }
         }
       }
-      
+
       // Button for toggling submenu
       .menu-button {
         background: none;
         border: none;
         cursor: pointer;
         font-family: inherit;
-        
+
         .submenu-icon {
           margin-left: 8px;
           font-size: 12px;
           transition: transform var(--transition-speed) ease;
-          
+
           &.active {
             transform: rotate(180deg);
           }
-          
+
           @media (max-width: 768px) {
             margin-left: 0;
           }
         }
       }
-      
+
       // Submenu container
       &.has-submenu {
         .submenu-container {
@@ -265,16 +265,16 @@
             z-index: 1000;
             overflow: hidden;
           }
-          
+
           @media (max-width: 768px) {
             display: none;
-            
+
             &.active {
               display: block;
             }
           }
         }
-        
+
         &:hover .submenu-container {
           @media (min-width: 769px) {
             visibility: visible;
@@ -282,25 +282,25 @@
             transform: translateY(0);
           }
         }
-        
+
         // Active state for mobile
         &.submenu-active {
           @media (max-width: 768px) {
             background-color: var(--submenu-active-bg);
-            
+
             .menu-button {
               color: var(--submenu-hover-text);
             }
           }
         }
       }
-      
+
       // Submenu list
       .submenu-list {
         list-style: none;
         padding: 0;
         margin: 0;
-        
+
         @media (max-width: 768px) {
           padding: 0 0 10px 0;
         }

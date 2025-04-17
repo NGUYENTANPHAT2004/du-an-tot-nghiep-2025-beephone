@@ -91,6 +91,22 @@
         display: none;
       }
     }
+
+    // Desktop arrow icon
+    .desktop-arrow {
+      display: none;
+      
+      @media (min-width: 769px) {
+        display: flex;
+        margin-left: auto;
+        color: var(--icon-color);
+        padding-right: 10px;
+        
+        .arrow-icon {
+          font-size: 12px;
+        }
+      }
+    }
   }
   
   // Active state
@@ -108,18 +124,39 @@
       }
     }
   }
+}
+
+// Subcategory list - riêng biệt để tránh xung đột
+.category-item .subcategory-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
   
-  // Subcategory list
-  .subcategory-list {
-    list-style: none;
-    margin: 0;
-    padding: 0;
+  // Mobile: hide by default, show when active
+  @media (max-width: 768px) {
+    display: none;
+    background-color: rgba(0, 0, 0, 0.03);
     
-    // Desktop: position absolute for submenus
+    &.active {
+      display: block;
+    }
+    
+    .category-item {
+      .category-header {
+        .category-link {
+          padding-left: 30px;
+        }
+      }
+    }
+  }
+}
+
+/* Desktop submenu styles - tách biệt để đảm bảo hoạt động đúng */
 @media (min-width: 769px) {
+  /* First level categories */
   .category-item {
     position: relative;
-
+    
     .subcategory-list {
       position: absolute;
       top: 0;
@@ -133,110 +170,37 @@
       transform: translateX(-10px);
       transition: all var(--transition-speed) ease;
       z-index: 1000;
-
-      // ✨ Xử lý cấp submenu kế tiếp (level 2, 3...)
-      .category-item {
-        &:hover > .subcategory-list {
-          opacity: 1;
-          visibility: visible;
-          transform: translateX(0);
-        }
-
-        .subcategory-list {
-          left: 100%; // để lùi sang phải tiếp tục
-          top: 0;
-        }
-      }
     }
-
-    // Cấp đầu tiên vẫn cần hiển thị khi hover
+    
     &:hover > .subcategory-list {
-      display: block;
       opacity: 1;
       visibility: visible;
       transform: translateX(0);
-    }
-  }
-}
-
-    // Mobile: hide by default, show when active
-    @media (max-width: 768px) {
-      display: none;
-      background-color: rgba(0, 0, 0, 0.03);
-      
-      &.active {
-        display: block;
-      }
-      
-      .category-item {
-        .category-header {
-          .category-link {
-            padding-left: 30px;
-          }
-        }
-      }
     }
   }
   
-  // Show submenu on hover for desktop
-  @media (min-width: 769px) {
+  /* Nested subcategories */
+  .subcategory-list .category-item {
     &:hover > .subcategory-list {
       opacity: 1;
       visibility: visible;
       transform: translateX(0);
     }
   }
-}
-
-/* Ensure parent category styles don't affect subcategories */
-.submenu-container {
-  .submenu-list {
-    .category-item {
-      position: relative;
-    }
-  }
-}
-
-/* Make sure the link is clickable on desktop */
-@media (min-width: 769px) {
-  .category-item {
+  
+  /* Special case for top-level submenu container */
+  .submenu-container .submenu-list .category-item {
     position: relative;
-  
-    // Khi hover 1 cấp
+    
     &:hover > .subcategory-list {
-      display: block;
       opacity: 1;
       visibility: visible;
       transform: translateX(0);
     }
-  
+    
     .subcategory-list {
-      // positioning for submenu
-      position: absolute;
       top: 0;
       left: 100%;
-      // ...
-  
-      // Nested submenu handling
-      .category-item {
-        position: relative;
-  
-        &:hover > .subcategory-list {
-          display: block;
-          opacity: 1;
-          visibility: visible;
-          transform: translateX(0);
-        }
-  
-        .subcategory-list {
-          top: 0;
-          left: 100%; // cứ đẩy sang phải
-        }
-      }
     }
   }
 }
-
-/* Extra styles to add to CategoryItem.scss for desktop hover effects */
-
-/* Desktop arrow icon */
