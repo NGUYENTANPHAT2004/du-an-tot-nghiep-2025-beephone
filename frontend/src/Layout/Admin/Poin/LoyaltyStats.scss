@@ -1,0 +1,301 @@
+/* LoyaltyStats.scss */
+.loyalty-stats {
+    .date-range-filter {
+      background-color: #f5f5f5;
+      border-radius: 8px;
+      padding: 15px;
+      margin-bottom: 20px;
+      
+      h4 {
+        margin-top: 0;
+        margin-bottom: 10px;
+        display: flex;
+        align-items: center;
+        
+        svg {
+          margin-right: 10px;
+          color: #3498db;
+        }
+      }
+      
+      form {
+        display: flex;
+        align-items: flex-end;
+        flex-wrap: wrap;
+        gap: 15px;
+        
+        .date-inputs {
+          display: flex;
+          gap: 15px;
+          flex: 1;
+          flex-wrap: wrap;
+          
+          .input-group {
+            display: flex;
+            flex-direction: column;
+            min-width: 200px;
+            
+            label {
+              margin-bottom: 5px;
+              font-size: 0.9rem;
+              color: #666;
+            }
+            
+            input {
+              padding: 8px 12px;
+              border: 1px solid #ddd;
+              border-radius: 4px;
+              
+              &:focus {
+                outline: none;
+                border-color: #3498db;
+              }
+            }
+          }
+        }
+        
+        button {
+          padding: 9px 20px;
+          background-color: #3498db;
+          color: white;
+          border: none;
+          border-radius: 4px;
+          cursor: pointer;
+          display: flex;
+          align-items: center;
+          
+          svg {
+            margin-right: 8px;
+          }
+          
+          &:hover {
+            background-color: #2980b9;
+          }
+          
+          &:disabled {
+            background-color: #95a5a6;
+            cursor: not-allowed;
+          }
+        }
+      }
+    }
+    
+    .stats-section {
+      background-color: white;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 20px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+      
+      h4 {
+        margin-top: 0;
+        margin-bottom: 20px;
+        display: flex;
+        align-items: center;
+        
+        svg {
+          margin-right: 10px;
+          color: #3498b9;
+        }
+      }
+      
+      .stats-cards {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 15px;
+        margin-bottom: 15px;
+        
+        .stats-card {
+          flex: 1;
+          min-width: 200px;
+          background-color: #f9f9f9;
+          border-radius: 8px;
+          padding: 15px;
+          box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+          
+          .card-title {
+            font-size: 0.9rem;
+            color: #666;
+            margin-bottom: 8px;
+          }
+          
+          .card-value {
+            font-size: 1.8rem;
+            font-weight: 600;
+            color: #2c3e50;
+          }
+        }
+      }
+      
+      .tier-distribution {
+        margin-top: 20px;
+        
+        .distribution-chart {
+          height: 40px;
+          display: flex;
+          border-radius: 4px;
+          overflow: hidden;
+          margin-bottom: 15px;
+          
+          .chart-bar {
+            height: 100%;
+            transition: width 0.3s ease;
+            min-width: 5px;
+            
+            &:hover {
+              opacity: 0.8;
+            }
+          }
+        }
+        
+        .distribution-legend {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 15px;
+          
+          .legend-item {
+            display: flex;
+            align-items: center;
+            margin-right: 20px;
+            
+            .color-box {
+              width: 16px;
+              height: 16px;
+              border-radius: 3px;
+              margin-right: 8px;
+            }
+            
+            .tier-name {
+              font-weight: 500;
+              margin-right: 5px;
+            }
+            
+            .tier-count {
+              margin-right: 5px;
+              color: #555;
+            }
+            
+            .tier-percentage {
+              color: #777;
+              font-size: 0.9rem;
+            }
+          }
+        }
+      }
+      
+      .top-redemptions {
+        margin-top: 15px;
+        overflow-x: auto;
+        
+        table {
+          width: 100%;
+          border-collapse: collapse;
+          
+          th, td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+          }
+          
+          th {
+            background-color: #f5f5f5;
+            font-weight: 600;
+          }
+          
+          tr:nth-child(even) {
+            background-color: #f9f9f9;
+          }
+          
+          tr:hover {
+            background-color: #f1f1f1;
+          }
+        }
+      }
+      
+      .chart-container {
+        margin-top: 20px;
+        
+        .chart-legend {
+          display: flex;
+          margin-bottom: 15px;
+          
+          .legend-item {
+            display: flex;
+            align-items: center;
+            margin-right: 20px;
+            
+            .color-box {
+              width: 16px;
+              height: 16px;
+              border-radius: 3px;
+              margin-right: 8px;
+              
+              &.issued {
+                background-color: #3498db;
+              }
+              
+              &.redeemed {
+                background-color: #2ecc71;
+              }
+            }
+          }
+        }
+        
+        .chart {
+          display: flex;
+          height: 250px;
+          position: relative;
+          border-bottom: 1px solid #ddd;
+          border-left: 1px solid #ddd;
+          padding-bottom: 30px;
+          margin-left: 50px;
+          
+          .chart-bars {
+            display: flex;
+            justify-content: space-around;
+            align-items: flex-end;
+            flex: 1;
+            height: 100%;
+            position: relative;
+            z-index: 1;
+            
+            .chart-column {
+              display: flex;
+              flex-direction: column;
+              align-items: center;
+              width: 50px;
+              margin: 0 5px;
+              
+              .column-label {
+                font-size: 0.8rem;
+                color: #666;
+                margin-top: 5px;
+                text-align: center;
+              }
+              
+              .column-bars {
+                display: flex;
+                align-items: flex-end;
+                height: 200px;
+                width: 100%;
+                
+                .bar {
+                  width: 20px;
+                  margin: 0 2px;
+                  transition: height 0.3s ease;
+                  
+                  &.issued {
+                    background-color: #3498db;
+                  }
+                  
+                  &.redeemed {
+                    background-color: #2ecc71;
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+}

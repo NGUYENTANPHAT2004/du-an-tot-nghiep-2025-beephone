@@ -1,12 +1,3 @@
-<<<<<<< HEAD
-/* eslint-disable react-hooks/exhaustive-deps */
-import React, { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
-import "./ChiTietLayout.scss";
-
-import ListBlog from "../../components/ListBlog/ListBlog";
-import ThanhDinhHuong from "../../components/ThanhDinhHuong/ThanhDinhHuong";
-=======
 import React, { useEffect, useState, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import "./ChiTietLayout.scss";
@@ -15,37 +6,26 @@ import axios from "axios";
 import ListBlog from "../../components/ListBlog/ListBlog";
 import ThanhDinhHuong from "../../components/ThanhDinhHuong/ThanhDinhHuong";
 import ProductRating from "../../components/ProductRating/ProductRating";
->>>>>>> c1d4eb0142ccb43d71f18e4c79dac8eb7c9e73f6
 import { Helmet } from "react-helmet";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCircleCheck, faGift } from "@fortawesome/free-solid-svg-icons";
 import Slider from "react-slick";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
-<<<<<<< HEAD
-=======
 import { RelatedProducts } from "../Splienquan";
 import ProductRatingsContainer from "../../components/ProductRating/ProductRatingcontainer";
->>>>>>> c1d4eb0142ccb43d71f18e4c79dac8eb7c9e73f6
+import ProductFlashSale from "../../components/flashe/ProductFlashSale";
 
 const ChiTietLayout = () => {
   const { tieude, loaisp } = useParams();
   const navigate = useNavigate();
   const [product, setProduct] = useState(null);
-<<<<<<< HEAD
-
-  const [isLoading, setIsLoading] = useState(true);
-  const [dungluong, setdungluong] = useState([]);
-  const [dungluong1, setdungluong1] = useState([]);
-  const [mausac1, setmausac1] = useState([]);
-=======
   const [quantity, setQuantity] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isStockLoading, setIsStockLoading] = useState(false);
   const [dungluong, setdungluong] = useState([]);
   const [dungluong1, setdungluong1] = useState("");
   const [mausac1, setmausac1] = useState("");
->>>>>>> c1d4eb0142ccb43d71f18e4c79dac8eb7c9e73f6
   const [annhmausac, setanhmausac] = useState([]);
   const [pricemausac, setpricemausac] = useState(0);
   const [khuyenmai, setkhuyenmai] = useState(0);
@@ -53,18 +33,12 @@ const ChiTietLayout = () => {
   const [idmausac, setidmausac] = useState("");
   const [idsanpham, setidsanpham] = useState("");
   const [iddungluong, setiddungluong] = useState("");
-<<<<<<< HEAD
-=======
   const [activeTab, setActiveTab] = useState("mota"); // 'mota', 'thongso', 'chitiet'
   const [techSpecs, setTechSpecs] = useState(null);
   const [productRatings, setProductRatings] = useState(null);
->>>>>>> c1d4eb0142ccb43d71f18e4c79dac8eb7c9e73f6
 
   const [imgsanpham, setimgsanpham] = useState("");
   const [namesanpham, setnamesanpham] = useState("");
-  const [processingColorChange, setProcessingColorChange] = useState(false);
-  const [processingCapacityChange, setProcessingCapacityChange] =
-    useState(false);
 
   const settings = {
     dots: true,
@@ -88,46 +62,6 @@ const ChiTietLayout = () => {
         },
       },
     ],
-<<<<<<< HEAD
-  };
-
-  useEffect(() => {
-    if (dungluong.length > 0) {
-      setdungluong1(dungluong[0].name);
-      setiddungluong(dungluong[0]._id);
-      if (dungluong[0].mausac.length > 0) {
-        setmausac1(dungluong[0].mausac[0].name);
-        setidmausac(dungluong[0].mausac[0]._id);
-        setpricemausac(dungluong[0].mausac[0].price);
-        setkhuyenmai(dungluong[0].mausac[0].khuyenmai);
-        setgiagoc(dungluong[0].mausac[0].giagoc);
-      }
-    }
-  }, [dungluong]);
-
-  const handleChangeDungLuong = (id, name) => {
-    setiddungluong(id);
-    setdungluong1(name);
-
-    const dungLuongMoi = dungluong.find((dl) => dl.name === name);
-    if (!dungLuongMoi) return;
-
-    const mauHienTai = dungLuongMoi.mausac.find((mau) => mau.name === mausac1);
-
-    if (mauHienTai) {
-      setidmausac(mauHienTai._id);
-      setpricemausac(mauHienTai.price);
-      setkhuyenmai(mauHienTai.khuyenmai);
-      setgiagoc(mauHienTai.giagoc);
-    } else if (dungLuongMoi.mausac.length > 0) {
-      setmausac1(dungLuongMoi.mausac[0].name);
-      setidmausac(dungLuongMoi.mausac[0]._id);
-      setpricemausac(dungLuongMoi.mausac[0].price);
-      setkhuyenmai(dungLuongMoi.mausac[0].khuyenmai);
-      setgiagoc(dungLuongMoi.mausac[0].giagoc);
-    }
-=======
->>>>>>> c1d4eb0142ccb43d71f18e4c79dac8eb7c9e73f6
   };
 
   // Sử dụng useCallback để tối ưu hàm fetchStock
@@ -173,8 +107,8 @@ const ChiTietLayout = () => {
           console.error("Chi tiết lỗi:", errorData);
         } catch (e) {
           console.error("Không thể đọc chi tiết lỗi");
+          setQuantity(0);
         }
-        setQuantity(0);
       }
     } catch (error) {
       console.error("Lỗi khi lấy tồn kho:", error);
@@ -204,107 +138,67 @@ const ChiTietLayout = () => {
     }
   }, [loaisp]);
 
-  // Xử lý thay đổi màu sắc
-  const handleColorChange = useCallback(
-    (mau) => {
-      // Nếu đang xử lý, bỏ qua
-      if (processingColorChange) return;
-
-      setProcessingColorChange(true);
-      setIsStockLoading(true);
-
-      console.log("Chọn màu:", mau.name, "ID:", mau._id);
-
-      // Cập nhật tất cả state liên quan đến màu sắc
-      setmausac1(mau.name);
-      setidmausac(mau._id);
-      setpricemausac(mau.price);
-      setkhuyenmai(mau.khuyenmai);
-      setgiagoc(mau.giagoc);
-
-      // Thực hiện cả hai request song song nhau
-      Promise.all([
-        // Kiểm tra tồn kho
-        fetch(
-          `http://localhost:3005/stock/${idsanpham}/${iddungluong}/${mau._id}`
-        )
-          .then((response) => {
-            if (!response.ok) throw new Error("Không thể kiểm tra tồn kho");
-            return response.json();
-          })
-          .then((data) => {
-            console.log(`Kết quả tồn kho cho màu ${mau.name}:`, data);
-            if (data.unlimitedStock) {
-              setQuantity("Không giới hạn");
-            } else {
-              setQuantity(data.stock);
-            }
-            return data;
-          }),
-
-        // Lấy ảnh màu sắc
-        fetch(`http://localhost:3005/getanhmausac/${mau._id}`)
-          .then((response) => {
-            if (!response.ok) throw new Error("Không thể lấy ảnh màu sắc");
-            return response.json();
-          })
-          .then((data) => {
-            setanhmausac(data);
-            return data;
-          }),
-      ])
-        .catch((error) => {
-          console.error("Lỗi khi xử lý thay đổi màu sắc:", error);
-          setQuantity(0);
-        })
-        .finally(() => {
-          setIsStockLoading(false);
-          setProcessingColorChange(false);
+  // Monitor changes to product selection and fetch stock accordingly
+  useEffect(() => {
+    const fetchStockIfReady = async () => {
+      // Only fetch if we have all required IDs
+      if (idsanpham && iddungluong && idmausac) {
+        console.log("Tất cả ID đã sẵn sàng, lấy thông tin tồn kho:", {
+          idsanpham,
+          iddungluong,
+          idmausac,
         });
-    },
-    [idsanpham, iddungluong, processingColorChange]
-  );
+        await fetchStock();
+      } else {
+        console.log("Chưa đủ thông tin để lấy tồn kho:", {
+          idsanpham: idsanpham || "chưa có",
+          iddungluong: iddungluong || "chưa có",
+          idmausac: idmausac || "chưa có",
+        });
+      }
+    };
 
-  // Xử lý thay đổi dung lượng
+    fetchStockIfReady();
+  }, [idsanpham, iddungluong, idmausac, fetchStock]);
+
+  // Set initial selection when dungluong data loads
+  useEffect(() => {
+    if (dungluong.length > 0) {
+      setdungluong1(dungluong[0].name);
+      setiddungluong(dungluong[0]._id);
+      if (dungluong[0].mausac.length > 0) {
+        setmausac1(dungluong[0].mausac[0].name);
+        setidmausac(dungluong[0].mausac[0]._id);
+        setpricemausac(dungluong[0].mausac[0].price);
+        setkhuyenmai(dungluong[0].mausac[0].khuyenmai);
+        setgiagoc(dungluong[0].mausac[0].giagoc);
+      }
+    }
+  }, [dungluong]);
+
+  // Tối ưu hàm handleChangeDungLuong
   const handleChangeDungLuong = useCallback(
     (id, name) => {
-      // Nếu đang xử lý, bỏ qua
-      if (processingCapacityChange) return;
+      // Lưu trữ giá trị cũ để so sánh
+      const oldDungLuongId = iddungluong;
 
-      setProcessingCapacityChange(true);
-      setIsStockLoading(true);
-
-      console.log("Thay đổi dung lượng thành:", name, "ID:", id);
-
-      // Cập nhật giá trị dung lượng
+      // Cập nhật giá trị dung lượng mới
       setiddungluong(id);
       setdungluong1(name);
 
       const dungLuongMoi = dungluong.find((dl) => dl.name === name);
-      if (!dungLuongMoi) {
-        console.error("Không tìm thấy dung lượng:", name);
-        setIsStockLoading(false);
-        setProcessingCapacityChange(false);
-        return;
-      }
+      if (!dungLuongMoi) return;
 
-      let newMauSacId = "";
-      let newMauSacName = "";
-
-      // Tìm màu hiện tại trong dung lượng mới
       const mauHienTai = dungLuongMoi.mausac.find(
         (mau) => mau.name === mausac1
       );
 
       if (mauHienTai) {
         // Nếu màu hiện tại vẫn tồn tại trong dung lượng mới
-        setmausac1(mauHienTai.name);
         setidmausac(mauHienTai._id);
         setpricemausac(mauHienTai.price);
         setkhuyenmai(mauHienTai.khuyenmai);
         setgiagoc(mauHienTai.giagoc);
-        newMauSacId = mauHienTai._id;
-        newMauSacName = mauHienTai.name;
       } else if (dungLuongMoi.mausac.length > 0) {
         // Nếu không, dùng màu đầu tiên trong dung lượng mới
         setmausac1(dungLuongMoi.mausac[0].name);
@@ -312,66 +206,11 @@ const ChiTietLayout = () => {
         setpricemausac(dungLuongMoi.mausac[0].price);
         setkhuyenmai(dungLuongMoi.mausac[0].khuyenmai);
         setgiagoc(dungLuongMoi.mausac[0].giagoc);
-        newMauSacId = dungLuongMoi.mausac[0]._id;
-        newMauSacName = dungLuongMoi.mausac[0].name;
-      } else {
-        console.error("Dung lượng này không có màu sắc nào");
-        setIsStockLoading(false);
-        setProcessingCapacityChange(false);
-        return;
       }
 
-      // Chủ động fetch tồn kho với thông tin mới
-      if (idsanpham && id && newMauSacId) {
-        console.log(
-          `Kiểm tra tồn kho với: SP=${idsanpham}, DL=${id}, MS=${newMauSacId}`
-        );
-
-        fetch(`http://localhost:3005/stock/${idsanpham}/${id}/${newMauSacId}`)
-          .then((response) => {
-            if (response.ok) return response.json();
-            throw new Error("Không thể kiểm tra tồn kho");
-          })
-          .then((data) => {
-            console.log(
-              `Kết quả tồn kho cho ${name} - ${newMauSacName}:`,
-              data
-            );
-            if (data.unlimitedStock) {
-              setQuantity("Không giới hạn");
-            } else {
-              setQuantity(data.stock);
-            }
-          })
-          .catch((error) => {
-            console.error("Lỗi khi kiểm tra tồn kho:", error);
-            setQuantity(0);
-          })
-          .finally(() => {
-            setIsStockLoading(false);
-            setProcessingCapacityChange(false);
-          });
-      } else {
-        setIsStockLoading(false);
-        setProcessingCapacityChange(false);
-      }
-
-      // Cập nhật ảnh màu sắc cho màu mới
-      if (newMauSacId) {
-        fetch(`http://localhost:3005/getanhmausac/${newMauSacId}`)
-          .then((response) => {
-            if (response.ok) return response.json();
-            throw new Error("Không thể lấy ảnh màu sắc");
-          })
-          .then((data) => {
-            setanhmausac(data);
-          })
-          .catch((error) => {
-            console.error("Lỗi khi lấy ảnh màu sắc:", error);
-          });
-      }
+      // Không cần gọi fetchStock ở đây vì useEffect sẽ xử lý khi idmausac thay đổi
     },
-    [dungluong, idsanpham, mausac1, processingCapacityChange]
+    [dungluong, mausac1, iddungluong]
   );
 
   const fetchdungluong = useCallback(async () => {
@@ -424,31 +263,6 @@ const ChiTietLayout = () => {
     } catch (error) {
       console.error("Lỗi khi lấy ảnh màu sắc:", error);
     }
-<<<<<<< HEAD
-  };
-
-  useEffect(() => {
-    fetchdungluong();
-    fetchProduct();
-  }, [tieude]);
-
-  useEffect(() => {
-    fetchanhmausac();
-  }, [idmausac]);
-
-  if (isLoading) {
-    return <p>Đang tải dữ liệu...</p>;
-  }
-
-  if (!product) {
-    return <p>Không tìm thấy sản phẩm!</p>;
-  }
-
-  const handleBuyNow = () => {
-    if (!dungluong1) {
-      alert("Vui lòng chọn dung lượng!");
-      return;
-=======
   }, [idmausac]);
 
   // Tối ưu hàm fetch đánh giá sản phẩm
@@ -467,37 +281,31 @@ const ChiTietLayout = () => {
     }
   }, [idsanpham]);
 
-  // Khởi tạo dữ liệu ban đầu
+  // Test API connectivity when component mounts
+  useEffect(() => {
+    const testApiConnectivity = async () => {
+      try {
+        console.log("Testing API connectivity...");
+        const response = await fetch("http://localhost:3005/api-status");
+        if (response.ok) {
+          console.log("API server is responding correctly");
+        } else {
+          console.warn("API server responded with status:", response.status);
+        }
+      } catch (error) {
+        console.error("Could not connect to API server:", error);
+      }
+    };
+
+    testApiConnectivity();
+  }, []);
+
+  // Fetch initial data
   useEffect(() => {
     fetchdungluong();
     fetchProduct();
     fetchTechSpecs();
   }, [fetchdungluong, fetchProduct, fetchTechSpecs]);
-
-  // Set initial selection when dungluong data loads
-  useEffect(() => {
-    if (dungluong.length > 0) {
-      const initialDungluong = dungluong[0];
-      setdungluong1(initialDungluong.name);
-      setiddungluong(initialDungluong._id);
-
-      if (initialDungluong.mausac.length > 0) {
-        const initialMausac = initialDungluong.mausac[0];
-        setmausac1(initialMausac.name);
-        setidmausac(initialMausac._id);
-        setpricemausac(initialMausac.price);
-        setkhuyenmai(initialMausac.khuyenmai);
-        setgiagoc(initialMausac.giagoc);
-
-        // Tải tồn kho cho lựa chọn ban đầu
-        setTimeout(() => {
-          if (idsanpham && initialDungluong._id && initialMausac._id) {
-            fetchStock();
-          }
-        }, 100);
-      }
-    }
-  }, [dungluong, idsanpham, fetchStock]);
 
   useEffect(() => {
     fetchanhmausac();
@@ -506,157 +314,97 @@ const ChiTietLayout = () => {
   useEffect(() => {
     if (idsanpham) {
       fetchProductRatings();
->>>>>>> c1d4eb0142ccb43d71f18e4c79dac8eb7c9e73f6
     }
   }, [idsanpham, fetchProductRatings]);
 
-  // Xử lý thêm vào giỏ hàng và mua ngay
-  const handleAddToCart = useCallback(
-    async (buyNow = false) => {
-      if (!dungluong1) {
-        alert("Vui lòng chọn dung lượng!");
+  // Tối ưu hóa handleBuyNow
+  const handleBuyNow = useCallback(async () => {
+    if (!dungluong1) {
+      alert("Vui lòng chọn dung lượng!");
+      return;
+    }
+
+    if (!mausac1) {
+      alert("Vui lòng chọn màu sắc!");
+      return;
+    }
+
+    const dungLuongHienTai = dungluong.find((dl) => dl.name === dungluong1);
+    const validColors = dungLuongHienTai
+      ? dungLuongHienTai.mausac.map((mau) => mau.name)
+      : [];
+
+    if (!validColors.includes(mausac1)) {
+      alert("Màu sắc không hợp lệ với dung lượng đã chọn!");
+      return;
+    }
+
+    if (!pricemausac) {
+      alert("Vui lòng chọn giá phù hợp với màu sắc!");
+      return;
+    }
+
+    // Kiểm tra tồn kho mới nhất trước khi thêm vào giỏ hàng
+    try {
+      await fetchStock();
+
+      // Kiểm tra lại sau khi lấy thông tin tồn kho mới nhất
+      if (quantity === 0 || quantity === "0" || quantity === "Hết hàng") {
+        alert("Sản phẩm đã hết hàng!");
         return;
       }
 
-      if (!mausac1) {
-        alert("Vui lòng chọn màu sắc!");
-        return;
+      const newItem = {
+        idsanpham,
+        namesanpham,
+        imgsanpham,
+        iddungluong,
+        dungluong: dungluong1,
+        mausac: mausac1,
+        idmausac: idmausac,
+        pricemausac,
+      };
+
+      let cart = JSON.parse(localStorage.getItem("cart")) || [];
+
+      const isExist = cart.some(
+        (item) =>
+          item.idsanpham === idsanpham &&
+          item.dungluong === dungluong1 &&
+          item.mausac === mausac1
+      );
+
+      if (!isExist) {
+        cart.push(newItem);
+        localStorage.setItem("cart", JSON.stringify(cart));
+        navigate("/cart");
+      } else {
+        alert("Sản phẩm này đã có trong giỏ hàng!");
       }
-
-      const dungLuongHienTai = dungluong.find((dl) => dl.name === dungluong1);
-      const validColors = dungLuongHienTai
-        ? dungLuongHienTai.mausac.map((mau) => mau.name)
-        : [];
-
-      if (!validColors.includes(mausac1)) {
-        alert("Màu sắc không hợp lệ với dung lượng đã chọn!");
-        return;
-      }
-
-<<<<<<< HEAD
-    const newItem = {
-=======
-      if (!pricemausac) {
-        alert("Vui lòng chọn giá phù hợp với màu sắc!");
-        return;
-      }
-
-      // Kiểm tra tồn kho trước khi thêm vào giỏ hàng
-      setIsStockLoading(true);
-      try {
-        const response = await fetch(
-          `http://localhost:3005/stock/${idsanpham}/${iddungluong}/${idmausac}`
-        );
-
-        if (!response.ok) {
-          const errorData = await response.json();
-          alert(`Lỗi: ${errorData.message || "Không thể kiểm tra tồn kho"}`);
-          setIsStockLoading(false);
-          return;
-        }
-
-        const stockData = await response.json();
-
-        // Kiểm tra tồn kho
-        if (
-          stockData.stock === 0 ||
-          stockData.stock === "0" ||
-          stockData.stock === "Hết hàng"
-        ) {
-          alert("Sản phẩm đã hết hàng!");
-          setIsStockLoading(false);
-          return;
-        }
-
-        const newItem = {
-          idsanpham,
-          namesanpham,
-          imgsanpham,
-          iddungluong,
-          dungluong: dungluong1,
-          mausac: mausac1,
-          idmausac: idmausac,
-          pricemausac,
-          soluong: 1, // Mặc định thêm 1 sản phẩm
-        };
-
-        let cart = JSON.parse(localStorage.getItem("cart")) || [];
-
-        if (buyNow) {
-          // Mua ngay: kiểm tra tồn tại
-          const isExist = cart.some(
-            (item) =>
-              item.idsanpham === idsanpham &&
-              item.dungluong === dungluong1 &&
-              item.mausac === mausac1
-          );
-
-          if (!isExist) {
-            cart.push(newItem);
-            localStorage.setItem("cart", JSON.stringify(cart));
-            navigate("/cart");
-          } else {
-            alert("Sản phẩm này đã có trong giỏ hàng!");
-            navigate("/cart");
-          }
-        } else {
-          // Thêm vào giỏ hàng
-          const existingItemIndex = cart.findIndex(
-            (item) =>
-              item.idsanpham === idsanpham &&
-              item.dungluong === dungluong1 &&
-              item.mausac === mausac1
-          );
-
-          if (existingItemIndex === -1) {
-            cart.push(newItem);
-            localStorage.setItem("cart", JSON.stringify(cart));
-            alert("Đã thêm sản phẩm vào giỏ hàng!");
-          } else {
-            // Nếu sản phẩm đã tồn tại, kiểm tra có thể tăng số lượng không
-            const currentQuantity = cart[existingItemIndex].soluong || 1;
-
-            if (
-              stockData.unlimitedStock ||
-              stockData.stock === "Không giới hạn" ||
-              stockData.stock > currentQuantity
-            ) {
-              cart[existingItemIndex].soluong = currentQuantity + 1;
-              localStorage.setItem("cart", JSON.stringify(cart));
-              alert("Đã tăng số lượng sản phẩm trong giỏ hàng!");
-            } else {
-              alert("Đã đạt số lượng tối đa có thể mua cho sản phẩm này!");
-            }
-          }
-        }
-
-        window.dispatchEvent(new Event("cartUpdated"));
-      } catch (error) {
-        console.error("Lỗi khi kiểm tra tồn kho:", error);
-        alert("Có lỗi xảy ra, vui lòng thử lại sau!");
-      } finally {
-        setIsStockLoading(false);
-      }
-    },
-    [
-      dungluong1,
-      mausac1,
-      pricemausac,
-      dungluong,
->>>>>>> c1d4eb0142ccb43d71f18e4c79dac8eb7c9e73f6
-      idsanpham,
-      namesanpham,
-      imgsanpham,
-      iddungluong,
-      idmausac,
-      navigate,
-    ]
-  );
+      window.dispatchEvent(new Event("cartUpdated"));
+    } catch (error) {
+      console.error("Lỗi khi kiểm tra tồn kho:", error);
+      alert("Có lỗi xảy ra, vui lòng thử lại sau!");
+    }
+  }, [
+    dungluong1,
+    mausac1,
+    pricemausac,
+    dungluong,
+    idsanpham,
+    namesanpham,
+    imgsanpham,
+    iddungluong,
+    idmausac,
+    quantity,
+    fetchStock,
+    navigate,
+  ]);
 
   // Function to display stock status with appropriate styling
   const renderStockStatus = useCallback(() => {
     if (isStockLoading) {
-      return <span className="loading-stock">Đang kiểm tra tồn kho...</span>;
+      return <span className="loading-stock">Đang tải...</span>;
     } else if (quantity === null) {
       return <span className="loading-stock">Chưa có thông tin</span>;
     } else if (quantity === 0 || quantity === "0" || quantity === "Hết hàng") {
@@ -666,13 +414,6 @@ const ChiTietLayout = () => {
     } else {
       return <span className="in-stock">Còn hàng</span>;
     }
-<<<<<<< HEAD
-    window.dispatchEvent(new Event("cartUpdated"));
-  };
-
-  return (
-    <div className="container-chitiet">
-=======
   }, [quantity, isStockLoading]);
 
   if (isLoading) {
@@ -689,7 +430,6 @@ const ChiTietLayout = () => {
         Tình trạng: <strong>{renderStockStatus()}</strong>
       </div>
 
->>>>>>> c1d4eb0142ccb43d71f18e4c79dac8eb7c9e73f6
       <Helmet>
         <title>{product.name} - Shopdunk</title>
       </Helmet>
@@ -721,14 +461,6 @@ const ChiTietLayout = () => {
             <div className="product-name-chitiet">{product.name}</div>
             <div className="divratedanhgia_container">
               <div className="divratedanhgia">
-<<<<<<< HEAD
-                <div className="startdangia">
-                  <img src="/star.png" alt="" width={15} height={15} />
-                  <img src="/star.png" alt="" width={15} height={15} />
-                  <img src="/star.png" alt="" width={15} height={15} />
-                  <img src="/star.png" alt="" width={15} height={15} />
-                  <img src="/star.png" alt="" width={15} height={15} />
-=======
                 <ProductRating
                   productId={idsanpham}
                   size="medium"
@@ -742,11 +474,10 @@ const ChiTietLayout = () => {
                       ({productRatings.totalRatings})
                     </span>
                   )}
->>>>>>> c1d4eb0142ccb43d71f18e4c79dac8eb7c9e73f6
                 </div>
-                <div className="danhgiarate">Đánh giá</div>
               </div>
             </div>
+            {idsanpham && <ProductFlashSale productId={idsanpham} />}
             <div className="chitietprice">
               <span className="current-price">
                 {pricemausac ? pricemausac.toLocaleString() : 0}đ
@@ -757,29 +488,6 @@ const ChiTietLayout = () => {
                 <span className="old-price">{giagoc.toLocaleString()}đ</span>
               )}
             </div>
-<<<<<<< HEAD
-            <div class="note_VAT">(Đã bao gồm VAT)</div>
-
-            <div className="mausac_dungluong">
-              <div class="note_tieude">Dung lượng:</div>
-
-              <div className="dungluong_chitiet">
-                {dungluong.map((item, index) => (
-                  <>
-                    <div className="dungluong_container" key={index}>
-                      <div
-                        className={
-                          dungluong1 === item.name
-                            ? "dungluong_item dungluong_item_active"
-                            : "dungluong_item"
-                        }
-                        onClick={() =>
-                          handleChangeDungLuong(item._id, item.name)
-                        }
-                      >
-                        <span>{item.name}</span>
-                      </div>
-=======
             <div className="note_VAT">(Đã bao gồm VAT)</div>
 
             <div className="mausac_dungluong">
@@ -796,46 +504,11 @@ const ChiTietLayout = () => {
                       }
                       onClick={() => handleChangeDungLuong(item._id, item.name)}
                     >
-                      <span>
-                        {processingCapacityChange && dungluong1 === item.name
-                          ? "⟳ "
-                          : ""}
-                        {item.name}
-                      </span>
->>>>>>> c1d4eb0142ccb43d71f18e4c79dac8eb7c9e73f6
+                      <span>{item.name}</span>
                     </div>
                   </div>
                 ))}
               </div>
-<<<<<<< HEAD
-              <div class="note_tieude">Màu sắc:</div>
-
-              <div className="mausac_chitiet">
-                {dungluong.map((item, index) => (
-                  <>
-                    <div className="dungluong_container" key={index}>
-                      <div className="mausac_container">
-                        {dungluong1 === item.name &&
-                          item.mausac.map((mau, row) => (
-                            <div
-                              className={
-                                mausac1 === mau.name
-                                  ? `border_mausac border_mausac1`
-                                  : `border_mausac`
-                              }
-                              key={row}
-                              onClick={() => {
-                                setmausac1(mau.name);
-                                setidmausac(mau._id);
-                                setpricemausac(mau.price);
-                                setkhuyenmai(mau.khuyenmai);
-                                setgiagoc(mau.giagoc);
-                              }}
-                            >
-                              <div
-                                style={{ backgroundColor: `${mau.name}` }}
-                              ></div>
-=======
               <div className="note_tieude">Màu sắc:</div>
 
               <div className="mausac_chitiet">
@@ -847,25 +520,30 @@ const ChiTietLayout = () => {
                           <div
                             className={
                               mausac1 === mau.name
-                                ? `border_mausac border_mausac1 ${
-                                    processingColorChange ? "processing" : ""
-                                  }`
-                                : `border_mausac ${
-                                    processingColorChange ? "disabled" : ""
-                                  }`
+                                ? `border_mausac border_mausac1`
+                                : `border_mausac`
                             }
                             key={row}
-                            onClick={() => handleColorChange(mau)}
+                            onClick={() => {
+                              console.log(
+                                "Chọn màu:",
+                                mau.name,
+                                "ID:",
+                                mau._id
+                              );
+
+                              // Cập nhật tất cả state liên quan đến màu sắc trong một batch
+                              setmausac1(mau.name);
+                              setidmausac(mau._id);
+                              setpricemausac(mau.price);
+                              setkhuyenmai(mau.khuyenmai);
+                              setgiagoc(mau.giagoc);
+                              // Không cần gọi fetchStock ở đây vì useEffect sẽ xử lý khi idmausac thay đổi
+                            }}
                           >
-                            <div style={{ backgroundColor: `${mau.name}` }}>
-                              {processingColorChange &&
-                                mausac1 === mau.name && (
-                                  <span className="color-loading-indicator">
-                                    ⟳
-                                  </span>
-                                )}
->>>>>>> c1d4eb0142ccb43d71f18e4c79dac8eb7c9e73f6
-                            </div>
+                            <div
+                              style={{ backgroundColor: `${mau.name}` }}
+                            ></div>
                           </div>
                         ))}
                     </div>
@@ -874,30 +552,6 @@ const ChiTietLayout = () => {
               </div>
             </div>
           </div>
-<<<<<<< HEAD
-          <div className="short-des">
-            <p className="title">
-              <FontAwesomeIcon icon={faGift} />
-              Ưu đãi
-            </p>
-            <div className="short-description">
-              <div className="short-description-header">
-                <span>
-                  ( Khuyến mãi dự kiến áp dụng{" "}
-                  <strong>đến 23h59 | 28/2/2025</strong>&nbsp;)
-                </span>
-              </div>
-              <hr />
-              <div style={{ display: "flex" }}>
-                <div className="short-description-content">
-                  <div className="event_price">
-                    Ưu đãi mùa yêu Valentine 10/2 - 17/2 giảm thêm
-                  </div>
-                  <div className="event_value">100,000 ₫</div>
-                  <div>
-                    Áp dụng màu Ultramarine (Xanh Lưu Ly). Được áp dụng cùng
-                    ZaloPay. Không áp dụng cùng CTKM khác.
-=======
 
           {/* Product Tabs Navigation */}
           <div className="product-tabs">
@@ -960,7 +614,6 @@ const ChiTietLayout = () => {
                       Áp dụng màu Ultramarine (Xanh Lưu Ly). Được áp dụng cùng
                       ZaloPay. Không áp dụng cùng CTKM khác.
                     </div>
->>>>>>> c1d4eb0142ccb43d71f18e4c79dac8eb7c9e73f6
                   </div>
                 </div>
                 <hr />
@@ -1056,103 +709,6 @@ const ChiTietLayout = () => {
                   </span>
                 </p>
               </div>
-<<<<<<< HEAD
-              <hr />
-              <p className="pchitiet">
-                <strong className="pstrong">I. Ưu đãi thanh toán&nbsp;</strong>
-              </p>
-              <p className="pchitiet lh-2">
-                <span style={{ color: "#000000" }}>
-                  <img src="/tichxanh.jpe" alt="" width={16} height={17} />
-                  Hỗ trợ trả góp
-                  <strong> 0% </strong>
-                  lãi suất, 0 phụ phí
-                  <span style={{ color: "#007edb" }}> (xem chi tiết)</span>
-                </span>
-              </p>
-              <p className="pchitiet lh-2">
-                <span style={{ color: "#000000" }}>
-                  <img src="/tichxanh.jpe" alt="" width={16} height={17} />
-                  Giảm đến
-                  <strong> 400.000đ </strong>
-                  khi thanh toán qua
-                  <strong> QR ZaloPay </strong>
-                  (SL có hạn)
-                </span>
-              </p>
-              <p className="pchitiet lh-2">
-                <span style={{ color: "#000000" }}>
-                  <img src="/tichxanh.jpe" alt="" width={16} height={17} />
-                  Giảm đến
-                  <strong> 200.000đ </strong>
-                  khi thanh toán qua
-                  <strong> Kredivo </strong>
-                </span>
-              </p>
-              <p className="pchitiet">
-                <strong className="pstrong">II. Ưu đãi mua kèm &nbsp;</strong>
-              </p>
-              <p className="pchitiet lh-2">
-                <span style={{ color: "#000000" }}>
-                  <img src="/tichxanh.jpe" alt="" width={16} height={17} />
-                  <strong> Ốp chính hãng Apple iPhone 16 series </strong>
-                  giảm
-                  <strong> 100.000đ </strong>
-                </span>
-              </p>
-              <p className="pchitiet lh-2">
-                <span style={{ color: "#000000" }}>
-                  <img src="/tichxanh.jpe" alt="" width={16} height={17} />
-                  <strong> Sản phẩm Apple, phụ kiên </strong>
-                  giảm đên
-                  <strong> 80% </strong>
-                  <span style={{ color: "#007edb" }}>(xem chi tiết)</span>
-                </span>
-              </p>
-              <p className="pchitiet lh-2">
-                <span style={{ color: "#000000" }}>
-                  <img src="/tichxanh.jpe" alt="" width={16} height={17} />
-                  Mua combo phụ kiện
-                  <strong> Non Apple </strong>
-                  giảm đến
-                  <strong> 200.000đ </strong>
-                </span>
-              </p>
-              <p className="pchitiet lh-2">
-                <span style={{ color: "#000000" }}>
-                  <img src="/tichxanh.jpe" alt="" width={16} height={17} />
-                  Giảm đến
-                  <strong> 20% </strong>
-                  khi mua các gói bảo hành
-                  <span style={{ color: "#007edb" }}> (xem chi tiết)</span>
-                </span>
-              </p>
-              <p className="pchitiet">
-                <strong className="pstrong">III. Ưu đãi khác &nbsp;</strong>
-              </p>
-              <p className="pchitiet lh-2">
-                <span style={{ color: "#000000" }}>
-                  <img src="/tichxanh.jpe" alt="" width={16} height={17} />
-                  Duy nhất tại ShopDunk, hỗ trợ mở thẻ tín dụng Sacombank hạn
-                  mức lên tới
-                  <strong> 25 triệu </strong>
-                  dành cho HS-SV
-                </span>
-              </p>
-              <p className="pchitiet lh-2">
-                <span style={{ color: "#000000" }}>
-                  <img src="/tichxanh.jpe" alt="" width={16} height={17} />
-                  Trợ giá lên đời đến
-                  <strong> 20% </strong>
-                  <span style={{ color: "#007edb" }}>(xem chi tiết)</span>
-                </span>
-              </p>
-            </div>
-          </div>
-          <div className="divbtn_muagay" onClick={handleBuyNow}>
-            MUA NGAY
-          </div>
-=======
             </div>
           </div>
 
@@ -1271,7 +827,7 @@ const ChiTietLayout = () => {
                 ? "disabled"
                 : ""
             }`}
-            onClick={handleAddToCart}
+            onClick={handleBuyNow}
           >
             {isStockLoading
               ? "ĐANG KIỂM TRA KHO"
@@ -1279,7 +835,6 @@ const ChiTietLayout = () => {
               ? "HẾT HÀNG"
               : "MUA NGAY"}
           </div>
->>>>>>> c1d4eb0142ccb43d71f18e4c79dac8eb7c9e73f6
           <div className="short-des">
             <p className="pchitiet lh-2">
               <span style={{ color: "#000000" }}>
@@ -1301,11 +856,7 @@ const ChiTietLayout = () => {
                 />
                 <span>
                   {" "}
-<<<<<<< HEAD
-                  Miễn phí 1 đổi 1 trong 30 ngày đầu tiên (nếu có lỗi do NSX)
-=======
                   Miễn phí 1 đổi 1 trong 30 ngày đầu tiên (nếu có lỗi do NSX)
->>>>>>> c1d4eb0142ccb43d71f18e4c79dac8eb7c9e73f6
                 </span>
               </span>
             </p>
@@ -1316,11 +867,7 @@ const ChiTietLayout = () => {
                   className="icontichxanh"
                 />
                 <span> Bảo hành chính hãng 1 năm</span>
-<<<<<<< HEAD
-                <span style={{ color: "#007edb" }}> (chi tiết)</span>
-=======
                 <span style={{ color: "#007edb" }}> (chi tiết)</span>
->>>>>>> c1d4eb0142ccb43d71f18e4c79dac8eb7c9e73f6
               </span>
             </p>
             <p className="pchitiet lh-2">
@@ -1330,11 +877,7 @@ const ChiTietLayout = () => {
                   className="icontichxanh"
                 />
                 <span> Giao hàng nhanh toàn quốc</span>
-<<<<<<< HEAD
-                <span style={{ color: "#007edb" }}> (chi tiết)</span>
-=======
                 <span style={{ color: "#007edb" }}> (chi tiết)</span>
->>>>>>> c1d4eb0142ccb43d71f18e4c79dac8eb7c9e73f6
               </span>
             </p>
             <p className="pchitiet lh-2">
@@ -1344,11 +887,7 @@ const ChiTietLayout = () => {
                   className="icontichxanh"
                 />
                 <span> Tax Refund For Foreingers</span>
-<<<<<<< HEAD
-                <span style={{ color: "#007edb" }}> (chi tiết)</span>
-=======
                 <span style={{ color: "#007edb" }}> (chi tiết)</span>
->>>>>>> c1d4eb0142ccb43d71f18e4c79dac8eb7c9e73f6
               </span>
             </p>
           </div>
@@ -1357,60 +896,8 @@ const ChiTietLayout = () => {
       <div className="category-sidebar">
         <ListBlog />
       </div>
-
-      {/* <div className='chitiet-footer'>
-        <div className='footer-icons'>
-          <div className='icon-item'>
-            <CiDeliveryTruck
-              style={{
-                color: '#823905',
-                fontSize: '35px',
-                display: 'inline-block'
-              }}
-            />
-            <p>MIỄN PHÍ VẬN CHUYỂN</p>
-          </div>
-          <div className='icon-item'>
-            <TfiReload
-              style={{
-                color: '#823905',
-                fontSize: '35px',
-                display: 'inline-block'
-              }}
-            />
-            <p>NHẬN ĐỔI TRẢ HÀNG</p>
-          </div>
-          <div className='icon-item'>
-            <AiOutlineDollar
-              style={{
-                color: '#823905',
-                fontSize: '35px',
-                display: 'inline-block'
-              }}
-            />
-            <p>GIÁ BÁN TỐT NHẤT</p>
-          </div>
-          <div className='icon-item'>
-            <FiLifeBuoy
-              style={{
-                color: '#823905',
-                fontSize: '35px',
-                display: 'inline-block'
-              }}
-            />
-            <p>BẢO HÀNH TRỌN ĐỜI</p>
-          </div>
-        </div>
-        <div className='footer-image'>
-          <img
-            src='https://dogovinhdinh.vn/wp-content/uploads/2020/10/banner.jpg'
-            alt='Logo'
-            className='img-footer'
-          />
-        </div>
-      </div> */}
+      <RelatedProducts category={loaisp} currentProductId={idsanpham} />
     </div>
   );
 };
-
 export default ChiTietLayout;

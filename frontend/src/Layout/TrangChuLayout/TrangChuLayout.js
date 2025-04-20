@@ -11,6 +11,7 @@ import ListBlog from "../../components/ListBlog/ListBlog";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faSearch } from "@fortawesome/free-solid-svg-icons";
 import { useNavigate } from "react-router-dom";
+import FlashSaleBanner from "../../components/flashe/flashebanner";
 function TrangChuLayout() {
   const [data, setdata] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -64,6 +65,7 @@ function TrangChuLayout() {
             <ThanhDinhHuong breadcrumbs={[{ label: "Trang Chủ", link: "/" }]} />
           )}
           <Carousel />
+          <FlashSaleBanner />
           <div className="search_sanpham">
             <label htmlFor="">Tìm kiếm sản phẩm</label>
             <div className="div_input_search">
