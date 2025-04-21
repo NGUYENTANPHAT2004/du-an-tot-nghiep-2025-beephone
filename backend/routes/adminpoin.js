@@ -9,13 +9,8 @@ const { User } = require('../models/user.model');
 const { magiamgia } = require('../models/MaGiamGiaModel');
 const moment = require('moment');
 
-// Middleware to check admin authorization
 const checkAdminAuth = async (req, res, next) => {
   try {
-    // Here you would typically check if the user is authenticated and has admin role
-    // This is a simplified version - in a real application, you'd check JWT tokens, etc.
-    
-    // For demonstration purposes, we're skipping actual auth check
     next();
   } catch (error) {
     console.error('Auth error:', error);
@@ -123,16 +118,14 @@ router.get('/admin/loyalty/redemption-options', checkAdminAuth, async (req, res)
 });
 
 // Create a new redemption option
+// Create a new redemption option
 router.post('/admin/loyalty/create-redemption', checkAdminAuth, async (req, res) => {
   try {
     const {
       name,
       description,
       pointsCost,
-      voucherType,
-      voucherValue,
       voucherId,
-      minOrderValue,
       availableTiers,
       limitPerUser,
       totalQuantity,
@@ -141,8 +134,8 @@ router.post('/admin/loyalty/create-redemption', checkAdminAuth, async (req, res)
       imageUrl
     } = req.body;
     
-    // Validate required fields
-    if (!name || !pointsCost || !voucherType || !voucherValue || !voucherId) {
+    // Validate required fields - Đã chỉnh sửa để đồng nhất với frontend
+    if (!name || !pointsCost || !voucherId) {
       return res.status(400).json({
         success: false,
         message: 'Thiếu thông tin bắt buộc'
@@ -158,14 +151,18 @@ router.post('/admin/loyalty/create-redemption', checkAdminAuth, async (req, res)
       });
     }
     
+    // Lấy thông tin voucher type và value từ voucher đã chọn
+    const voucherType = 'percentage'; // Mặc định là percentage dựa trên model magiamgia
+    const voucherValue = voucher.sophantram || 0;
+    
     const redemptionOption = new PointsRedemption({
       name,
       description,
       pointsCost: Number(pointsCost),
-      voucherType,
-      voucherValue: Number(voucherValue),
+      voucherType, // Lấy từ voucher đã chọn
+      voucherValue, // Lấy từ voucher đã chọn
       voucherId,
-      minOrderValue: minOrderValue ? Number(minOrderValue) : 0,
+      minOrderValue: voucher.minOrderValue || 0,
       availableTiers: availableTiers || [],
       limitPerUser: limitPerUser ? Number(limitPerUser) : 1,
       totalQuantity: totalQuantity ? Number(totalQuantity) : 100,
@@ -192,6 +189,7 @@ router.post('/admin/loyalty/create-redemption', checkAdminAuth, async (req, res)
 });
 
 // Update an existing redemption option
+// Update an existing redemption option
 router.put('/admin/loyalty/update-redemption/:id', checkAdminAuth, async (req, res) => {
   try {
     const { id } = req.params;
@@ -199,10 +197,7 @@ router.put('/admin/loyalty/update-redemption/:id', checkAdminAuth, async (req, r
       name,
       description,
       pointsCost,
-      voucherType,
-      voucherValue,
       voucherId,
-      minOrderValue,
       availableTiers,
       limitPerUser,
       totalQuantity,
@@ -211,8 +206,8 @@ router.put('/admin/loyalty/update-redemption/:id', checkAdminAuth, async (req, r
       imageUrl
     } = req.body;
     
-    // Validate required fields
-    if (!name || !pointsCost || !voucherType || !voucherValue || !voucherId) {
+    // Validate required fields - Đã chỉnh sửa để đồng nhất với frontend
+    if (!name || !pointsCost || !voucherId) {
       return res.status(400).json({
         success: false,
         message: 'Thiếu thông tin bắt buộc'
@@ -237,14 +232,18 @@ router.put('/admin/loyalty/update-redemption/:id', checkAdminAuth, async (req, r
       });
     }
     
+    // Lấy thông tin voucher type và value từ voucher đã chọn
+    const voucherType = 'percentage'; // Mặc định là percentage dựa trên model magiamgia
+    const voucherValue = voucher.sophantram || 0;
+    
     // Update fields
     redemptionOption.name = name;
     redemptionOption.description = description;
     redemptionOption.pointsCost = Number(pointsCost);
     redemptionOption.voucherType = voucherType;
-    redemptionOption.voucherValue = Number(voucherValue);
+    redemptionOption.voucherValue = voucherValue;
     redemptionOption.voucherId = voucherId;
-    redemptionOption.minOrderValue = minOrderValue ? Number(minOrderValue) : 0;
+    redemptionOption.minOrderValue = voucher.minOrderValue || 0;
     redemptionOption.availableTiers = availableTiers || [];
     redemptionOption.limitPerUser = limitPerUser ? Number(limitPerUser) : 1;
     redemptionOption.totalQuantity = totalQuantity ? Number(totalQuantity) : 100;
@@ -725,7 +724,6 @@ router.get('/admin/loyalty/search', checkAdminAuth, async (req, res) => {
       });
     }
     
-    // Tìm kiếm user theo tên hoặc email
     const users = await User.User.find({
       $or: [
         { username: { $regex: term, $options: 'i' } },
@@ -734,7 +732,7 @@ router.get('/admin/loyalty/search', checkAdminAuth, async (req, res) => {
       ]
     }).select('_id username email phone').limit(20);
     
-    // Nếu không tìm thấy người dùng
+   
     if (users.length === 0) {
       return res.json({
         success: true,
@@ -743,7 +741,7 @@ router.get('/admin/loyalty/search', checkAdminAuth, async (req, res) => {
       });
     }
     
-    // Lấy ra danh sách userId và phone để tìm trong UserPoints
+    
     const userIds = users.map(user => user._id);
     const phones = users.map(user => user.phone).filter(Boolean);
     const emails = users.map(user => user.email).filter(Boolean);
@@ -759,7 +757,7 @@ router.get('/admin/loyalty/search', checkAdminAuth, async (req, res) => {
     
     const pointsAccounts = await UserPoints.find(userPointsQuery);
     
-    // Nếu không tìm thấy tài khoản điểm
+
     if (pointsAccounts.length === 0) {
       return res.json({
         success: true,
@@ -822,7 +820,6 @@ router.get('/admin/loyalty/user-points/:userId', checkAdminAuth, async (req, res
   }
 });
 
-// Sửa lại API lấy lịch sử điểm
 router.get('/admin/loyalty/user-points-history/:userId', checkAdminAuth, async (req, res) => {
   try {
     const { userId } = req.params;
@@ -841,7 +838,6 @@ router.get('/admin/loyalty/user-points-history/:userId', checkAdminAuth, async (
       });
     }
     
-    // Get history sorted from newest to oldest
     const history = userPoints.pointsHistory.sort((a, b) => new Date(b.date) - new Date(a.date));
     
     res.json({

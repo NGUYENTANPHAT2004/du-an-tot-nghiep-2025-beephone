@@ -1,4 +1,4 @@
-// Fixed RedemptionOptions.js - For managing reward options focusing on user ID
+// RedemptionOptions.js - Đã đơn giản hóa theo yêu cầu
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { toast } from 'react-toastify';
@@ -12,7 +12,9 @@ import {
   faGift, 
   faPercent, 
   faShippingFast, 
-  faTag
+  faTag,
+  faToggleOn,
+  faToggleOff
 } from '@fortawesome/free-solid-svg-icons';
 import moment from 'moment';
 
@@ -26,10 +28,7 @@ const RedemptionOptions = () => {
     name: '',
     description: '',
     pointsCost: '',
-    voucherType: 'percentage',
-    voucherValue: '',
     voucherId: '',
-    minOrderValue: '0',
     availableTiers: [],
     limitPerUser: '1',
     totalQuantity: '100',
@@ -88,10 +87,7 @@ const RedemptionOptions = () => {
       name: '',
       description: '',
       pointsCost: '',
-      voucherType: 'percentage',
-      voucherValue: '',
       voucherId: '',
-      minOrderValue: '0',
       availableTiers: [],
       limitPerUser: '1',
       totalQuantity: '100',
@@ -110,10 +106,7 @@ const RedemptionOptions = () => {
       name: option.name,
       description: option.description || '',
       pointsCost: option.pointsCost.toString(),
-      voucherType: option.voucherType,
-      voucherValue: option.voucherValue.toString(),
       voucherId: option.voucherId,
-      minOrderValue: option.minOrderValue.toString(),
       availableTiers: option.availableTiers || [],
       limitPerUser: option.limitPerUser.toString(),
       totalQuantity: option.totalQuantity.toString(),
@@ -153,12 +146,12 @@ const RedemptionOptions = () => {
     }
   };
 
-  // Save redemption option - Fixed to prioritize user ID for redemption limits
+  // Save redemption option
   const handleSubmit = async (e) => {
     e.preventDefault();
     
     // Validate data
-    if (!formData.name || !formData.pointsCost || !formData.voucherValue || !formData.voucherId) {
+    if (!formData.name || !formData.pointsCost || !formData.voucherId) {
       toast.error('Vui lòng điền đầy đủ thông tin bắt buộc');
       return;
     }
@@ -170,8 +163,6 @@ const RedemptionOptions = () => {
       const payload = {
         ...formData,
         pointsCost: Number(formData.pointsCost),
-        voucherValue: Number(formData.voucherValue),
-        minOrderValue: Number(formData.minOrderValue) || 0,
         limitPerUser: Number(formData.limitPerUser) || 1,
         totalQuantity: Number(formData.totalQuantity) || 100,
         remainingQuantity: editMode ? formData.remainingQuantity : Number(formData.totalQuantity) || 100
@@ -180,12 +171,6 @@ const RedemptionOptions = () => {
       // Validate essential values
       if (payload.pointsCost <= 0) {
         toast.error('Số điểm cần để đổi phải lớn hơn 0');
-        setLoading(false);
-        return;
-      }
-      
-      if (payload.voucherValue <= 0) {
-        toast.error('Giá trị voucher phải lớn hơn 0');
         setLoading(false);
         return;
       }
@@ -210,11 +195,6 @@ const RedemptionOptions = () => {
         toast.error('Ngày kết thúc phải sau ngày bắt đầu');
         setLoading(false);
         return;
-      }
-      
-      // Note about redemption limits
-      if (payload.limitPerUser > 1) {
-        toast.info('Lưu ý: Giới hạn đổi điểm sẽ áp dụng theo user ID của người dùng');
       }
       
       // Perform API call
@@ -316,15 +296,10 @@ const RedemptionOptions = () => {
     }
   };
 
-  // Display voucher type icon
-  const getVoucherTypeIcon = (type) => {
-    switch (type) {
-      case 'percentage': return <FontAwesomeIcon icon={faPercent} />;
-      case 'fixed': return <FontAwesomeIcon icon={faTag} />;
-      case 'shipping': return <FontAwesomeIcon icon={faShippingFast} />;
-      case 'product': return <FontAwesomeIcon icon={faGift} />;
-      default: return <FontAwesomeIcon icon={faGift} />;
-    }
+  // Get voucher details from voucher ID
+  const getVoucherDetails = (voucherId) => {
+    if (!voucherId) return null;
+    return vouchers.find(voucher => voucher._id === voucherId);
   };
 
   // Display voucher type name
@@ -376,8 +351,7 @@ const RedemptionOptions = () => {
             <thead>
               <tr>
                 <th>Tên quà</th>
-                <th>Loại</th>
-                <th>Giá trị</th>
+                <th>Voucher</th>
                 <th>Điểm</th>
                 <th>Cấp thành viên</th>
                 <th>Còn lại</th>
@@ -387,70 +361,85 @@ const RedemptionOptions = () => {
               </tr>
             </thead>
             <tbody>
-              {options.map(option => (
-                <tr key={option._id} className={!option.isActive ? 'inactive' : ''}>
-                  <td className="option-name">
-                    <span className="name">{option.name}</span>
-                    {option.description && (
-                      <span className="description">{option.description}</span>
-                    )}
-                  </td>
-                  <td className="option-type">
-                    {getVoucherTypeIcon(option.voucherType)}
-                    <span>{getVoucherTypeName(option.voucherType)}</span>
-                  </td>
-                  <td>
-                    {option.voucherType === 'percentage' || option.voucherType === 'product'
-                      ? `${option.voucherValue}%`
-                      : option.voucherType === 'fixed'
-                      ? `${option.voucherValue.toLocaleString('vi-VN')}đ`
-                      : 'Miễn phí'}
-                  </td>
-                  <td>{option.pointsCost.toLocaleString('vi-VN')}</td>
-                  <td>
-                    {option.availableTiers && option.availableTiers.length > 0 
-                      ? option.availableTiers.map(tier => getTierName(tier)).join(', ')
-                      : 'Tất cả'}
-                  </td>
-                  <td>
-                    {option.remainingQuantity}/{option.totalQuantity}
-                    <br />
-                    <small>({Math.round(option.remainingQuantity / option.totalQuantity * 100)}%)</small>
-                  </td>
-                  <td>{moment(option.endDate).format('DD/MM/YYYY')}</td>
-                  <td>
-                    <span className={`status-badge ${option.isActive ? 'active' : 'inactive'}`}>
-                      {option.isActive ? 'Hoạt động' : 'Không hoạt động'}
-                    </span>
-                  </td>
-                  <td className="actions">
-                    <button 
-                      className="action-button edit"
-                      onClick={() => openEditModal(option)}
-                    >
-                      <FontAwesomeIcon icon={faEdit} />
-                    </button>
-                    <button 
-                      className="action-button delete"
-                      onClick={() => handleDelete(option._id)}
-                    >
-                      <FontAwesomeIcon icon={faTrash} />
-                    </button>
-                    <button 
-                      className={`action-button toggle ${option.isActive ? 'deactivate' : 'activate'}`}
-                      onClick={() => handleToggleActive(option._id, option.isActive)}
-                    >
-                      {option.isActive ? 'Tắt' : 'Bật'}
-                    </button>
-                  </td>
-                </tr>
-              ))}
+              {options.map(option => {
+                const voucherDetails = getVoucherDetails(option.voucherId);
+                
+                return (
+                  <tr key={option._id} className={!option.isActive ? 'inactive' : ''}>
+                    <td className="option-name">
+                      <span className="name">{option.name}</span>
+                      {option.description && (
+                        <span className="description">{option.description}</span>
+                      )}
+                    </td>
+                    <td>
+                      {voucherDetails ? (
+                        <div className="voucher-info">
+                          <div className="voucher-code">{voucherDetails.magiamgia}</div>
+                          <div className="voucher-value">
+                            {voucherDetails.sophantram}% giảm giá
+                            {voucherDetails.minOrderValue > 0 && 
+                              ` (min: ${voucherDetails.minOrderValue.toLocaleString('vi-VN')}đ)`}
+                          </div>
+                          {voucherDetails.goldenHourStart && voucherDetails.goldenHourEnd && (
+                            <div className="golden-hour">
+                              <small>Giờ vàng: {voucherDetails.goldenHourStart}-{voucherDetails.goldenHourEnd}</small>
+                            </div>
+                          )}
+                        </div>
+                      ) : (
+                        'Không tìm thấy'
+                      )}
+                    </td>
+                    <td>{option.pointsCost.toLocaleString('vi-VN')}</td>
+                    <td>
+                      {option.availableTiers && option.availableTiers.length > 0 
+                        ? option.availableTiers.map(tier => getTierName(tier)).join(', ')
+                        : 'Tất cả'}
+                    </td>
+                    <td>
+                      {option.remainingQuantity}/{option.totalQuantity}
+                      <br />
+                      <small>({Math.round(option.remainingQuantity / option.totalQuantity * 100)}%)</small>
+                    </td>
+                    <td>{moment(option.endDate).format('DD/MM/YYYY')}</td>
+                    <td>
+                      <span className={`status-badge ${option.isActive ? 'active' : 'inactive'}`}>
+                        {option.isActive ? 'Hoạt động' : 'Không hoạt động'}
+                      </span>
+                    </td>
+                    <td className="actions">
+                      <button 
+                        className="action-button edit"
+                        onClick={() => openEditModal(option)}
+                        title="Chỉnh sửa"
+                      >
+                        <FontAwesomeIcon icon={faEdit} />
+                      </button>
+                      <button 
+                        className="action-button delete"
+                        onClick={() => handleDelete(option._id)}
+                        title="Xóa"
+                      >
+                        <FontAwesomeIcon icon={faTrash} />
+                      </button>
+                      <button 
+                        className={`action-button toggle ${option.isActive ? 'deactivate' : 'activate'}`}
+                        onClick={() => handleToggleActive(option._id, option.isActive)}
+                        title={option.isActive ? 'Vô hiệu hóa' : 'Kích hoạt'}
+                      >
+                        <FontAwesomeIcon icon={option.isActive ? faToggleOn : faToggleOff} />
+                      </button>
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>
       )}
 
-      {/* Create/Edit redemption option modal - Updated with clearer user ID info */}
+      {/* Modal tạo/chỉnh sửa - đã đơn giản hóa */}
       {modalOpen && (
         <div className="modal-backdrop">
           <div className="modal-content">
@@ -487,70 +476,21 @@ const RedemptionOptions = () => {
                 />
               </div>
               
-              <div className="form-row">
-                <div className="form-group">
-                  <label>Số điểm cần để đổi:</label>
-                  <input
-                    type="number"
-                    name="pointsCost"
-                    value={formData.pointsCost}
-                    onChange={handleChange}
-                    placeholder="Ví dụ: 500"
-                    min="1"
-                    required
-                  />
-                </div>
-
-                <div className="form-group">
-                  <label>Giá trị tối thiểu đơn hàng:</label>
-                  <input
-                    type="number"
-                    name="minOrderValue"
-                    value={formData.minOrderValue}
-                    onChange={handleChange}
-                    placeholder="Ví dụ: 100000"
-                    min="0"
-                  />
-                </div>
-              </div>
-              
-              <div className="form-row">
-                <div className="form-group">
-                  <label>Loại voucher:</label>
-                  <select
-                    name="voucherType"
-                    value={formData.voucherType}
-                    onChange={handleChange}
-                    required
-                  >
-                    <option value="percentage">Giảm theo %</option>
-                    <option value="fixed">Giảm số tiền cố định</option>
-                    <option value="shipping">Miễn phí vận chuyển</option>
-                    <option value="product">Giảm giá sản phẩm</option>
-                  </select>
-                </div>
-                
-                <div className="form-group">
-                  <label>Giá trị voucher:</label>
-                  <input
-                    type="number"
-                    name="voucherValue"
-                    value={formData.voucherValue}
-                    onChange={handleChange}
-                    placeholder={formData.voucherType === 'percentage' ? 'Ví dụ: 10 (%)' : 'Ví dụ: 50000 (đ)'}
-                    min="1"
-                    required
-                  />
-                  <small>
-                    {formData.voucherType === 'percentage' || formData.voucherType === 'product' 
-                      ? '% giảm giá' 
-                      : 'Số tiền giảm (đ)'}
-                  </small>
-                </div>
+              <div className="form-group">
+                <label>Số điểm cần để đổi:</label>
+                <input
+                  type="number"
+                  name="pointsCost"
+                  value={formData.pointsCost}
+                  onChange={handleChange}
+                  placeholder="Ví dụ: 500"
+                  min="1"
+                  required
+                />
               </div>
               
               <div className="form-group">
-                <label>Voucher:</label>
+                <label>Chọn Voucher:</label>
                 <select
                   name="voucherId"
                   value={formData.voucherId}
@@ -560,16 +500,19 @@ const RedemptionOptions = () => {
                   <option value="">-- Chọn voucher --</option>
                   {vouchers.map(voucher => (
                     <option key={voucher._id} value={voucher._id}>
-                      {voucher.magiamgia} - {voucher.sophantram}% (hết hạn: {voucher.ngayketthuc})
+                      {voucher.magiamgia} - {voucher.sophantram}% 
+                      {voucher.minOrderValue > 0 ? ` (min: ${voucher.minOrderValue.toLocaleString('vi-VN')}đ)` : ''} 
+                      {voucher.goldenHourStart ? ` - Giờ vàng: ${voucher.goldenHourStart}-${voucher.goldenHourEnd}` : ''}
                     </option>
                   ))}
                 </select>
+                <small>Chọn voucher mẫu cho quà đổi điểm. Khi người dùng đổi điểm, hệ thống sẽ tạo voucher riêng theo mẫu này.</small>
               </div>
               
               <div className="form-group">
                 <label>Cấp thành viên có thể đổi:</label>
                 <div className="checkbox-group">
-                  <label>
+                  <label className="checkbox-label">
                     <input
                       type="checkbox"
                       name="availableTiers"
@@ -577,9 +520,9 @@ const RedemptionOptions = () => {
                       checked={formData.availableTiers.includes('standard')}
                       onChange={handleChange}
                     />
-                    Tiêu Chuẩn
+                    <span>Tiêu Chuẩn</span>
                   </label>
-                  <label>
+                  <label className="checkbox-label">
                     <input
                       type="checkbox"
                       name="availableTiers"
@@ -587,9 +530,9 @@ const RedemptionOptions = () => {
                       checked={formData.availableTiers.includes('silver')}
                       onChange={handleChange}
                     />
-                    Bạc
+                    <span>Bạc</span>
                   </label>
-                  <label>
+                  <label className="checkbox-label">
                     <input
                       type="checkbox"
                       name="availableTiers"
@@ -597,9 +540,9 @@ const RedemptionOptions = () => {
                       checked={formData.availableTiers.includes('gold')}
                       onChange={handleChange}
                     />
-                    Vàng
+                    <span>Vàng</span>
                   </label>
-                  <label>
+                  <label className="checkbox-label">
                     <input
                       type="checkbox"
                       name="availableTiers"
@@ -607,7 +550,7 @@ const RedemptionOptions = () => {
                       checked={formData.availableTiers.includes('platinum')}
                       onChange={handleChange}
                     />
-                    Bạch Kim
+                    <span>Bạch Kim</span>
                   </label>
                 </div>
                 <small>Để trống để cho phép tất cả các cấp</small>
@@ -623,6 +566,7 @@ const RedemptionOptions = () => {
                     onChange={handleChange}
                     min="1"
                   />
+                  <small>Số lần tối đa mỗi người có thể đổi quà này</small>
                 </div>
                 
                 <div className="form-group">
@@ -634,6 +578,7 @@ const RedemptionOptions = () => {
                     onChange={handleChange}
                     min="1"
                   />
+                  <small>Tổng số lượt đổi điểm cho quà này</small>
                 </div>
               </div>
               
@@ -673,17 +618,24 @@ const RedemptionOptions = () => {
               <div className="modal-footer">
                 <button 
                   type="button"
-                  className="cancel"
+                  className="cancel-button"
                   onClick={() => setModalOpen(false)}
                 >
                   Hủy
                 </button>
                 <button 
                   type="submit"
-                  className="submit"
+                  className="submit-button"
                   disabled={loading}
                 >
-                  {loading ? <FontAwesomeIcon icon={faSpinner} spin /> : (editMode ? 'Cập nhật' : 'Tạo mới')}
+                  {loading ? (
+                    <>
+                      <FontAwesomeIcon icon={faSpinner} spin />
+                      <span>{editMode ? 'Đang cập nhật...' : 'Đang tạo...'}</span>
+                    </>
+                  ) : (
+                    <span>{editMode ? 'Cập nhật' : 'Tạo mới'}</span>
+                  )}
                 </button>
               </div>
             </form>
