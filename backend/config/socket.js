@@ -1,4 +1,7 @@
+// config/socket.js
 const socketIo = require('socket.io');
+const { authMiddleware } = require('../socket/chat/middlewares/authMiddleware');
+const { adminMiddleware } = require('../socket/chat/middlewares/Addminmidleware');
 
 let io;
 
@@ -10,19 +13,41 @@ let io;
 const initSocket = (server) => {
   io = socketIo(server, { 
     cors: { 
-      origin: "*",  // Trong môi trường production, nên giới hạn domain cụ thể
+      origin: "*",  // In production, limit to specific domains
       methods: ["GET", "POST"],
       credentials: true,
     },
     pingTimeout: 60000,
     pingInterval: 25000,
-    transports: ['websocket', 'polling'],  // Hỗ trợ cả WebSocket và polling
-    allowEIO3: true,  // Cho phép tương thích với Socket.io v2 clients
-    maxHttpBufferSize: 1e8  // Tăng buffer size cho các tin nhắn lớn (100MB)
+    transports: ['websocket', 'polling'],
+    allowEIO3: true,
+    maxHttpBufferSize: 1e8  // 100MB buffer size for large messages
   });
   
-  console.log("✅ Socket.io đã được khởi tạo!");
+  // Initialize different socket namespaces
+  initNamespaces(io);
+  
+  console.log("✅ Socket.io initialized successfully!");
   return io;
+};
+
+/**
+ * Initialize different namespaces with their middlewares
+ * @param {Object} io - Socket.io instance
+ */
+const initNamespaces = (io) => {
+  // Admin namespace with admin middleware
+  const adminNamespace = io.of('/admin');
+  adminNamespace.use(adminMiddleware);
+  
+  // Chat namespace with auth middleware (allows guest access)
+  const chatNamespace = io.of('/chat');
+  chatNamespace.use(authMiddleware);
+  
+  // Store namespace (for customer notifications)
+  const storeNamespace = io.of('/store');
+  
+  console.log("✅ Socket.io namespaces configured!");
 };
 
 /**
@@ -31,32 +56,62 @@ const initSocket = (server) => {
  */
 const getIo = () => {
   if (!io) {
-    throw new Error("Socket.io chưa được khởi tạo!");
+    throw new Error("Socket.io not initialized!");
   }
   return io;
 };
 
 /**
- * Cấu hình middleware chung cho tất cả các kết nối Socket.io
+ * Get a specific namespace
+ * @param {string} namespace - Namespace path (e.g., '/admin', '/chat')
+ * @returns {Object} namespace - Socket.io namespace
+ */
+const getNamespace = (namespace) => {
+  if (!io) {
+    throw new Error("Socket.io not initialized!");
+  }
+  return io.of(namespace);
+};
+
+/**
+ * Apply middleware to all Socket.io connections
  * @param {Function} middleware - Middleware function to apply
  */
 const useMiddleware = (middleware) => {
   if (!io) {
-    throw new Error("Socket.io chưa được khởi tạo! Hãy gọi initSocket trước.");
+    throw new Error("Socket.io not initialized! Call initSocket first.");
   }
   io.use(middleware);
 };
 
 /**
- * Phát sóng một sự kiện đến tất cả các clients đã kết nối
- * @param {string} event - Tên sự kiện
- * @param {any} data - Dữ liệu để gửi
+ * Broadcast an event to all connected clients
+ * @param {string} event - Event name
+ * @param {any} data - Data to send
+ * @param {string} namespace - Optional namespace (default: main namespace)
  */
-const broadcastEvent = (event, data) => {
+const broadcastEvent = (event, data, namespace = null) => {
   if (!io) {
-    throw new Error("Socket.io chưa được khởi tạo!");
+    throw new Error("Socket.io not initialized!");
   }
-  io.emit(event, data);
+  
+  if (namespace) {
+    io.of(namespace).emit(event, {
+      ...data,
+      timestamp: new Date().toISOString()
+    });
+  } else {
+    io.emit(event, {
+      ...data,
+      timestamp: new Date().toISOString()
+    });
+  }
 };
 
-module.exports = { initSocket, getIo, useMiddleware, broadcastEvent };
+module.exports = { 
+  initSocket, 
+  getIo, 
+  getNamespace,
+  useMiddleware, 
+  broadcastEvent 
+};
