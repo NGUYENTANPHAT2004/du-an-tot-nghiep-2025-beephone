@@ -199,6 +199,9 @@ function AddSanPham({ isOpen, onClose, idtheloai, fetchData }) {
         formData.append("image", file);
       }
 
+      // Truyền danh sách biến thể dưới dạng JSON
+      formData.append("variantList", JSON.stringify(variantList));
+
       const response = await fetch(
         `http://localhost:3005/postchitietsp/${idtheloai}`,
         {
@@ -209,23 +212,6 @@ function AddSanPham({ isOpen, onClose, idtheloai, fetchData }) {
 
       if (response.ok) {
         const newProduct = await response.json();
-
-        // Thêm tồn kho cho từng biến thể đã chọn
-        for (const variant of variantList) {
-          await fetch("http://localhost:3005/stock/add", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              productId: newProduct._id,
-              dungluongId: variant.dungluong,
-              mausacId: variant.mausac,
-              quantity: parseInt(variant.stockQuantity, 10) || 0,
-            }),
-          });
-        }
-
         handelclose();
         fetchData();
       }
@@ -409,8 +395,7 @@ function AddSanPham({ isOpen, onClose, idtheloai, fetchData }) {
                   <option value="">-- Chọn màu sắc --</option>
                   {mausacs.map((ms) => (
                     <option key={ms._id} value={ms._id}>
-                      {ms.name} - Giá:{" "}
-                      {parseInt(price) + parseInt(ms.price || 0)}đ
+                      {ms.name} - Giá: {parseInt(ms.price || 0)}đ
                     </option>
                   ))}
                 </select>
