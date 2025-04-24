@@ -1,11 +1,12 @@
-const db = require('./db')
+const mongoose = require('mongoose');
 
-const dungluongSchema = new db.mongoose.Schema({
-  name: { type: String },
-  mausac: [{ type: db.mongoose.Schema.Types.ObjectId, ref: 'mausac' }],
-  idloaisp: { type: db.mongoose.Schema.Types.ObjectId, ref: 'loaisp' },
-  isdelete: { type: Boolean, default: false }
-})
+const dungluongSchema = new mongoose.Schema({
+  name: { type: String, required: true },
+  idloaisp: { type: mongoose.Schema.Types.ObjectId, ref: 'loaisp' },
+  mausac: [{ type: mongoose.Schema.Types.ObjectId, ref: 'mausac' }],
+  isDeleted: { type: Boolean, default: false }
+});
 
-const dungluong = db.mongoose.model('dungluong', dungluongSchema)
-module.exports = { dungluong }
+const dungluong = mongoose.models.dungluong || mongoose.model('dungluong', dungluongSchema);
+
+module.exports = { dungluong };

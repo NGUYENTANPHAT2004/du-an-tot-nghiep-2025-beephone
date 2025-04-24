@@ -1,0 +1,188 @@
+// RedemptionDetailModal.scss
+.redemption-modal-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+  }
+  
+  .redemption-modal {
+    background-color: white;
+    border-radius: 8px;
+    width: 90%;
+    max-width: 500px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    overflow: hidden;
+  }
+  
+  .redemption-modal-header {
+    padding: 16px 20px;
+    background-color: #f8f9fa;
+    border-bottom: 1px solid #eee;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    
+    h3 {
+      margin: 0;
+      color: #333;
+      font-size: 1.3rem;
+    }
+    
+    .close-button {
+      background: none;
+      border: none;
+      font-size: 1.2rem;
+      color: #777;
+      cursor: pointer;
+      
+      &:hover {
+        color: #333;
+      }
+    }
+  }
+  
+  .redemption-modal-content {
+    padding: 20px;
+  }
+  
+  .redemption-details {
+    h4 {
+      margin-top: 0;
+      margin-bottom: 16px;
+      color: #0066cc;
+      font-size: 1.5rem;
+    }
+    
+    .description {
+      color: #666;
+      margin-bottom: 24px;
+      line-height: 1.5;
+    }
+    
+    .detail-item {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 12px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid #eee;
+      
+      &:last-of-type {
+        margin-bottom: 20px;
+      }
+      
+      .label {
+        color: #666;
+        font-weight: 500;
+      }
+      
+      .value {
+        font-weight: bold;
+        
+        &.highlight {
+          color: #0066cc;
+        }
+        
+        &.sufficient {
+          color: #28a745;
+        }
+        
+        &.insufficient {
+          color: #dc3545;
+        }
+      }
+    }
+    
+    .masked-code {
+      font-family: monospace;
+      letter-spacing: 2px;
+      background-color: #f5f5f5;
+      padding: 4px 8px;
+      border-radius: 4px;
+      border: 1px dashed #ccc;
+      color: #666;
+    }
+    
+    .highlight-item {
+      background-color: #f8f9fa;
+      padding: 10px;
+      border-radius: 6px;
+      border-bottom: none !important;
+      margin-top: 16px;
+    }
+    
+    .golden-hour {
+      color: #ff6600;
+    }
+    
+    .note {
+      background-color: #f8f9fa;
+      padding: 12px;
+      border-radius: 6px;
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      
+      svg {
+        color: #0066cc;
+        margin-top: 3px;
+      }
+      
+      p {
+        margin: 0;
+        color: #666;
+        font-size: 0.9rem;
+        line-height: 1.4;
+      }
+    }
+  }
+  
+  .redemption-modal-footer {
+    padding: 16px 20px;
+    background-color: #f8f9fa;
+    border-top: 1px solid #eee;
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    
+    button {
+      padding: 10px 16px;
+      border-radius: 4px;
+      font-weight: 500;
+      cursor: pointer;
+      
+      &.cancel-button {
+        background-color: white;
+        border: 1px solid #ddd;
+        color: #666;
+        
+        &:hover {
+          background-color: #f5f5f5;
+        }
+      }
+      
+      &.confirm-button {
+        background-color: #0066cc;
+        color: white;
+        border: none;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        
+        &:hover {
+          background-color: #0055aa;
+        }
+        
+        &.disabled {
+          background-color: #cccccc;
+          cursor: not-allowed;
+        }
+      }
+    }
+  }
