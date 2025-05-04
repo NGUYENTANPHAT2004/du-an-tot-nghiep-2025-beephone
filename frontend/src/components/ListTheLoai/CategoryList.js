@@ -14,7 +14,7 @@ const CategoryList = () => {
 
   return (
     <div className='category-list'>
-      <div className='category-title'>DANH MỤC SẢN PHẨM</div>
+      <div className='category-title'>DANH SÁCH SẢN PHẨM</div>
       <ul>
         {categories.map(category => (
           <li key={category.id} className='category-item'>
