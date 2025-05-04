@@ -1,95 +1,142 @@
-const express = require("express");
-var path = require("path");
-var session = require("express-session");
-var methodOverride = require("method-override");
-var bodyParser = require("body-parser");
-const app = express();
-const MongoStore = require("connect-mongo");
-var db = require("./models/db");
-const mausacriengroutes = require("./routes/MauSacRiengRoutes");
-const categoryrouter = require("./routes/CategoryRoutes.js");
-const uri = "mongodb://localhost:27017/datn";
-const dungluongroutes = require('./routes/DungLuongRoutes')
-const sanphamroutes = require('./routes/SanPhamRoutes')
-const loaisanphamroutes = require('./routes/LoaiSanPhamRoutes')
-const userroutes = require('./routes/UserRouter')
-const authroutes = require("./routes/Authroutes.js")
-const stockrouter = require('./routes/stockrouter')
-const OrderRating = require('./routes/OrderRating')
-const http = require("http")
-const { initSocket } = require('./config/socket');
-const chatAnalyticsService = require('./socket/chat/services/ChatAnalyticsService');
+/* eslint-disable @typescript-eslint/no-var-requires */
+// Load environment variables first before any other code
+require('dotenv').config();
+
+const express = require('express');
+const path = require('path');
+const session = require('express-session');
+const methodOverride = require('method-override');
+const bodyParser = require('body-parser');
+const MongoStore = require('connect-mongo');
+const db = require('./models/db');
+const http = require("http");
 const fs = require('fs');
-const jwtSecret = process.env.JWT_SECRET // Thêm fallback key
-console.log(jwtSecret)
+const cors = require('cors');
+
+// Import routes
+const userroutes = require('./routes/UserRouter');
+const sanphamroutes = require('./routes/SanPhamRoutes');
+const loaisanphamroutes = require('./routes/LoaiSanPhamRoutes');
+const dungluongroutes = require('./routes/DungLuongRoutes');
+const categoryrouter = require('./routes/CategoryRoutes.js');
+const blogroutes = require('./routes/BlogRoutes');
+const mausacriengroutes = require('./routes/MauSacRiengRoutes');
+const magiamgiaroutes = require('./routes/MaGiamGiaRoutes');
+const danhgiaroutes = require('./routes/DanhGiaRoutes');
+const hoadonrouter = require('./routes/HoaDonRoutes');
+const stockrouter = require('./routes/stockrouter');
+const authroutes = require("./routes/Authroutes.js");
+const orderrating = require('./routes/OrderRatingRoutes');
+const chatroutes = require('./routes/ChatRoutes');
+const loyaltyPointsRoutes = require('./routes/LoyaltyPointsRoutes');
+const adminpoin = require('./routes/adminpoin');
+const validatemagiamgia = require('./routes/validateroutes.js')
+// Socket.io and services
+const { initSocket } = require('./config/socket');
+const { initSocketHandlers } = require('./socket/index');
+const chatAnalyticsService = require('./socket/chat/services/ChatAnalyticsService');
+const flasheroutes = require('./routes/flasheroutes.js')
+const { scheduleAllFlashSales } = require('./service/flashSaleScheduler');
+
+const uri = process.env.MONGODB_URI || 'mongodb+srv://phat1z:123@ez88.akrq2.mongodb.net/datn?retryWrites=true&w=majority&appName=ez88';
+
+
+console.log('Environment:', process.env.NODE_ENV || 'development');
+console.log('Port:', process.env.PORT || 3005);
+
 const mongoStoreOptions = {
   mongooseConnection: db.mongoose.connection,
   mongoUrl: uri,
-  collection: "sessions",
-};
-const cors = require("cors");
-const server = http.createServer(app)
-const io = initSocket(server)
+  collection: 'sessions'
+}
+
+const app = express();
+const server = http.createServer(app);
+
+
+const io = initSocket(server);
+
+const socketNamespaces = initSocketHandlers(io);
+
+// Configure Express
+app.use(express.json());
 app.use(cors());
+console.log("🚀 Server starting...");
 
 app.use(
   session({
-    secret: "adscascd8saa8sdv87ds78v6dsv87asvdasv8",
+    secret: process.env.JWT_SECRET || 'adscascd8saa8sdv87ds78v6dsv87asvdasv8',
     resave: false,
     saveUninitialized: true,
-    store: MongoStore.create(mongoStoreOptions),
-    // ,cookie: { secure: true }
+    store: MongoStore.create(mongoStoreOptions)
+    // ,cookie: { secure: true } // Enable for HTTPS
   })
 );
+
+// Ensure data directory exists for chat
 const dataDir = path.join(__dirname, 'data');
 if (!fs.existsSync(dataDir)) {
   fs.mkdirSync(dataDir, { recursive: true });
-  console.log('✅ Đã tạo thư mục dữ liệu cho chat');
+  console.log('✅ Created data directory for chat');
 }
+
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
-app.use(methodOverride("_method"));
+app.use(methodOverride('_method'));
+app.use(express.static(path.join(__dirname, '/public')));
+app.use(express.static(path.join(__dirname, '/uploads')));
 
-app.use("/", mausacriengroutes);
-app.use("/", categoryrouter);
-app.use('/', dungluongroutes)
-app.use('/', loaisanphamroutes)
-app.use('/', userroutes)
-app.use('/', sanphamroutes)
-app.use('/', authroutes)
-app.use('/', stockrouter)
-app.use('/', OrderRating)
+// Register routes
+app.use('/', userroutes);
+app.use('/', sanphamroutes);
+app.use('/', loaisanphamroutes);
+app.use('/', dungluongroutes);
+app.use('/', categoryrouter);
+app.use('/', blogroutes);
+app.use('/', mausacriengroutes);
+app.use('/', danhgiaroutes);
+app.use('/', magiamgiaroutes);
+app.use('/', authroutes);
+app.use('/', hoadonrouter);
+app.use('/', stockrouter);
+app.use('/', orderrating);
+app.use('/', chatroutes); 
+app.use('/', loyaltyPointsRoutes);
+app.use('/', adminpoin);
+app.use('/', validatemagiamgia)
+app.use("/", flasheroutes)
+
+// Setup daily analytics job
 const setupDailyAnalytics = () => {
   const now = new Date();
   const midnight = new Date(now);
   midnight.setHours(24, 0, 0, 0);
   
-  // Tính thời gian đến lúc 0:00
+  
   const delay = midnight.getTime() - now.getTime();
   
   setTimeout(() => {
-    // Chạy lần đầu
+  
     chatAnalyticsService.updateDailyAnalytics();
     
-    // Sau đó chạy mỗi ngày
+   
     setInterval(() => {
       chatAnalyticsService.updateDailyAnalytics();
-    }, 24 * 60 * 60 * 1000); // 24 giờ
+    }, 24 * 60 * 60 * 1000);
   }, delay);
+  
+  console.log('✅ Daily analytics job scheduled');
 };
 
-// Khởi động tác vụ định kỳ
+
 setupDailyAnalytics();
+scheduleAllFlashSales();
 
-// Setup socket handlers
+const PORT = process.env.PORT || 3005;
 
-adminnotifi(io)
 
-// Use server.listen instead of app.listen
-server.listen(3005, () => {
-  console.log('Server is running on port 3005')
-  console.log(__dirname)
-})
+server.listen(PORT, () => {
+  console.log(`✅ Server is running on port ${PORT}`);
+});
 
-module.exports = { io, app, server }
-
+module.exports = { io, app, server };

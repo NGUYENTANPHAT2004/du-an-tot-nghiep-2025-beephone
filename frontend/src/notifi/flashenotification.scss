@@ -1,0 +1,253 @@
+.flash-sale-notification {
+  position: fixed;
+  top: 150px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: linear-gradient(135deg, #0061ff, #60efff);
+  color: white;
+  border-radius: 16px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+  width: 380px;
+  z-index: 99;
+  overflow: hidden;
+  animation: slide-in 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+  backdrop-filter: blur(10px);
+
+  .close-button {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    background: rgba(255, 255, 255, 0.2);
+    border: none;
+    color: white;
+    font-size: 14px;
+    cursor: pointer;
+    opacity: 0.8;
+    z-index: 2;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+
+    &:hover {
+      opacity: 1;
+      background: rgba(255, 255, 255, 0.3);
+      transform: scale(1.1);
+    }
+  }
+
+  .notification-content {
+    display: flex;
+    padding: 24px;
+    gap: 20px;
+
+    .notification-icon {
+      background: rgba(255, 255, 255, 0.15);
+      width: 56px;
+      height: 56px;
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      backdrop-filter: blur(5px);
+
+      svg {
+        font-size: 26px;
+        filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+        animation: flash 2s infinite;
+      }
+    }
+
+    .notification-info {
+      flex: 1;
+
+      h3 {
+        margin: 0 0 12px 0;
+        font-size: 20px;
+        font-weight: 700;
+        letter-spacing: -0.5px;
+      }
+
+      .notification-time {
+        display: flex;
+        align-items: center;
+        margin-bottom: 12px;
+        color: rgba(255, 255, 255, 0.95);
+        font-size: 15px;
+        font-weight: 500;
+
+        svg {
+          margin-right: 8px;
+          font-size: 14px;
+        }
+      }
+
+      .notification-details {
+        margin-bottom: 20px;
+
+        .notification-name {
+          font-weight: 600;
+          margin: 0 0 8px 0;
+          font-size: 16px;
+        }
+
+        .notification-date,
+        .notification-products {
+          margin: 0 0 6px 0;
+          font-size: 14px;
+          color: rgba(255, 255, 255, 0.85);
+          line-height: 1.5;
+        }
+      }
+
+      .notification-actions {
+        display: flex;
+        gap: 12px;
+
+        button,
+        a {
+          flex: 1;
+          padding: 12px;
+          border-radius: 12px;
+          text-align: center;
+          font-weight: 600;
+          font-size: 14px;
+          text-decoration: none;
+          cursor: pointer;
+          transition: all 0.2s ease;
+          border: none;
+        }
+
+        .remind-me-button {
+          background: rgba(255, 255, 255, 0.15);
+          color: white;
+          backdrop-filter: blur(5px);
+
+          &:hover {
+            background: rgba(255, 255, 255, 0.25);
+            transform: translateY(-2px);
+          }
+        }
+
+        .view-details-button {
+          background: white;
+          color: #0061ff;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-weight: 600;
+
+          &:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+          }
+        }
+      }
+    }
+  }
+}
+
+.notification-toggle {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  width: 56px;
+  height: 56px;
+  background: linear-gradient(135deg, #0061ff, #60efff);
+  color: white;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+  z-index: 99;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+
+  &:hover {
+    transform: translateY(-4px) scale(1.05);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.2);
+  }
+
+  svg {
+    font-size: 22px;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+  }
+
+  &.has-new {
+    animation: pulse 2s infinite;
+  }
+
+  .notification-dot {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    width: 12px;
+    height: 12px;
+    background-color: #22c55e;
+    border-radius: 50%;
+    border: 2px solid white;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+}
+
+@keyframes slide-in {
+  from {
+    transform: translateX(-50%) translateY(-20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(-50%) translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes flash {
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.7;
+    transform: scale(0.95);
+  }
+}
+
+@keyframes pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(0, 97, 255, 0.4);
+  }
+  70% {
+    box-shadow: 0 0 0 15px rgba(0, 97, 255, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(0, 97, 255, 0);
+  }
+}
+
+@media (max-width: 480px) {
+  .flash-sale-notification {
+    width: calc(100% - 32px);
+    max-width: 380px;
+    top: 70px;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+
+  .notification-toggle {
+    width: 48px;
+    height: 48px;
+    bottom: 16px;
+    right: 16px;
+    border-radius: 14px;
+
+    svg {
+      font-size: 20px;
+    }
+  }
+}

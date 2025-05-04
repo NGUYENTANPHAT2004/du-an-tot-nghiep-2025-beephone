@@ -1,4 +1,5 @@
 .voucher-modal-overlay {
+<<<<<<< HEAD
     position: fixed;
     top: 0;
     left: 0;
@@ -280,3 +281,126 @@
       }
     }
   }
+=======
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 2000; /* Tăng z-index để hiển thị trên tất cả các phần tử khác */
+  padding: 20px;
+}
+
+.voucher-modal {
+  background-color: white;
+  border-radius: 8px;
+  width: 100%;
+  max-width: 500px;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  animation: modalFadeIn 0.3s ease;
+  position: relative; /* Đảm bảo position relative cho modal */
+
+  @media (max-width: 576px) {
+    max-width: 100%;
+    height: 90vh;
+  }
+}
+
+@keyframes modalFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Các phần CSS khác giữ nguyên */
+.voucher-modal-header {
+  padding: 15px 20px;
+  border-bottom: 1px solid #eee;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  .voucher-modal-title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+
+    .voucher-icon {
+      color: #d26e4b;
+      font-size: 24px;
+    }
+
+    h2 {
+      margin: 0;
+      font-size: 1.2rem;
+      color: #333;
+    }
+  }
+
+  .close-button {
+    background: none;
+    border: none;
+    font-size: 20px;
+    cursor: pointer;
+    color: #555;
+    padding: 5px;
+
+    &:hover {
+      color: #d26e4b;
+    }
+  }
+}
+
+.voucher-tabs {
+  display: flex;
+  border-bottom: 1px solid #eee;
+
+  .tab-button {
+    flex: 1;
+    padding: 12px 15px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    color: #555;
+    position: relative;
+    white-space: nowrap; /* Ngăn chặn văn bản bị ngắt dòng */
+
+    @media (max-width: 400px) {
+      font-size: 0.85rem;
+      padding: 12px 5px;
+    }
+
+    &:hover {
+      color: #d26e4b;
+    }
+
+    &.active {
+      color: #d26e4b;
+
+      &:after {
+        content: "";
+        position: absolute;
+        bottom: -1px;
+        left: 0;
+        width: 100%;
+        height: 2px;
+        background-color: #d26e4b;
+      }
+    }
+  }
+}
+>>>>>>> 0d442491630d281a1ae3f6de0ba2f1a02ebec069

@@ -1,59 +1,59 @@
 /**
- * Main entry point for chat socket functionality
+ * Main entry point for socket functionality
  */
-require('dotenv').config();
-const { 
-  handleIncomingMessage, 
-  handleInitChat, 
-  handleMessageFeedback, 
-  handleGetHistory, 
-  handleEndChat 
-} = require('./handlers/Chathandle');
+const { setupAdminSocket } = require('./adminnotifi');
+const { setupChatSocket } = require('./chatsocket');
+const { setupStoreSocket } = require('./storesocket');
 
 /**
- * Initialize chat socket handlers
+ * Initialize all socket handlers
  * @param {Object} io - Socket.io instance
+ * @returns {Object} - Socket namespaces
  */
-const initChatHandlers = (io) => {
-  // Create a namespace for chat
-  const chatNamespace = io.of('/chat');
-
-  // No middleware is applied to avoid authentication issues
+const initSocketHandlers = (io) => {
+  console.log('🚀 Initializing socket handlers...');
   
-  chatNamespace.on('connection', (socket) => {
-    console.log(`✅ Kết nối chat mới: ${socket.id}`);
-    
-    // Initialize chat
-    socket.on('init_chat', (data) => handleInitChat(socket, data));
-    
-    // User message handler
-    socket.on('user_message', (data) => handleIncomingMessage(socket, io, data));
-    
-    // Message feedback
-    socket.on('message_feedback', (data) => handleMessageFeedback(socket, data));
-    
-    // Get chat history
-    socket.on('get_history', (data) => handleGetHistory(socket, data));
-    
-    // End chat session
-    socket.on('end_chat', () => handleEndChat(socket));
-    
-    // Disconnect handler
-    socket.on('disconnect', () => {
-      console.log(`❌ Ngắt kết nối chat: ${socket.id}`);
-      
-      // End session if active
-      if (socket.sessionId) {
-        handleEndChat(socket).catch(error => {
-          console.error('Lỗi khi tự động kết thúc phiên chat:', error);
-        });
-      }
-    });
+  // Initialize each namespace with its handlers
+  const adminNamespace = setupAdminSocket(io);
+  const chatNamespace = setupChatSocket(io);
+  const storeNamespace = setupStoreSocket(io);
+  
+  // Set up global error handler
+  io.engine.on('connection_error', (err) => {
+    console.error('❌ Socket.io connection error:', err);
   });
-
-  console.log('✅ Khởi tạo chat handlers thành công');
-  return chatNamespace;
+  
+  console.log('✅ All socket handlers initialized successfully');
+  
+  return {
+    admin: adminNamespace,
+    chat: chatNamespace,
+    store: storeNamespace
+  };
 };
 
-// Export the initialization function
-module.exports = { initChatHandlers };
+/**
+ * Broadcast a global announcement to all connected clients
+ * @param {Object} io - Socket.io instance
+ * @param {string} message - Announcement message
+ * @param {string} type - Announcement type
+ */
+const broadcastAnnouncement = (io, message, type = 'info') => {
+  if (!io || !message) return;
+  
+  // Send to all namespaces
+  ['admin', 'chat', 'store'].forEach(namespace => {
+    io.of(`/${namespace}`).emit('system_announcement', {
+      message,
+      type,
+      timestamp: new Date().toISOString()
+    });
+  });
+  
+  console.log(`📢 System announcement sent: ${message}`);
+};
+
+module.exports = { 
+  initSocketHandlers,
+  broadcastAnnouncement
+};

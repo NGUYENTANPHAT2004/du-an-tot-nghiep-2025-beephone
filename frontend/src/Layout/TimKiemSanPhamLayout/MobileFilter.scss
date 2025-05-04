@@ -1,0 +1,380 @@
+// Enhanced mobile filters for product search
+// This file should be imported in your TimKiemSanPhamLayout.scss
+
+.mobile-filters {
+    // Main container styles
+    &-container {
+      margin-bottom: 20px;
+      background-color: #fff;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+    }
+  
+    // Header section
+    &-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 15px;
+      border-bottom: 1px solid #f0f0f0;
+      
+      h3 {
+        margin: 0;
+        font-size: 16px;
+        font-weight: 500;
+        color: #333;
+        display: flex;
+        align-items: center;
+        
+        .filter-icon {
+          margin-right: 8px;
+          color: #0066cc;
+          font-size: 14px;
+        }
+      }
+      
+      .toggle-btn {
+        background: none;
+        border: none;
+        color: #666;
+        cursor: pointer;
+        font-size: 18px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: transform 0.3s;
+        
+        &.open {
+          transform: rotate(180deg);
+        }
+      }
+    }
+  
+    // Content section
+    &-content {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.3s ease;
+      
+      &.expanded {
+        max-height: 1000px;
+        padding: 15px;
+      }
+    }
+  
+    // Panels
+    .filter-panel {
+      margin-bottom: 20px;
+      
+      &:last-child {
+        margin-bottom: 0;
+      }
+      
+      &-title {
+        font-size: 14px;
+        font-weight: 500;
+        color: #333;
+        margin-bottom: 12px;
+      }
+      
+      // Price range options
+      .price-options {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
+        
+        .price-option {
+          text-align: center;
+          padding: 10px 5px;
+          background-color: #f7f7f7;
+          border: 1px solid #e0e0e0;
+          border-radius: 4px;
+          font-size: 13px;
+          cursor: pointer;
+          transition: all 0.2s;
+          
+          &:hover, &.active {
+            background-color: #0066cc;
+            border-color: #0066cc;
+            color: white;
+          }
+        }
+      }
+      
+      // Category list
+      .category-list {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        
+        .category-item {
+          display: flex;
+          align-items: center;
+          cursor: pointer;
+          
+          input[type="radio"] {
+            margin: 0 10px 0 0;
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+            accent-color: #0066cc;
+          }
+          
+          label {
+            cursor: pointer;
+            font-size: 14px;
+          }
+        }
+      }
+    }
+  
+    // Action buttons
+    &-actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 20px;
+      
+      .apply-btn {
+        flex: 1;
+        background-color: #0066cc;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        padding: 10px 15px;
+        font-size: 14px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: background-color 0.2s;
+        
+        &:hover {
+          background-color: #0052a3;
+        }
+      }
+      
+      .reset-btn {
+        background-color: #fff;
+        color: #666;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        padding: 10px 15px;
+        font-size: 14px;
+        cursor: pointer;
+        transition: all 0.2s;
+        
+        &:hover {
+          color: #f44336;
+          border-color: #f44336;
+        }
+      }
+    }
+  
+    // Active filters display
+    &-active {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 15px;
+      
+      .filter-tag {
+        display: flex;
+        align-items: center;
+        background-color: #f0f7ff;
+        border: 1px solid #d0e3ff;
+        border-radius: 20px;
+        padding: 6px 12px;
+        font-size: 13px;
+        color: #0066cc;
+        
+        .remove-tag {
+          background: none;
+          border: none;
+          color: #0066cc;
+          margin-left: 8px;
+          cursor: pointer;
+          display: flex;
+          align-items: center;
+          
+          &:hover {
+            color: #f44336;
+          }
+        }
+      }
+    }
+  }
+  
+  // Mobile drawer for very small screens
+  @media (max-width: 480px) {
+    .filter-drawer {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: white;
+      z-index: 1010;
+      transform: translateY(100%);
+      transition: transform 0.3s ease;
+      display: flex;
+      flex-direction: column;
+      
+      &.open {
+        transform: translateY(0);
+      }
+      
+      &-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 15px;
+        border-bottom: 1px solid #eee;
+        
+        h3 {
+          margin: 0;
+          font-size: 16px;
+          font-weight: 500;
+        }
+        
+        .close-btn {
+          background: none;
+          border: none;
+          font-size: 20px;
+          color: #666;
+          cursor: pointer;
+        }
+      }
+      
+      &-content {
+        flex: 1;
+        overflow-y: auto;
+        padding: 15px;
+      }
+      
+      &-footer {
+        border-top: 1px solid #eee;
+        padding: 15px;
+        background: white;
+        
+        .filter-drawer-actions {
+          display: flex;
+          gap: 10px;
+          
+          button {
+            flex: 1;
+            padding: 12px;
+            border-radius: 4px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+          }
+          
+          .apply-btn {
+            background-color: #0066cc;
+            color: white;
+            border: none;
+          }
+          
+          .reset-btn {
+            background-color: #f5f5f5;
+            color: #666;
+            border: 1px solid #ddd;
+          }
+        }
+      }
+    }
+    
+    .filter-drawer-backdrop {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: rgba(0, 0, 0, 0.5);
+      z-index: 1009;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+      
+      &.active {
+        opacity: 1;
+        pointer-events: auto;
+      }
+    }
+    
+    // Filter button for small screens
+    .mobile-filter-trigger {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background-color: #0066cc;
+      color: white;
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+      border: none;
+      cursor: pointer;
+      z-index: 100;
+      font-size: 20px;
+      
+      &:active {
+        transform: scale(0.95);
+      }
+    }
+  }
+  
+  // Override existing styles to fix mobile issues
+  @media (max-width: 480px) {
+    .filter-sidebar {
+      width: 100%;
+      padding: 0;
+      
+      .filter-section {
+        padding: 15px;
+        
+        .price-presets {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 8px;
+          
+          button {
+            padding: 10px 8px;
+            font-size: 12px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+          }
+        }
+      }
+      
+      .filter-actions {
+        padding: 15px;
+        border-top: 1px solid #f0f0f0;
+        background: white;
+        margin: 0;
+        position: sticky;
+        bottom: 0;
+      }
+    }
+    
+    .search-container-product {
+      .search-header {
+        .filter-controls {
+          flex-wrap: wrap;
+          gap: 10px;
+          
+          .filter-button, 
+          .custom-select,
+          .reset-button {
+            flex: 1;
+            min-width: 0;
+            justify-content: center;
+            white-space: nowrap;
+          }
+        }
+      }
+    }
+  }
+  

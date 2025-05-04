@@ -1,0 +1,136 @@
+// VoucherNotification.scss
+.voucher-notification-container {
+  position: fixed;
+  top: 0;
+  right: 100px; /* Điều chỉnh vị trí sang phải để tránh chồng lên chat button */
+  width: 300px;
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  overflow: hidden;
+  z-index: 990;
+  display: flex;
+  flex-direction: column;
+  max-height: 400px;
+}
+
+.notification-header {
+  background-color: #f5f5f5;
+  padding: 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid #e0e0e0;
+
+  h3 {
+    margin: 0;
+    font-size: 16px;
+    margin-left: 8px;
+  }
+
+  .notification-icon {
+    color: #ff6b6b;
+    font-size: 18px;
+  }
+}
+
+.notification-list {
+  overflow-y: auto;
+  flex-grow: 1;
+  padding: 8px;
+  max-height: 300px;
+}
+
+.notification-item {
+  padding: 12px;
+  border-radius: 6px;
+  margin-bottom: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: flex-start;
+  position: relative;
+
+  &:hover {
+    background-color: #f9f9f9;
+  }
+
+  &.new-voucher {
+    background-color: #e3f9e5;
+  }
+
+  &.golden-hour {
+    background-color: #fff8e1;
+  }
+
+  .notif-type-icon {
+    margin-right: 12px;
+    margin-top: 2px;
+    font-size: 16px;
+
+    .new-voucher & {
+      color: #1b873f;
+    }
+
+    .golden-hour & {
+      color: #ff9800;
+    }
+  }
+}
+
+.notification-content {
+  flex-grow: 1;
+
+  h4 {
+    margin: 0 0 4px 0;
+    font-size: 14px;
+  }
+
+  p {
+    margin: 0 0 8px 0;
+    font-size: 12px;
+    color: #555;
+  }
+
+  .timestamp {
+    font-size: 10px;
+    color: #777;
+  }
+}
+
+.notification-footer {
+  padding: 8px;
+  border-top: 1px solid #e0e0e0;
+  text-align: center;
+
+  .view-all-button {
+    width: 100%;
+    background-color: #ff6b6b;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 8px 12px;
+    font-size: 14px;
+    cursor: pointer;
+
+    &:hover {
+      background-color: #ff5252;
+    }
+  }
+}
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+  .voucher-notification-container {
+    width: 280px;
+    right: 80px; /* Điều chỉnh để không bị đè lên với nút chat trên mobile */
+    bottom: 20px;
+  }
+}
+
+@media (max-width: 480px) {
+  .voucher-notification-container {
+    right: 20px;
+    bottom: 90px; /* Đưa thông báo lên trên nút chat trên điện thoại nhỏ */
+    width: calc(100% - 40px);
+  }
+}
