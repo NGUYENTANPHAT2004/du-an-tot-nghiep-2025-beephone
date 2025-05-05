@@ -32,13 +32,7 @@ function AddMaGiamGia({ isOpen, onClose, fetchdata }) {
     onClose()
   }
 
-  const handleDayToggle = (day) => {
-    if (daysOfWeek.includes(day)) {
-      setDaysOfWeek(daysOfWeek.filter(d => d !== day))
-    } else {
-      setDaysOfWeek([...daysOfWeek, day])
-    }
-  }
+  
 
   const handelAddMaGiamGia = async () => {
     try {
@@ -48,6 +42,7 @@ function AddMaGiamGia({ isOpen, onClose, fetchdata }) {
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
+          goldenHourEnd,
           soluong,
           sophantram: phantram,
           ngaybatdau,
@@ -55,7 +50,6 @@ function AddMaGiamGia({ isOpen, onClose, fetchdata }) {
           minOrderValue: parseInt(minOrderValue || 0),
           maxOrderValue: maxOrderValue ? parseInt(maxOrderValue) : null,
           goldenHourStart,
-          goldenHourEnd,
           isServerWide,
           isOneTimePerUser,
           daysOfWeek: daysOfWeek.length > 0 ? daysOfWeek.sort() : [] // Sort days numerically
@@ -69,7 +63,13 @@ function AddMaGiamGia({ isOpen, onClose, fetchdata }) {
       console.error(error)
     }
   }
-
+  const handleDayToggle = (day) => {
+    if (daysOfWeek.includes(day)) {
+      setDaysOfWeek(daysOfWeek.filter(d => d !== day))
+    } else {
+      setDaysOfWeek([...daysOfWeek, day])
+    }
+  }
   return (
     <Modal isOpen={isOpen} onClose={handleClose}>
       <div className='addtheloai'>
@@ -200,6 +200,8 @@ function AddMaGiamGia({ isOpen, onClose, fetchdata }) {
             )}
           </div>
         </div>
+
+        
 
         <div className='button-group'>
           <button onClick={handelAddMaGiamGia} className='btnaddtl'>
