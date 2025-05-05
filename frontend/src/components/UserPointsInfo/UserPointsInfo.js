@@ -111,4 +111,6 @@ const UserPointsInfo = () => {
   );
 };
 
+ useState
+
 export default UserPointsInfo;
