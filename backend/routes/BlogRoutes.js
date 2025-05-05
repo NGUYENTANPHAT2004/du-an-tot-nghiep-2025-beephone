@@ -4,6 +4,15 @@ const Blog = require("../models/blog.model");
 const uploads = require("./upload");
 const unicode = require("unidecode");
 
+
+const DOMAIN = "http://localhost:3005";
+
+const  extractImageUrl = (req) => 
+    req.files?.image ? `${DOMAIN}/${req.files.image[0].filename}` : null;
+
+const asyncHandler = (fn) => (req, res, next) => fn(req, res, next).catch(next);
+
+
 function removeSpecialChars(str) {
   const specialChars = /[:+,!@#$%^&*()\-/?.\s]/g;
   return str
@@ -26,13 +35,10 @@ router.post(
           .json({ message: "Tiêu đề blog không được để trống" });
       }
 
-      const domain = "http://localhost:3005";
-      const image =
-        req.files && req.files["image"]
-          ? `${domain}/${req.files["image"][0].filename}`
-          : null;
+      
+      const image = extractImageUrl(req);
 
-      const tieude_khongdau1 = unicode(tieude_blog);
+      
       const tieude_khongdau = removeSpecialChars(tieude_khongdau1);
 
       const blog = new Blog.blogModel({
@@ -72,17 +78,16 @@ router.post(
         return res.status(404).json({ message: "Không tìm thấy blog" });
       }
 
-      const tieude_khongdau1 = unicode(tieude_blog);
-      const tieude_khongdau = removeSpecialChars(tieude_khongdau1);
+      
+      
 
       blog.tieude_blog = tieude_blog;
       blog.tieude_khongdau = tieude_khongdau;
       blog.noidung = noidung;
 
       // Update image if provided
-      if (req.files && req.files["image"]) {
-        const domain = "http://localhost:3005";
-        blog.img_blog = `${domain}/${req.files["image"][0].filename}`;
+      if (req.files?.image) {
+        blog.img_blog = extractImageUrl(req);
       }
 
       await blog.save();
