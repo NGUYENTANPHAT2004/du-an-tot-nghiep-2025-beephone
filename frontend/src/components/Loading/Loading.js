@@ -1,19 +1,13 @@
-const multer = require('multer')
-const path = require('path')
-const pathToUploads = path.resolve(__dirname, '../uploads')
+// Loading.js
+import React from 'react';
+import './Loading.scss';
 
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, pathToUploads)
-  },
-  filename: (req, file, cb) => {
-    const uniqueSuffix = `${Date.now()}-${Math.round(
-      Math.random() * 1e9
-    )}${path.extname(file.originalname)}`
-    cb(null, file.fieldname + '-' + uniqueSuffix)
-  }
-})
+const Loading = () => {
+  return (
+    <div className="loading-overlay">
+      <div className="loading-spinner"></div>
+    </div>
+  );
+};
 
-const upload = multer({ storage: storage })
-
-module.exports = upload
+export default Loading;
