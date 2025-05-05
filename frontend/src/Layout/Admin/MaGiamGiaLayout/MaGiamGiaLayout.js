@@ -35,17 +35,6 @@ function MaGiamGiaLayout() {
     fetchdata()
   }, [])
 
-  const handleSelectAll = () => {
-    if (selectAll) {
-      setSelectedIds([])
-    } else {
-      // Only select IDs that match the current filter
-      const filteredData = filterData(data, filterType)
-      setSelectedIds(filteredData.map(item => item._id))
-    }
-    setSelectAll(!selectAll)
-  }
-
   const handleSelectItem = id => {
     let newSelectedIds = [...selectedIds]
     if (newSelectedIds.includes(id)) {
@@ -61,6 +50,18 @@ function MaGiamGiaLayout() {
       filteredData.every(item => newSelectedIds.includes(item._id)))
   }
 
+  const handleSelectAll = () => {
+    if (selectAll) {
+      setSelectedIds([])
+    } else {
+      // Only select IDs that match the current filter
+      const filteredData = filterData(data, filterType)
+      setSelectedIds(filteredData.map(item => item._id))
+    }
+    setSelectAll(!selectAll)
+  }
+
+  
   const handleServerWideVoucherCreated = (voucherData) => {
     toast.success(`Mã giảm giá toàn server đã được tạo: ${voucherData.code}`, {
       position: "top-right",
@@ -74,6 +75,10 @@ function MaGiamGiaLayout() {
   }
 
   // Function to filter data based on the selected filter type
+  
+
+  // Get the filtered data based on current filter type
+  const filteredData = filterData(data, filterType)
   const filterData = (data, filterType) => {
     switch(filterType) {
       case 'serverWide':
@@ -89,10 +94,6 @@ function MaGiamGiaLayout() {
         return data
     }
   }
-
-  // Get the filtered data based on current filter type
-  const filteredData = filterData(data, filterType)
-
   return (
     <div className='theloai_container'>
       <div className='nav_chucnang'>

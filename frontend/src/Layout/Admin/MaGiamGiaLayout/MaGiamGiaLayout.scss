@@ -13,16 +13,16 @@
       gap: 10px;
       
       button {
+        
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        transition: all 0.2s;
         padding: 8px 12px;
         border: 1px solid #ddd;
         background-color: #f5f5f5;
         border-radius: 4px;
         cursor: pointer;
-        display: flex;
-        align-items: center;
-        gap: 5px;
-        transition: all 0.2s;
-        
         &:hover {
           background-color: #e0e0e0;
         }
@@ -59,12 +59,13 @@
     }
     
     .type-badge {
+      
+      font-weight: 500;
       display: inline-flex;
       align-items: center;
       padding: 3px 8px;
       border-radius: 12px;
       font-size: 12px;
-      font-weight: 500;
       
       &.server-wide {
         background-color: #fff3e0;
@@ -86,9 +87,10 @@
   
   /* Add styling for the golden hour in the table */
   .golden-hour-cell {
-    color: #f57c00;
     display: flex;
     align-items: center;
+    color: #f57c00;
+    
     
     svg {
       margin-right: 5px;
